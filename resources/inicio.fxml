@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="586.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="co.edu.uniquindio.compiladores.controlador.InicioControler">
+   <children>
+      <Text layoutX="208.0" layoutY="40.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Analizador Lexico">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Text>
+      <Button fx:id="button_analizarCodigo" layoutX="47.0" layoutY="55.0" mnemonicParsing="false" onAction="#analizarCodigo" text="Analizar Codigo" />
+      <TextArea fx:id="codigo_fuente" layoutX="47.0" layoutY="100.0" prefHeight="199.0" prefWidth="525.0" />
+      <TableView fx:id="tabla_lexema" editable="true" layoutX="50.0" layoutY="345.0" prefHeight="211.0" prefWidth="519.0">
+        <columns>
+          <TableColumn fx:id="colm_lexema" prefWidth="75.0" text="Lexema" />
+          <TableColumn fx:id="colm_categoria" prefWidth="75.0" text="Categoria" />
+            <TableColumn fx:id="colm_fila" prefWidth="75.0" text="Fila" />
+            <TableColumn fx:id="colm_columna" prefWidth="75.0" text="Columna" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+   </children>
+</AnchorPane>
