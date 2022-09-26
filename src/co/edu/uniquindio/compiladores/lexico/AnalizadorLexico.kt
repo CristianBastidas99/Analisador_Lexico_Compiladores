@@ -1,5 +1,7 @@
 package co.edu.uniquindio.compiladores.lexico
 
+import java.util.ArrayList
+
 class AnalizadorLexico (var codigoFuente:String) {
 
     var posicionAcual = 0
@@ -35,6 +37,17 @@ class AnalizadorLexico (var codigoFuente:String) {
             if(esOperadorAritmetico()) continue
 
             if(esOperadorRelacional()) continue
+
+            if(esParentesisIzquierdo()) continue
+
+            if(esParantesisDerecho()) continue
+
+            if( esLlavesDerecha()) continue
+
+            if( esLlavesIzquierda()) continue
+
+            if( esCorcheteIzquierdo()) continue
+            if( esCorcheteDerecho()) continue
 
             if(esFinSentencia()) continue
 
@@ -424,6 +437,111 @@ class AnalizadorLexico (var codigoFuente:String) {
             almacenarToken(lexema, Categoria.OPERADOR_ASIGNACION, filaInicial, columnaInicial)
             return true
         }
+        return false
+    }
+    fun esParentesisIzquierdo() : Boolean{
+
+        if (caracterActual == '(') {
+            var lexema = ""
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionAcual
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            almacenarToken(lexema, Categoria.PARENTESIS_IZQUIERDO, filaInicial, columnaInicial)
+            return true
+        }
+
+        return false
+    }
+    fun esParantesisDerecho() : Boolean{
+
+        if (caracterActual == ')') {
+            var lexema = ""
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionAcual
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            almacenarToken(lexema, Categoria.PARENTESIS_DERECHO, filaInicial, columnaInicial)
+            return true
+        }
+
+        return false
+    }
+    fun esLlavesIzquierda() : Boolean{
+
+        if (caracterActual == '{') {
+            var lexema = ""
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionAcual
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            almacenarToken(lexema, Categoria.LLAVE_IZQUIERDO, filaInicial, columnaInicial)
+            return true
+        }
+
+        return false
+    }
+
+    fun esLlavesDerecha() : Boolean{
+
+        if (caracterActual == '}') {
+            var lexema = ""
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionAcual
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            almacenarToken(lexema, Categoria.LLAVE_DERECHO, filaInicial, columnaInicial)
+            return true
+        }
+
+        return false
+    }
+
+    fun esCorcheteDerecho() : Boolean{
+
+        if (caracterActual == ']') {
+            var lexema = ""
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionAcual
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            almacenarToken(lexema, Categoria.CORCHETE_DERECHO, filaInicial, columnaInicial)
+            return true
+        }
+
+        return false
+    }
+
+    fun esCorcheteIzquierdo() : Boolean{
+
+        if (caracterActual == '[') {
+            var lexema = ""
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionAcual
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            almacenarToken(lexema, Categoria.CORCHETE_IZQUIERDO, filaInicial, columnaInicial)
+            return true
+        }
+
         return false
     }
 
