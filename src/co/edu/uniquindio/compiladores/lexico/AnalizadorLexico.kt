@@ -42,12 +42,13 @@ class AnalizadorLexico (var codigoFuente:String) {
 
             if(esParantesisDerecho()) continue
 
-            if( esLlavesDerecha()) continue
+            if(esLlavesDerecha()) continue
 
-            if( esLlavesIzquierda()) continue
+            if(esLlavesIzquierda()) continue
 
-            if( esCorcheteIzquierdo()) continue
-            if( esCorcheteDerecho()) continue
+            if(esCorcheteIzquierdo()) continue
+
+            if(esCorcheteDerecho()) continue
 
             if(esFinSentencia()) continue
 
@@ -62,6 +63,8 @@ class AnalizadorLexico (var codigoFuente:String) {
             if(esComentarioBloque()) continue
 
             if(esCaracter()) continue
+
+            if(esCadenaCaracter()) continue
 
             almacenarToken(caracterActual + "", Categoria.DESCONOCIDO, filaActual, columnaActual)
             obtenerSiguienteCaracter()
@@ -616,7 +619,9 @@ class AnalizadorLexico (var codigoFuente:String) {
                 obtenerSiguienteCaracter()
             }
 
-            if(caracterActual != finCodigo) {
+            if(caracterActual == '\n' && caracterActual != finCodigo) {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
                 almacenarToken(lexema, Categoria.COMENTARIO_LINEA, filaInicial, columnaInicial)
                 return true
             }
@@ -693,6 +698,34 @@ class AnalizadorLexico (var codigoFuente:String) {
                     return true
                 }
             }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esCadenaCaracter():Boolean{
+        var posicion = posicionAcual;
+        if(caracterActual == '\''){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            while (caracterActual != '\'' && caracterActual != finCodigo) {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+            }
+
+            if(caracterActual == '\'' && caracterActual != finCodigo){
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+                almacenarToken(lexema, Categoria.CADENA_CARCTERES, filaInicial, columnaInicial)
+                return true
+            }
+
             restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
         }
         return false
