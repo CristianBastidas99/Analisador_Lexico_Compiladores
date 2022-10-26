@@ -99,9 +99,368 @@ class AnalizadorLexico (var codigoFuente:String) {
 
         if(esPalabraReservadaEnt()) return true
 
+        if(esPalabraReservadaCls()) return true
+
+        if(esPalabraReservadaBln()) return true
+
+        if(esPalabraReservadaCrt()) return true
+
+        if(esPalabraReservadaMut()) return true
+
+        if(esPalabraReservadaInm()) return true
+
+        if(esPalabraReservadaWhl()) return true
+
+        if(esPalabraReservadaRet()) return true
+
+        if(esPalabraReservadaRad()) return true
+
+        if(esPalabraReservadaTre()) return true
+
+        if(esPalabraReservadaFls()) return true
+
+        if(esPalabraReservadaIf()) return true
+
+        if(esPalabraReservadaElse()) return true
+
+        if(esPalabraReservadaVd()) return true
+
         return false
 
     }
+    fun esPalabraReservadaBln():Boolean{
+        if(caracterActual == 'b'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'l') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 'n') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+
+
+    fun esPalabraReservadaCls():Boolean{
+        if(caracterActual == 'c'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'l') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 's') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esPalabraReservadaCrt():Boolean{
+        if(caracterActual == 'c'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'r') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 't') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esPalabraReservadaMut():Boolean{
+        if(caracterActual == 'm'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'u') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 't') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esPalabraReservadaInm():Boolean{
+        if(caracterActual == 'i'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'n') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 'm') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esPalabraReservadaWhl():Boolean{
+        if(caracterActual == 'w'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'h') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 'l') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+    fun esPalabraReservadaRet():Boolean{
+        if(caracterActual == 'r'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'e') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 't') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+    fun esPalabraReservadaRad():Boolean{
+        if(caracterActual == 'r'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'a') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 'd') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+    fun esPalabraReservadaTre():Boolean{
+        if(caracterActual == 't'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'r') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 'e') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+    fun esPalabraReservadaFls():Boolean{
+        if(caracterActual == 'f'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'l') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 's') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esPalabraReservadaIf():Boolean{
+        if(caracterActual == 'i'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'f') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+                almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                 return true
+                }
+
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+    fun esPalabraReservadaElse():Boolean{
+        if(caracterActual == 'e'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'l') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if (caracterActual == 's') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+
+                    if (caracterActual == 'e') {
+                        lexema += caracterActual
+                        obtenerSiguienteCaracter()
+                        almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                        return true
+                    }
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+    fun esPalabraReservadaVd():Boolean{
+        if(caracterActual == 'v'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'd') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+                almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                return true
+            }
+
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+
+
 
     fun esPalabraReservadaEnt():Boolean{
         if(caracterActual == 'e'){
