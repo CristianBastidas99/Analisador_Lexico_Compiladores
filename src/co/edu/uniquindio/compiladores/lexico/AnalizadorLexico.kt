@@ -979,7 +979,25 @@ class AnalizadorLexico (var codigoFuente:String) {
             lexema += caracterActual
             obtenerSiguienteCaracter()
 
-            if(caracterActual != '°') {
+            if(caracterActual == '\\'){
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == '°' || caracterActual == '\n' || caracterActual == '\t' || caracterActual == '\"' || caracterActual == '\\'){
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+
+                    if(caracterActual == '°') {
+                        lexema += caracterActual
+                        obtenerSiguienteCaracter()
+
+                        almacenarToken(lexema, Categoria.CARACTER, filaInicial, columnaInicial)
+                        return true
+                    }
+                    restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+                }
+                restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+            }else if(caracterActual != '°' && caracterActual != '\n' && caracterActual != '\t' && caracterActual != '\"'){
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 
@@ -1014,17 +1032,23 @@ class AnalizadorLexico (var codigoFuente:String) {
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
 
-                    /*if(caracterActual == )....{
+                    if(caracterActual == '\n' || caracterActual == '\t' || caracterActual == '\"' || caracterActual == '\'' || caracterActual == '\\'){
 
+                        lexema += caracterActual
+                        obtenerSiguienteCaracter()
                     }else{
-                        reporta error
-                                break,
-                    }*/
+                        restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+                        return false;
+                    }
 
+                }else if(caracterActual != '\n' && caracterActual != '\t' && caracterActual != '\"' && caracterActual != '\''){
+
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                }else{
+                    restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+                    return false;
                 }
-
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
             }
 
             if(caracterActual == '\'' && caracterActual != finCodigo){
