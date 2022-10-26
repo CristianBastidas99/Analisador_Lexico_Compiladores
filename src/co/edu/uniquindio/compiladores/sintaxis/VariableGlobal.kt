@@ -1,5 +1,14 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
-class VariableGlobal {
+import co.edu.uniquindio.compiladores.lexico.Token
+import javafx.scene.control.TreeItem
+
+class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
+    fun getArbolVisual(): TreeItem<String>? {
+
+        val raiz = TreeItem("${visibilidad.lexema} ${tipo.lexema} ${nombre.lexema}")
+
+        return raiz
+    }
 
 }
