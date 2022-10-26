@@ -10,6 +10,8 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
 
         val raiz = TreeItem("Unidad de compilacion")
 
+        raiz.children.add( TreeItem("${visibilidad.lexema} ${nombre.lexema}"))
+
         if(!listaVariablesGlobales.isEmpty()) {
 
             val VariablesGlobales = TreeItem("Variables Globales")
@@ -27,4 +29,10 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
 
         return raiz
     }
+
+    override fun toString(): String {
+        return "UnidadDeCompilacion(visibilidad=${visibilidad.lexema}, nombre=${nombre.lexema}, listaVariablesGlobales=$listaVariablesGlobales, listaFunciones=$listaFunciones)"
+    }
+
+
 }

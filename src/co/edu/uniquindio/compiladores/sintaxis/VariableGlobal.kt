@@ -11,4 +11,9 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
         return raiz
     }
 
+    override fun toString(): String {
+        return "VariableGlobal(visibilidad=${visibilidad.lexema}, tipo=${tipo.lexema}, nombre=${nombre.lexema})"
+    }
+
+
 }

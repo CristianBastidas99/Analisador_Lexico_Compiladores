@@ -12,4 +12,9 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
         return raiz
     }
 
+    override fun toString(): String {
+        return "Funcion(visibilidad=${visibilidad.lexema}, valorRetornado=${valorRetornado.lexema}, nombre=${nombre.lexema}, listaParametros=$listaParametros, listaSentencias=$listaSentencias)"
+    }
+
+
 }

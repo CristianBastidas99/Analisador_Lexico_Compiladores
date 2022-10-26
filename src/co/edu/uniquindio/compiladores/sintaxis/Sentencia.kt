@@ -1,5 +1,5 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
-class Sentencia {
+open class Sentencia{
 
 }
