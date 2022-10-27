@@ -30,8 +30,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
     }
 
-    /*
-    <Unidad de Compilación> ::= <Visibilidad> Class Identificador “{” [ <Lista de Variables Globales>] [ <Lista de Funciones> ] “}”
+    /**
+     * <Unidad de Compilación> ::= <Visibilidad> Class Identificador “{” [ <Lista de Variables Globales>] [ <Lista de Funciones> ] “}”
      */
     fun esUnidadDeCompilacion(): UnidadDeCompilacion?{
 
@@ -72,8 +72,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    /*
-    <Visibilidad> ::= pub | pvt
+    /**
+     * <Visibilidad> ::= pub | pvt
      */
     fun esVisibilidad():Token?{
 
@@ -86,8 +86,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    /*
-    <Lista de Variables Globales> ::= <Variable Global> [<Lista de Variables Globales>]
+    /**
+     * <Lista de Variables Globales> ::= <Variable Global> [<Lista de Variables Globales>]
      */
     fun esListaVariablesGlobales():ArrayList<VariableGlobal>{
         var lista:ArrayList<VariableGlobal> =  ArrayList<VariableGlobal>()
@@ -101,8 +101,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return lista
     }
 
-    /*
-    <Variable Global> ::= <Visibilidad> <Tipo> Identificador “|
+    /**
+     * <Variable Global> ::= <Visibilidad> <Tipo> Identificador “|
      */
     private fun esVariableGlobal(): VariableGlobal? {
 
@@ -132,8 +132,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    /*
-    <Tipo> ::= ent | dbe| str| booleano | Caracter
+    /**
+     * <Tipo> ::= ent | dbe| str| booleano | Caracter
      */
     private fun esTipo(): Token? {
 
@@ -147,8 +147,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    /*
-    <Lista de Funciones> ::= <Función> [<Lista de Funciones>]
+    /**
+     * <Lista de Funciones> ::= <Función> [<Lista de Funciones>]
      */
     fun esListaFunciones():ArrayList<Funcion>{
 
@@ -163,8 +163,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return lista
     }
 
-    /*
-    <Función> ::= <Visibilidad> <Valor Retornado> Identificador “(” [ <Lista de Parámetros> ] “)” “{” <Lista de Sentencias> “}”
+    /**
+     * <Función> ::= <Visibilidad> <Valor Retornado> Identificador “(” [ <Lista de Parámetros con Tipo> ] “)” “{” <Lista de Sentencias> “}”
      */
     private fun esFuncion(): Funcion? {
 
@@ -185,7 +185,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                     if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                         obtenerSiguienteToken()
-                        val listaParametros:ArrayList<Parametro> = esListaParametros()
+                        val listaParametroConTipo:ArrayList<ParametroConTipo> = esListaParametrosConTipo()
 
                         if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                             obtenerSiguienteToken()
@@ -196,7 +196,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                                 if(tokenActual.categoria == Categoria.LLAVE_DERECHO) {
                                     obtenerSiguienteToken()
-                                    return Funcion(visibilidad, valorRetornado, nombre, listaParametros, listaSentencias)
+                                    return Funcion(visibilidad, valorRetornado, nombre, listaParametroConTipo, listaSentencias)
                                 }
                             }
                         }
@@ -208,8 +208,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    /*
-    <Valor Retornado> ::= Void | <Tipo>
+    /**
+     * <Valor Retornado> ::= Void | <Tipo>
      */
     private fun esValorRetornado(): Token? {
 
@@ -223,18 +223,18 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-     * <Lista de Parámetros> ::= <Parámetro> [“:” <Lista de Parámetros>]
+     * <Lista de Parámetros con Tipo> ::= <Parámetro Con Tipo> [“:” <Lista de Parámetros>]
      */
-    private fun esListaParametros(): ArrayList<Parametro> {
+    private fun esListaParametrosConTipo(): ArrayList<ParametroConTipo> {
 
-        var lista:ArrayList<Parametro> =  ArrayList<Parametro>()
-        var p: Parametro? = esParametro()
+        var lista:ArrayList<ParametroConTipo> =  ArrayList<ParametroConTipo>()
+        var p: ParametroConTipo? = esParametroConTipo()
 
         while (p != null){
             lista.add(p)
             if(tokenActual.categoria == Categoria.SEPARADOR ){
                 obtenerSiguienteToken()
-                p = esParametro()
+                p = esParametroConTipo()
             }else{
                 p = null
             }
@@ -245,21 +245,65 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-    *<Parámetro> ::= [<Tipo>] Identificador
+    *<Parámetro Con Tipo> ::= <Tipo> Identificador
     */
-    private fun esParametro(): Parametro? {
+    private fun esParametroConTipo(): ParametroConTipo? {
 
         var posicionInicial = posicionActual
         var tipo = esTipo()
 
-        if(tipo != null){
+        if(tipo != null) {
             obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var nombre = tokenActual
+                obtenerSiguienteToken()
+                return ParametroConTipo(tipo, nombre)
+            }
         }
 
-        if(tokenActual.categoria == Categoria.IDENTIFICADOR) {
-            var nombre = tokenActual
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <Lista de Parámetros sin Tipo> ::= <Parámetro Sin Tipo> [“:” <Lista de Parámetros sin Tipo>]
+     */
+    private fun esListaParametrosSinTipo(): ArrayList<ParametroSinTipo> {
+
+        var lista:ArrayList<ParametroSinTipo> =  ArrayList<ParametroSinTipo>()
+        var p: ParametroSinTipo? = esParametroSinTipo()
+
+        while (p != null){
+            lista.add(p)
+            if(tokenActual.categoria == Categoria.SEPARADOR ){
+                obtenerSiguienteToken()
+                p = esParametroSinTipo()
+            }else{
+                p = null
+            }
+        }
+
+        return lista
+
+    }
+
+    /**
+     * <Parámetro Sin Tipo> ::= Identificador
+     */
+    private fun esParametroSinTipo(): ParametroSinTipo? {
+
+        var posicionInicial = posicionActual
+        var tipo = esTipo()
+
+        if(tipo == null) {
             obtenerSiguienteToken()
-            return Parametro(tipo, nombre)
+
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var nombre = tokenActual
+                obtenerSiguienteToken()
+                return ParametroSinTipo(nombre)
+            }
         }
 
         restablecerToken(posicionInicial)
@@ -293,9 +337,14 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             return desicion
         }
 
-        var declaracionVariable:DeclaracionVariable? = esDeclaracionVariableSentencia()
-        if(declaracionVariable != null){
-            return declaracionVariable
+        var declaracionVariableInm:DeclaracionVariableInm? = esDeclaracionVariableInmSentencia()
+        if(declaracionVariableInm != null){
+            return declaracionVariableInm
+        }
+
+        var declaracionVariableMut:DeclaracionVariableMut? = esDeclaracionVariableMutSentencia()
+        if(declaracionVariableMut != null){
+            return declaracionVariableMut
         }
 
         var asignacion:Asignacion? = esAsignacionSentencia()
@@ -336,6 +385,13 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
+
+
+    /**
+     * <Decisión> ::= <Decisión if> [<Decisión else>]
+     * <Decisión if> ::= if “(” <Expresión Lógica> “)” “{” <Lista de Sentencias> “}”
+     * <Decisión else> ::= else “{” <Lista de Sentencias> “}”
+     */
     private fun esDesicionSentencia(): Desicion? {
 
         var posicionInicial = posicionActual
@@ -345,10 +401,9 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
             if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
                 obtenerSiguienteToken()
-                var esprLogica:String? = esExpresionLogica()
+                var exprLogica:ExpresionLogica? = esExpresionLogica()
 
-                if(esprLogica != null){
-                    obtenerSiguienteToken()
+                if(exprLogica != null){
 
                     if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
                         obtenerSiguienteToken()
@@ -358,7 +413,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             val listaSentenciasIf:ArrayList<Sentencia> = esListaSentencias()
 
                             if(listaSentenciasIf.isNotEmpty()){
-                                obtenerSiguienteToken()
 
                                 if(tokenActual.categoria == Categoria.LLAVE_DERECHO){
                                     obtenerSiguienteToken()
@@ -371,17 +425,16 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                             val listaSentenciasElse: ArrayList<Sentencia> = esListaSentencias()
 
                                             if (listaSentenciasElse.isNotEmpty()) {
-                                                obtenerSiguienteToken()
 
                                                 if (tokenActual.categoria == Categoria.LLAVE_DERECHO) {
                                                     obtenerSiguienteToken()
-                                                    return Desicion(esprLogica, listaSentenciasIf, listaSentenciasElse)
+                                                    return Desicion(exprLogica, listaSentenciasIf, listaSentenciasElse)
                                                 }
                                             }
                                         }
                                     }
 
-                                    return Desicion(esprLogica, listaSentenciasIf, ArrayList<Sentencia>())
+                                    return Desicion(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
                                 }
                             }
                         }
@@ -394,38 +447,41 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    private fun esExpresionLogica(): String? {
+    /**
+     * <ExpLogica> ::= [not] "("<ExpRelacional>")" [<OpeLogico> <ExpLogica>]
+     */
+    private fun esExpresionLogica(): ExpresionLogica? {
 
         var posicionInicial = posicionActual
+        var negacion:Token? = null
 
         if(tokenActual.categoria == Categoria.OPERADOR_LOGICO && tokenActual.lexema == "not"){
+            negacion = tokenActual
             obtenerSiguienteToken()
         }
 
         if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
             obtenerSiguienteToken()
-            var expRelacional:String? = esExpresionRelacional()
+            var expRelacional:ExpresionRelacional? = esExpresionRelacional()
 
             if(expRelacional != null){
                 obtenerSiguienteToken()
-                expRelacional = "(${expRelacional})"
 
                 if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
                     obtenerSiguienteToken()
-                    var opeLogico:String? = esOperadorLogico()
+                    var opeLogico:Token? = esOperadorLogico()
 
                     if(opeLogico != null){
                         obtenerSiguienteToken()
-                        var expLogica:String?  = esExpresionLogica()
+                        var expLogica:ExpresionLogica?  = esExpresionLogica()
 
-                        if(expRelacional2 != null){
+                        if(expLogica != null){
                             obtenerSiguienteToken()
-                            expRelacional += opeLogico
-                            expRelacional += expLogica
+                            return ExpresionLogica(negacion, expRelacional, opeLogico, expLogica)
                         }
                     }
 
-                    return expRelacional
+                    return ExpresionLogica(negacion, expRelacional, opeLogico, null)
                 }
             }
         }
@@ -433,12 +489,154 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         return null
     }
 
-    private fun esExpresionRelacional(): String? {
+    /**
+     * <OpeLogico> ::= and | or | xor
+     */
+    private fun esOperadorLogico(): Token? {
 
-        if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
+        if(tokenActual.categoria == Categoria.OPERADOR_LOGICO){
 
+            if(tokenActual.lexema == "and" || tokenActual.lexema == "or" || tokenActual.lexema == "xor"){
+                return tokenActual
+            }
         }
+        return null
     }
 
+
+    /**
+     * <Exp Relacional> ::= <ExpAritmetica> OpeRacional “(“ <ExpAritmetica> “)”
+     */
+    private fun esExpresionRelacional(): ExpresionRelacional? {
+
+        var posicionInicial = posicionActual
+
+
+        if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+            obtenerSiguienteToken()
+            var exprAritmetica:ExpresionAritmetica? = esExpresionAritmetica()
+
+            if (exprAritmetica != null) {
+                obtenerSiguienteToken()
+
+                if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                    obtenerSiguienteToken()
+
+                    if (tokenActual.categoria == Categoria.OPERADOR_RELACIONAL) {
+                        var opeRelacional = tokenActual
+                        obtenerSiguienteToken()
+
+                        if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                            obtenerSiguienteToken()
+                            var exprAritmetica2: ExpresionAritmetica? = esExpresionAritmetica()
+
+                            if (exprAritmetica2 != null) {
+                                obtenerSiguienteToken()
+
+                                if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                                    obtenerSiguienteToken()
+                                    return ExpresionRelacional(exprAritmetica, opeRelacional, exprAritmetica2)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <ExpAritmetica> ::= Numero [OperAritmetico “(” <ExpAritmetica> “)”]
+     */
+    private fun esExpresionAritmetica(): ExpresionAritmetica? {
+
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL){
+            var numero = tokenActual
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.OPERADOR_ARITMETICO){
+                var operAritmetico = tokenActual
+                obtenerSiguienteToken()
+
+                if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
+                    obtenerSiguienteToken()
+                    var exprAritmetica:ExpresionAritmetica? = esExpresionAritmetica()
+
+                    if(exprAritmetica != null){
+
+                        if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
+                            obtenerSiguienteToken()
+                            return ExpresionAritmetica(numero, operAritmetico, exprAritmetica)
+                        }
+                    }
+                }
+            }
+            return ExpresionAritmetica(numero, null, null)
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <DeclaracionVariableMut> ::= <TipoVariable> identificador “|”
+     */
+    private fun esDeclaracionVariableMutSentencia(): DeclaracionVariableMut? {
+        var posicionInicial = posicionActual
+        var tipo:Token? = esTipo()
+
+        if(tipo != null){
+            obtenerSiguienteToken()
+
+            if (tokenActual.categoria == Categoria.IDENTIFICADOR) {
+                var nombre: Token = tokenActual
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
+                    return DeclaracionVariableMut(tipo, nombre)
+                }
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <DeclaracionVariableInm> ::= <TipoVariable> <Asignacion>
+     */
+    private fun esDeclaracionVariableInmSentencia(): DeclaracionVariableInm? {
+        var posicionInicial = posicionActual
+        var tipo:Token? = esTipo()
+
+        if(tipo != null){
+            obtenerSiguienteToken()
+            var asignacion:Asignacion? = esAsignacion;
+
+            if(asignacion != null) {
+                return DeclaracionVariableInm(tipo, asignacion)
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <Asignacion> ::= identificador <OpeAsignacion> <TipoAsig> “|”
+     */
+    private fun esAsignacionSentencia(): Asignacion? {
+        var posicionInicial = posicionActual
+
+
+        restablecerToken(posicionInicial)
+        return null
+    }
 
 }
