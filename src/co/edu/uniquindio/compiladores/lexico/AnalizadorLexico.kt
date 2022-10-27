@@ -91,14 +91,6 @@ class AnalizadorLexico (var codigoFuente:String) {
 
         if(esPalabraReservadaPtt()) return true
 
-        if(esPalabraReservadaEnt()) return true
-
-        if(esPalabraReservadaEnt()) return true
-
-        if(esPalabraReservadaEnt()) return true
-
-        if(esPalabraReservadaEnt()) return true
-
         if(esPalabraReservadaCls()) return true
 
         if(esPalabraReservadaBln()) return true
@@ -124,6 +116,8 @@ class AnalizadorLexico (var codigoFuente:String) {
         if(esPalabraReservadaElse()) return true
 
         if(esPalabraReservadaVd()) return true
+
+        if(esPalabraReservadaImp()) return true
 
         return false
 
@@ -459,8 +453,31 @@ class AnalizadorLexico (var codigoFuente:String) {
         return false
     }
 
+    fun esPalabraReservadaImp():Boolean{
+        if(caracterActual == 'i'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
 
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
 
+            if(caracterActual == 'm') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 'p') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
 
     fun esPalabraReservadaEnt():Boolean{
         if(caracterActual == 'e'){

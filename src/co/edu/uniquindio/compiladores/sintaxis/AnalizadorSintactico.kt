@@ -367,11 +367,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             return retorno
         }
 
-        var lectura:Lectura? = esLecturaSentencia()
-        if(lectura != null){
-            return lectura
-        }
-
         var invFuncion:InvFuncion? = esInvFuncionSentencia()
         if(invFuncion != null){
             return invFuncion
@@ -384,8 +379,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         return null
     }
-
-
 
     /**
      * <Decisión> ::= <Decisión if> [<Decisión else>]
@@ -617,7 +610,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         if(tipo != null){
             obtenerSiguienteToken()
-            var asignacion:Asignacion? = esAsignacion;
+            var asignacion:Asignacion? = esAsignacionSentencia();
 
             if(asignacion != null) {
                 return DeclaracionVariableInm(tipo, asignacion)
@@ -630,13 +623,337 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
     /**
      * <Asignacion> ::= identificador <OpeAsignacion> <TipoAsig> “|”
+     * <TipoAsig> ::= <Expresión> | identificador | <Lectura> | <InvFunción>
      */
     private fun esAsignacionSentencia(): Asignacion? {
         var posicionInicial = posicionActual
 
+        if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+            var identificador = tokenActual
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.OPERADOR_ASIGNACION){
+                var opeAsignacion = tokenActual
+                obtenerSiguienteToken()
+                var expresion:Expresion? = esExpresion()
+
+                if(expresion != null){
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Asignacion(identificador, opeAsignacion, expresion, null, null)
+                    }
+                }
+
+                if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+                    var identificador2 = tokenActual
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Asignacion(identificador, opeAsignacion, null, identificador2, null)
+                    }
+                }
+
+                var sentencia:Sentencia? = esLecturaSentencia()
+
+                if(sentencia != null){
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Asignacion(identificador, opeAsignacion, null, null, sentencia)
+                    }
+                }
+
+                sentencia = esInvFuncionSentencia()
+
+                if(sentencia != null){
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Asignacion(identificador, opeAsignacion, null, null, sentencia)
+                    }
+                }
+            }
+        }
 
         restablecerToken(posicionInicial)
         return null
     }
 
+    /**
+     * <Expresión> ::= <ExpAritmetica> | <Exp Relacional> | <ExpLogica> | <ExpCadena>
+     */
+    private fun esExpresion(): Expresion? {
+        var posicionInicial = posicionActual
+        var expresion:Expresion? = esExpresionAritmetica()
+
+        if(expresion != null){
+            return expresion
+        }
+
+        expresion = esExpresionRelacional()
+
+        if(expresion != null){
+            return expresion
+        }
+
+        expresion = esExpresionLogica()
+
+        if(expresion != null){
+            return expresion
+        }
+
+        expresion = esExpresionCadena()
+
+        if(expresion != null){
+            return expresion
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <ExpCadena> ::= <TipoExpCadena> [“+” <ExpCadena>]
+     */
+    private fun esExpresionCadena(): ExpresionCadena? {
+        var posicionInicial = posicionActual
+        var tipoExpresionCadena:Token? = esTipoExpresionCadena()
+
+        if(tipoExpresionCadena != null){
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.OPERADOR_ARITMETICO && tokenActual.lexema == "+"){
+                var operAgrupacion = tokenActual
+                obtenerSiguienteToken()
+                var expresionCadena:ExpresionCadena? = esExpresionCadena()
+
+                if(expresionCadena != null){
+                    obtenerSiguienteToken()
+                    return ExpresionCadena(tipoExpresionCadena, operAgrupacion, expresionCadena)
+                }
+            }
+            return ExpresionCadena(tipoExpresionCadena, null, null)
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <TipoExpCadena> ::= ent |dbe | str| crt
+     */
+    private fun esTipoExpresionCadena(): Token? {
+
+        if(tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL ||
+            tokenActual.categoria == Categoria.CADENA_CARCTERES || tokenActual.categoria == Categoria.CARACTER){
+            return tokenActual
+        }
+        return null
+    }
+
+    /**
+     * <Impresión> ::= print “(” <TipoImpresion> “)” “|”
+     * <TipoImpresion> ::= <Expresion> | identificador
+     */
+    private fun esImpresionSentencia(): Impresion? {
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "imp"){
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
+                obtenerSiguienteToken()
+                var expresion:Expresion? = esExpresion()
+
+                if(expresion != null){
+
+                    if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
+                        obtenerSiguienteToken()
+
+                        if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
+                            obtenerSiguienteToken()
+                            return Impresion(expresion, null)
+                        }
+                    }
+                }
+
+                if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+                    var identificador = tokenActual
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
+                        obtenerSiguienteToken()
+
+                        if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
+                            obtenerSiguienteToken()
+                            return Impresion(null, identificador)
+                        }
+                    }
+                }
+
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <While> ::= whl “(” <Expresión Lógica> “)” “{” <Lista de Sentencias> “}”
+     */
+    private fun esCicloSentencia(): Ciclo? {
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "whl"){
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
+                obtenerSiguienteToken()
+                var expresionLogica:ExpresionLogica? = esExpresionLogica()
+
+                if(expresionLogica != null){
+
+                    if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
+                        obtenerSiguienteToken()
+
+                        if(tokenActual.categoria == Categoria.LLAVE_IZQUIERDO){
+                            obtenerSiguienteToken()
+                            val listaSentencias: ArrayList<Sentencia> = esListaSentencias()
+
+                            if(tokenActual.categoria == Categoria.LLAVE_DERECHO){
+                                obtenerSiguienteToken()
+                                return Ciclo(expresionLogica, listaSentencias)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <Retorno> ::= ret <TipoRetorno> “|”
+     * <TipoRetorno> ::= identificador | <Expresión>
+     */
+    private fun esRetornoSentencia(): Retorno? {
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "ret"){
+            obtenerSiguienteToken()
+            var expresion:Expresion? = esExpresion()
+
+            if(expresion != null){
+
+                if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
+                    obtenerSiguienteToken()
+                    return Retorno(null, expresion)
+                }
+            }
+
+            if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+                var identificador = tokenActual
+                obtenerSiguienteToken()
+
+                if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
+                    obtenerSiguienteToken()
+                    return Retorno(identificador, null)
+                }
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <Lectura> ::= read “(” cadena “)” “|
+     */
+    private fun esLecturaSentencia(): Lectura? {
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "rad"){
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
+                obtenerSiguienteToken()
+
+                if(tokenActual.categoria == Categoria.CADENA_CARCTERES){
+                    var cadena = tokenActual
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
+                        obtenerSiguienteToken()
+
+                        if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
+                            obtenerSiguienteToken()
+                            return Lectura(cadena)
+                        }
+                    }
+                }
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    /**
+     * <InvFunción> ::= identificador “(” [<Lista de Parámetros sin Tipo>] “)” “|
+     */
+    private fun esInvFuncionSentencia(): InvFuncion? {
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+            var nombre = tokenActual
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
+                obtenerSiguienteToken()
+                val listaParametroSinTipo:ArrayList<ParametroSinTipo> = esListaParametrosSinTipo()
+
+                if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
+                        obtenerSiguienteToken()
+                        return InvFuncion(nombre, listaParametroSinTipo)
+                    }
+                }
+
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
+
+    private fun esIncrDecrSentencia(): IncrDecr? {
+        var posicionInicial = posicionActual
+
+        if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+            var nombre = tokenActual
+            obtenerSiguienteToken()
+
+            if(tokenActual.categoria == Categoria.OPERADOR_INCREMETO || tokenActual.categoria == Categoria.OPERADOR_DECREMENTO) {
+                var tipo = tokenActual
+                obtenerSiguienteToken()
+
+                if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                    obtenerSiguienteToken()
+                    return IncrDecr(nombre, tipo)
+                }
+            }
+        }
+
+        restablecerToken(posicionInicial)
+        return null
+    }
 }
