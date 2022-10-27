@@ -119,6 +119,10 @@ class AnalizadorLexico (var codigoFuente:String) {
 
         if(esPalabraReservadaImp()) return true
 
+        if(esPalabraReservadaCat()) return true
+
+        if(esPalabraReservadaArray()) return true
+
         return false
 
     }
@@ -479,7 +483,72 @@ class AnalizadorLexico (var codigoFuente:String) {
         return false
     }
 
-    fun esPalabraReservadaEnt():Boolean{
+    fun esPalabraReservadaCat():Boolean{
+        if(caracterActual == 'c'){
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if(caracterActual == 'a') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if(caracterActual == 't') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                    return true
+                }
+            }
+            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+        }
+        return false
+    }
+
+    fun esPalabraReservadaArray():Boolean {
+        if (caracterActual == 'a') {
+            var lexema = ""
+            var filaInicial = filaActual
+            var columnaInicial = columnaActual
+            var posicionInicial = posicionAcual;
+
+            lexema += caracterActual
+            obtenerSiguienteCaracter()
+
+            if (caracterActual == 'r') {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+
+                if (caracterActual == 'r') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+
+                    if (caracterActual == 'a') {
+                        lexema += caracterActual
+                        obtenerSiguienteCaracter()
+
+                        if (caracterActual == 'y') {
+                            lexema += caracterActual
+                            obtenerSiguienteCaracter()
+                            almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
+                            return true
+
+                        }
+                    }
+                }
+            }
+
+            restablecerCaracterActual(posicionInicial, filaInicial, columnaInicial)
+        }
+
+        return false
+    }
+
+        fun esPalabraReservadaEnt():Boolean{
         if(caracterActual == 'e'){
             var lexema = ""
             var filaInicial = filaActual
