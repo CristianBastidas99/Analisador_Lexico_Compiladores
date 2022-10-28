@@ -10,18 +10,20 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
 
         val raiz = TreeItem("Unidad de compilacion")
 
-        raiz.children.add( TreeItem("${visibilidad.lexema} ${nombre.lexema}"))
+        raiz.children.add( TreeItem("${visibilidad.lexema}"))
 
-        if(!listaVariablesGlobales.isEmpty()) {
+        raiz.children.add( TreeItem("${nombre.lexema}"))
 
-            val VariablesGlobales = TreeItem("Variables Globales")
-            raiz.children.add(VariablesGlobales)
+        if(listaVariablesGlobales.isNotEmpty()) {
+
+            val variablesGlobales = TreeItem("Variables Globales")
+            raiz.children.add(variablesGlobales)
             for (variableGlobal in listaVariablesGlobales) {
-                VariablesGlobales.children.add(variableGlobal.getArbolVisual())
+                variablesGlobales.children.add(variableGlobal.getArbolVisual())
             }
         }
 
-        if(!listaFunciones.isEmpty()) {
+        if(listaFunciones.isNotEmpty()) {
             for (funcion in listaFunciones) {
                 raiz.children.add(funcion.getArbolVisual())
             }

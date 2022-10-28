@@ -9,6 +9,30 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
 
         val raiz = TreeItem("Funcion")
 
+        raiz.children.add( TreeItem("${visibilidad.lexema}"))
+
+        raiz.children.add( TreeItem("${valorRetornado.lexema}"))
+
+        raiz.children.add( TreeItem("${nombre.lexema}"))
+
+        if(listaParametrosConTipo.isNotEmpty()) {
+
+            val parametrosConTipo = TreeItem("Parametros con tipo")
+            raiz.children.add(parametrosConTipo)
+            for (parametroConTipo in listaParametrosConTipo) {
+                parametrosConTipo.children.add(parametroConTipo.getArbolVisual())
+            }
+        }
+
+        if(listaSentencias.isNotEmpty()) {
+
+            val sentencias = TreeItem("Sentencias")
+            raiz.children.add(sentencias)
+            for (sentencia in listaSentencias) {
+                sentencias.children.add(sentencia.getArbolVisual())
+            }
+        }
+
         return raiz
     }
 

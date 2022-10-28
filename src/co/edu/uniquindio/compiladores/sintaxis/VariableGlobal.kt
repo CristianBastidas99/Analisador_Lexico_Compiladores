@@ -6,7 +6,13 @@ import javafx.scene.control.TreeItem
 class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
     fun getArbolVisual(): TreeItem<String>? {
 
-        val raiz = TreeItem("${visibilidad.lexema} ${tipo.lexema} ${nombre.lexema}")
+        val raiz = TreeItem("Variable global")
+
+        raiz.children.add(TreeItem("${visibilidad.lexema}"))
+
+        raiz.children.add(TreeItem("${tipo.lexema}"))
+
+        raiz.children.add(TreeItem("${nombre.lexema}"))
 
         return raiz
     }
