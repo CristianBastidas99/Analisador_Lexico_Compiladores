@@ -6,7 +6,7 @@ import javafx.scene.control.TreeItem
 
 class ExpresionAritmetica (var numero:Token, var operAritmetico:Token?, var exprAritmetica:ExpresionAritmetica?) : Expresion() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Expresion relacional")
+        val raiz = TreeItem("Expresion aritmetica")
 
         raiz.children.add( TreeItem( "${numero.lexema}" ) )
 
