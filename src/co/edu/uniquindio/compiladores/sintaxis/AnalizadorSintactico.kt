@@ -1,23 +1,9 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
 import co.edu.uniquindio.compiladores.lexico.Categoria
+import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
 
-/**
-pub cls ^alumno {
-
-    pvt str ^nombre |
-    pvt ent ^edad |
-    pvt ent ^matric |
-
-    pub ent ^mult (ent ^a : ent ^b) {
-
-        if ( ( (#3 ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) ) {
-
-        }
-    }
-}
- */
 
 class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
@@ -47,7 +33,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     fun reportarError(mensaje:String){
-
+        listaErrores.add(Error(mensaje,tokenActual.fila, tokenActual.columna))
     }
 
     /**
@@ -145,10 +131,18 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                         obtenerSiguienteToken()
                         return VariableGlobal(visibilidad, tipo, nombre)
+                    }else{
+                        reportarError("Debe colocar el fin de sentencia del parametro global")
                     }
+                }else{
+                    reportarError("Debe definir el identificador del parametro global")
                 }
+            }else{
+                reportarError("Debe definir el tipo del parametro global")
             }
             restablecerToken(posicionInicial)
+        }else{
+            reportarError("Debe definir la visibilidad del parametro global")
         }
         return null
     }
@@ -218,13 +212,27 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                 if(tokenActual.categoria == Categoria.LLAVE_DERECHO) {
                                     obtenerSiguienteToken()
                                     return Funcion(visibilidad, valorRetornado, nombre, listaParametroConTipo, listaSentencias)
+                                }else{
+                                    reportarError("Debe definir la llave derecha de la funcion")
                                 }
+                            }else{
+                                reportarError("Debe definir la llave izquierda de la funcion")
                             }
+                        }else{
+                            reportarError("Debe definir el parentesis derecho de la funcion")
                         }
+                    }else{
+                        reportarError("Debe definir el parentesis izquierdo de la funcion")
                     }
+                }else{
+                    reportarError("Debe definir el identificador de la funcion")
                 }
+            }else{
+                reportarError("Debe definir el valor retornado de la funcion")
             }
             restablecerToken(posicionInicial)
+        }else{
+            reportarError("Debe definir la visibilidad de la funcion")
         }
         return null
     }
@@ -257,6 +265,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroConTipo()
             }else{
+                reportarError("Debe definir el separador del parametro con tipo")
                 p = null
             }
         }
@@ -280,7 +289,11 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 var nombre = tokenActual
                 obtenerSiguienteToken()
                 return ParametroConTipo(tipo, nombre)
+            }else{
+                reportarError("Debe definir el identificador del parametro")
             }
+        }else{
+            reportarError("Debe definir el tipo del parametro")
         }
 
         restablecerToken(posicionInicial)
@@ -301,6 +314,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroSinTipo()
             }else{
+                reportarError("Debe definir el separador del parametro sin tipo")
                 p = null
             }
         }
@@ -323,7 +337,11 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 var nombre = tokenActual
                 obtenerSiguienteToken()
                 return ParametroSinTipo(nombre)
+            }else{
+                reportarError("Debe definir el identificador del parametro")
             }
+        }else{
+            reportarError("Este parametro no lleva tipo")
         }
 
         restablecerToken(posicionInicial)
@@ -438,16 +456,34 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                         if (tokenActual.categoria == Categoria.LLAVE_DERECHO) {
                                             obtenerSiguienteToken()
                                             return Desicion(exprLogica, listaSentenciasIf, listaSentenciasElse)
+                                        }else{
+                                            reportarError("Debe definir la llave derecha de la desicion ELSE")
                                         }
+                                    }else{
+                                        reportarError("Debe definir la llave izquierda de la desicion ELSE")
                                     }
+                                }else{
+                                    reportarError("Debe indicar la palabra reservada ELSE de la desicion")
                                 }
 
                                 return Desicion(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
+                            }else{
+                                reportarError("Debe definir la llave derecha de la desicion IF")
                             }
+                        }else{
+                            reportarError("Debe definir la llave izquierda de la desicion IF")
                         }
+                    }else{
+                        reportarError("Debe definir el parentesis derecho de la desicion")
                     }
+                }else{
+                    reportarError("Debe definir una expresion logica valida en la desicion")
                 }
+            }else{
+                reportarError("Debe definir el parentesis izquierdo de la desicion")
             }
+        }else{
+            reportarError("Debe inciar con la palabra reservada IF de la desicion")
         }
 
         restablecerToken(posicionInicial)
