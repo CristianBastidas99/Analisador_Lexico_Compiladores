@@ -44,7 +44,16 @@
                </content>
             </Tab>
           <Tab text="Errores Lexicos" />
-            <Tab text="Errores Sintacticos" />
+            <Tab text="Errores Sintacticos">
+               <content>
+                  <TableView fx:id="tablaErroresSint" prefHeight="200.0" prefWidth="200.0">
+                    <columns>
+                        <TableColumn fx:id="colm_errorErroresSint" prefWidth="335.20002365112305" text="Error" />
+                      <TableColumn fx:id="colm_filaErroresSint" prefWidth="98.4000244140625" text="Fila" />
+                      <TableColumn fx:id="colm_columnaErroresSint" prefWidth="92.800048828125" text="Columna" />
+                    </columns>
+                  </TableView>
+               </content></Tab>
         </tabs>
       </TabPane>
    </children>

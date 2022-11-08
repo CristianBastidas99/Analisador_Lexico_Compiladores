@@ -7,8 +7,8 @@ import co.edu.uniquindio.compiladores.lexico.Token
 
 class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
-    var posicionActual = -1
-    var tokenActual = Token("Inicio",Categoria.PUNTO, 0, 0)
+    var posicionActual = -1 //Se inicia en -1 para poder leer la posicion 0
+    var tokenActual = Token("Inicio",Categoria.PUNTO, 0, 0) //Se inicializa como un token sin importancia
     var listaErrores = ArrayList<Error>()
 
     fun obtenerSiguienteToken(){
@@ -24,6 +24,9 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         }
     }
 
+    /**
+     * Metodo que resetea la posicion y el token que se esta utilizando
+     */
     fun restablecerToken(posicion:Int){
 
         if(posicion < listaTokens.size){
@@ -132,17 +135,17 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         obtenerSiguienteToken()
                         return VariableGlobal(visibilidad, tipo, nombre)
                     }else{
-                        reportarError("Debe colocar el fin de sentencia del parametro global")
+                        reportarError("Debe colocar el fin de sentencia de la variable global")
                     }
                 }else{
-                    reportarError("Debe definir el identificador del parametro global")
+                    reportarError("Debe definir el identificador de la variable global")
                 }
             }else{
-                reportarError("Debe definir el tipo del parametro global")
+                reportarError("Debe definir el tipo de la variable global")
             }
             restablecerToken(posicionInicial)
         }else{
-            reportarError("Debe definir la visibilidad del parametro global")
+            reportarError("Debe definir la visibilidad de la variable global")
         }
         return null
     }
@@ -265,7 +268,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroConTipo()
             }else{
-                reportarError("Debe definir el separador del parametro con tipo")
+                reportarError("Debe definir el separador del parametro")
                 p = null
             }
         }
@@ -314,7 +317,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroSinTipo()
             }else{
-                reportarError("Debe definir el separador del parametro sin tipo")
+                reportarError("Debe definir el separador del parametro")
                 p = null
             }
         }
@@ -482,8 +485,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }else{
                 reportarError("Debe definir el parentesis izquierdo de la desicion")
             }
-        }else{
-            reportarError("Debe inciar con la palabra reservada IF de la desicion")
         }
 
         restablecerToken(posicionInicial)
@@ -519,13 +520,23 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                         if(expLogica != null){
                             return ExpresionLogica(negacion, expRelacional, opeLogico, expLogica)
+                        }else{
+                            reportarError("Expresion logica no valida")
+                            restablecerToken(posicionActual - 1)
                         }
                     }
 
                     return ExpresionLogica(negacion, expRelacional, opeLogico, null)
+                }else{
+                    reportarError("Debe cerrar con parentesis derecho la expresion logica")
                 }
+            }else{
+                reportarError("Expresion relacional no valida")
             }
+        }else{
+            reportarError("Debe iniciar con un parentecis izquierdo la expresion logica")
         }
+
         restablecerToken(posicionInicial)
         return null
     }
@@ -575,12 +586,26 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                 if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                                     obtenerSiguienteToken()
                                     return ExpresionRelacional(exprAritmetica, opeRelacional, exprAritmetica2)
+                                }else{
+                                    reportarError("Debe encerrar en parentesis la expresion aritmetica")
                                 }
+                            }else{
+                                reportarError("Expresion aritmetica no es valida")
                             }
+                        }else{
+                            reportarError("Debe encerrar en parentesis la expresion aritmetica")
                         }
+                    }else{
+                        reportarError("Falta el operador relacional en la expresion Relacional")
                     }
+                }else{
+                    reportarError("Debe encerrar en parentesis la expresion aritmetica")
                 }
+            }else{
+                reportarError("Expresion aritmetica no es valida")
             }
+        }else{
+            reportarError("Debe encerrar en parentesis la expresion aritmetica")
         }
 
         restablecerToken(posicionInicial)
@@ -597,6 +622,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         if(tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL){
             var numero = tokenActual
             obtenerSiguienteToken()
+            posicionInicial = posicionActual
 
             if(tokenActual.categoria == Categoria.OPERADOR_ARITMETICO){
                 var operAritmetico = tokenActual
@@ -611,11 +637,21 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO) {
                             obtenerSiguienteToken()
                             return ExpresionAritmetica(numero, operAritmetico, exprAritmetica)
+                        }else{
+                            reportarError("Debe encerrar en parentesis la expresion aritmetica")
                         }
+                    }else{
+                        reportarError("Expresion aritmetica no valida")
                     }
+                }else{
+                    reportarError("Debe encerrar en parentesis la expresion aritmetica")
                 }
+                restablecerToken(posicionInicial)
             }
+
             return ExpresionAritmetica(numero, null, null)
+        }else{
+            reportarError("Una expresion aritmetica debe tener minimo un numero")
         }
 
         restablecerToken(posicionInicial)
@@ -639,7 +675,11 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                     obtenerSiguienteToken()
                     return DeclaracionVariableMut(tipo, nombre)
+                }else{
+                    reportarError("Falta el fin de sentencia")
                 }
+            }else{
+                reportarError("Se espera un identificador")
             }
         }
 
@@ -660,6 +700,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
             if(asignacion != null) {
                 return DeclaracionVariableInm(tipo, asignacion)
+            }else{
+                reportarError("La asignacion no es valida")
             }
         }
 
@@ -688,16 +730,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                         obtenerSiguienteToken()
                         return Asignacion(identificador, opeAsignacion, expresion, null, null)
-                    }
-                }
-
-                if(tokenActual.categoria == Categoria.IDENTIFICADOR){
-                    var identificador2 = tokenActual
-                    obtenerSiguienteToken()
-
-                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
-                        obtenerSiguienteToken()
-                        return Asignacion(identificador, opeAsignacion, null, identificador2, null)
+                    }else{
+                        reportarError("Falta el fin de sentencia")
                     }
                 }
 
@@ -712,6 +746,23 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 if(sentencia != null){
                     return Asignacion(identificador, opeAsignacion, null, null, sentencia)
                 }
+
+                if(tokenActual.categoria == Categoria.IDENTIFICADOR){
+                    var identificador2 = tokenActual
+                    obtenerSiguienteToken()
+
+                    if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
+                        obtenerSiguienteToken()
+                        return Asignacion(identificador, opeAsignacion, null, identificador2, null)
+                    }else{
+                        reportarError("Falta el fin de sentencia")
+                    }
+                }
+
+                reportarError("Por favor especifique el tipo de asignacion")
+
+            }else{
+                reportarError("Falta el operador de asignacion")
             }
         }
 
@@ -769,9 +820,14 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                 if(expresionCadena != null){
                     return ExpresionCadena(tipoExpresionCadena, operAgrupacion, expresionCadena)
+                }else{
+                    reportarError("Expresion cadena no valida")
+                    restablecerToken(posicionActual - 1)
                 }
             }
             return ExpresionCadena(tipoExpresionCadena, null, null)
+        }else{
+            reportarError("La expresion cadena debe tener minimo una cadena")
         }
 
         restablecerToken(posicionInicial)
@@ -812,7 +868,11 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                             obtenerSiguienteToken()
                             return Impresion(expresion, null)
+                        }else{
+                            reportarError("Falta el fin de sentencia")
                         }
+                    }else{
+                        reportarError("El tipo de impresion debe ir encerrado en parentesis")
                     }
                 }
 
@@ -826,10 +886,18 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                             obtenerSiguienteToken()
                             return Impresion(null, identificador)
+                        }else{
+                            reportarError("Falta el fin de sentencia")
                         }
+                    }else{
+                        reportarError("El tipo de impresion debe ir encerrado en parentesis")
                     }
                 }
 
+                reportarError("El elemento que desea imprimir no es valido")
+
+            }else{
+                reportarError("El tipo de impresion debe ir encerrado en parentesis")
             }
         }
 
@@ -862,10 +930,20 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             if(tokenActual.categoria == Categoria.LLAVE_DERECHO){
                                 obtenerSiguienteToken()
                                 return Ciclo(expresionLogica, listaSentencias)
+                            }else{
+                                reportarError("Las sentencias deben ir encerradas en llaves")
                             }
+                        }else{
+                            reportarError("Las sentencias deben ir encerradas en llaves")
                         }
+                    }else{
+                        reportarError("La expresion logica debe ir encerrado en parentesis")
                     }
+                }else{
+                    reportarError("Expresion logica no valida")
                 }
+            }else{
+                reportarError("La expresion logica debe ir encerrado en parentesis")
             }
         }
 
@@ -889,6 +967,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                     obtenerSiguienteToken()
                     return Retorno(null, expresion)
+                }else{
+                    reportarError("Falta el fin de sentencia")
                 }
             }
 
@@ -899,8 +979,13 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                     obtenerSiguienteToken()
                     return Retorno(identificador, null)
+                }else{
+                    reportarError("Falta el fin de sentencia")
                 }
             }
+
+            reportarError("El elemento que intenta retornar no es valido")
+
         }
 
         restablecerToken(posicionInicial)
@@ -929,9 +1014,17 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                             obtenerSiguienteToken()
                             return Lectura(cadena)
+                        }else{
+                            reportarError("Falta el fin de sentencia")
                         }
+                    }else{
+                        reportarError("La cadena debe ir encerrada en parentesis")
                     }
+                }else{
+                    reportarError("Se espera una cadena")
                 }
+            }else{
+                reportarError("La cadena debe ir encerrada en parentesis")
             }
         }
 
@@ -959,9 +1052,12 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                         obtenerSiguienteToken()
                         return InvFuncion(nombre, listaParametroSinTipo)
+                    }else{
+                        reportarError("Falta el fin de sentencia")
                     }
+                }else{
+                    reportarError("los parametros deber estar encerrados en parentesis")
                 }
-
             }
         }
 
@@ -987,6 +1083,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 if (tokenActual.categoria == Categoria.FIN_SENTENCIA) {
                     obtenerSiguienteToken()
                     return IncrDecr(nombre, tipo)
+                }else{
+                    reportarError("Falta el fin de sentencia")
                 }
             }
         }

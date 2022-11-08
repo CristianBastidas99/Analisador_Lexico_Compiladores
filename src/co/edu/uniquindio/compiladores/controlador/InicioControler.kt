@@ -2,6 +2,7 @@ package co.edu.uniquindio.compiladores.controlador
 
 import co.edu.uniquindio.compiladores.lexico.AnalizadorLexico
 import co.edu.uniquindio.compiladores.lexico.Categoria
+import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import javafx.collections.FXCollections
@@ -26,6 +27,11 @@ class InicioControler {
     @FXML lateinit var colm_catTabLexico : TableColumn<Token, Categoria>
     @FXML lateinit var colm_filaTabLexico : TableColumn<Token, Int>
     @FXML lateinit var colm_colmTabLexico : TableColumn<Token, Int>
+
+    @FXML lateinit var tablaErroresSint : TableView<Error>
+    @FXML lateinit var colm_errorErroresSint : TableColumn<Error, String>
+    @FXML lateinit var colm_filaErroresSint : TableColumn<Error, Int>
+    @FXML lateinit var colm_columnaErroresSint : TableColumn<Error, Int>
 
 
     @FXML
@@ -53,6 +59,17 @@ class InicioControler {
             var uc = analizadorSintactico.esUnidadDeCompilacion()
 
             arbolVisual.setRoot(uc!!.getArbolVisual())
+
+            val listErrorSint = FXCollections.observableArrayList<Error>()
+            listErrorSint.addAll(analizadorSintactico.listaErrores)
+
+            tablaErroresSint.items.clear()
+
+            colm_errorErroresSint.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
+            colm_filaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
+            colm_columnaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+
+            tablaErroresSint.items.addAll(listErrorSint)
 
         }
     }

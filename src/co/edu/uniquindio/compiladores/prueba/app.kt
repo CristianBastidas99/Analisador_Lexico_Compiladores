@@ -51,6 +51,9 @@ pub cls ^alumno {
 
     }
 }
+    //autogenerate from DDL  JPA hibernate
+    //generate model from tables JPA hibernate
+
  */
 
 fun main() {
