@@ -1,7 +1,10 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
+import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
+import java.util.ArrayList
 
 class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
     fun getArbolVisual(): TreeItem<String>? {
@@ -19,6 +22,10 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
 
     override fun toString(): String {
         return "VariableGlobal(visibilidad=${visibilidad.lexema}, tipo=${tipo.lexema}, nombre=${nombre.lexema})"
+    }
+
+    fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, lexema: String) {
+        tablaSimbolos.guardasSimboloValor(nombre.lexema, tipo.lexema, true, lexema, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
     }
 
 

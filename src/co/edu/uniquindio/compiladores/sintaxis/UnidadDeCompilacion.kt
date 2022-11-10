@@ -1,7 +1,9 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
+import co.edu.uniquindio.compiladores.lexico.Error
 
 
 class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVariablesGlobales:ArrayList<VariableGlobal>, val listaFunciones:ArrayList<Funcion>) {
@@ -31,6 +33,24 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
 
         return raiz
     }
+
+    fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos) {
+        if(listaVariablesGlobales.isNotEmpty()) {
+            for (variableGlobal in listaVariablesGlobales) {
+                variableGlobal.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+            }
+        }
+        if(listaFunciones.isNotEmpty()) {
+            for (funcion in listaFunciones) {
+                funcion.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+            }
+        }
+    }
+
+    fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos) {
+
+    }
+
 
     override fun toString(): String {
         return "UnidadDeCompilacion(visibilidad=${visibilidad.lexema}, nombre=${nombre.lexema}, listaVariablesGlobales=$listaVariablesGlobales, listaFunciones=$listaFunciones)"

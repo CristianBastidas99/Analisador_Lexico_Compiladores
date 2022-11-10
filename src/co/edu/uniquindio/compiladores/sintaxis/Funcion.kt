@@ -1,6 +1,9 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
+
+import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
 
 class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token, val listaParametrosConTipo:ArrayList<ParametroConTipo>, val listaSentencias:ArrayList<Sentencia>) {
@@ -38,6 +41,21 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
 
     override fun toString(): String {
         return "Funcion(visibilidad=${visibilidad.lexema}, valorRetornado=${valorRetornado.lexema}, nombre=${nombre.lexema}, listaParametros=$listaParametrosConTipo, listaSentencias=$listaSentencias)"
+    }
+
+    fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, lexema: String) {
+        val listaTipoParametro : ArrayList<String> = obtenerTipoParametros()
+        tablaSimbolos.guardasSimboloFuncion(nombre.lexema, valorRetornado.lexema, listaTipoParametro, lexema, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
+    }
+
+    fun obtenerTipoParametros():ArrayList<String> {
+        val listaTipoParametro : ArrayList<String> = ArrayList()
+        if(listaParametrosConTipo.isNotEmpty()){
+            for(p in listaParametrosConTipo){
+                listaTipoParametro.add(p.tipo.lexema)
+            }
+        }
+        return listaTipoParametro
     }
 
 

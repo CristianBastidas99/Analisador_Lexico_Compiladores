@@ -4,6 +4,7 @@ import co.edu.uniquindio.compiladores.lexico.AnalizadorLexico
 import co.edu.uniquindio.compiladores.lexico.Categoria
 import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import javafx.collections.FXCollections
 import javafx.event.ActionEvent
@@ -58,19 +59,25 @@ class InicioControler {
             var analizadorSintactico = AnalizadorSintactico(analizador.listaTokens)
             var uc = analizadorSintactico.esUnidadDeCompilacion()
 
-            arbolVisual.setRoot(uc!!.getArbolVisual())
+            if(uc != null) {
+                arbolVisual.setRoot(uc!!.getArbolVisual())
 
-            val listErrorSint = FXCollections.observableArrayList<Error>()
-            listErrorSint.addAll(analizadorSintactico.listaErrores)
+                val listErrorSint = FXCollections.observableArrayList<Error>()
+                listErrorSint.addAll(analizadorSintactico.listaErrores)
 
-            tablaErroresSint.items.clear()
+                tablaErroresSint.items.clear()
 
-            colm_errorErroresSint.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
-            colm_filaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
-            colm_columnaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+                colm_errorErroresSint.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
+                colm_filaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
+                colm_columnaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
 
-            tablaErroresSint.items.addAll(listErrorSint)
+                tablaErroresSint.items.addAll(listErrorSint)
 
+                val semantica = AnalizadorSemantico(uc)
+                semantica.llenarTablaSimbolos()
+                println(semantica.tablaSimbolos)
+
+            }
         }
     }
 

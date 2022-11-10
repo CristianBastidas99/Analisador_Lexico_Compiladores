@@ -144,9 +144,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 reportarError("Debe definir el tipo de la variable global")
             }
             restablecerToken(posicionInicial)
-        }else{
-            reportarError("Debe definir la visibilidad de la variable global")
         }
+
         return null
     }
 
@@ -234,9 +233,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 reportarError("Debe definir el valor retornado de la funcion")
             }
             restablecerToken(posicionInicial)
-        }else{
-            reportarError("Debe definir la visibilidad de la funcion")
         }
+
         return null
     }
 
@@ -268,7 +266,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroConTipo()
             }else{
-                reportarError("Debe definir el separador del parametro")
+                //reportarError("Debe definir el separador del parametro")
                 p = null
             }
         }
@@ -295,8 +293,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }else{
                 reportarError("Debe definir el identificador del parametro")
             }
-        }else{
-            reportarError("Debe definir el tipo del parametro")
         }
 
         restablecerToken(posicionInicial)
@@ -317,7 +313,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroSinTipo()
             }else{
-                reportarError("Debe definir el separador del parametro")
+                //reportarError("Debe definir el separador del parametro")
                 p = null
             }
         }
