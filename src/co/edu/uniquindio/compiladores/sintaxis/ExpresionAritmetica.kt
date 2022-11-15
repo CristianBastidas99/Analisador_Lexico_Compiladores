@@ -1,5 +1,6 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
+import co.edu.uniquindio.compiladores.lexico.Categoria
 import co.edu.uniquindio.compiladores.lexico.Token
 import javafx.scene.control.TreeItem
 
@@ -19,6 +20,23 @@ class ExpresionAritmetica (var numero:Token, var operAritmetico:Token?, var expr
         }
 
         return raiz
+    }
+
+    override fun obtenerTipo(): String {
+
+        val tipo = numero.categoria
+        var returnValue = "ent"
+
+        if(tipo == Categoria.DECIMAL){
+            returnValue = "dbe"
+            return returnValue
+        }else{
+            if(exprAritmetica != null) {
+                returnValue = exprAritmetica!!.obtenerTipo()
+            }
+        }
+
+        return returnValue
     }
 
 }

@@ -16,4 +16,8 @@ class ExpresionRelacional(var expAritmetica1:ExpresionAritmetica, var opeRelacio
         return raiz
     }
 
+    override fun obtenerTipo(): String {
+        return "bln"
+    }
+
 }

@@ -1,7 +1,12 @@
 package co.edu.uniquindio.compiladores.prueba
 
 import co.edu.uniquindio.compiladores.lexico.AnalizadorLexico
+import co.edu.uniquindio.compiladores.lexico.Categoria
+import co.edu.uniquindio.compiladores.lexico.Token
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
+import co.edu.uniquindio.compiladores.sintaxis.InvFuncion
+import co.edu.uniquindio.compiladores.sintaxis.ParametroSinTipo
+import co.edu.uniquindio.compiladores.sintaxis.Sentencia
 
 /*
 &Unidad de Compilacion
@@ -58,7 +63,15 @@ pub cls ^alumno {
 
 fun main() {
 
-    pruebaUnidadDeCompilacion()
+    var nombre = Token("^var", Categoria.IDENTIFICADOR, 0, 0)
+    var sentencia: Sentencia = InvFuncion(nombre, ArrayList<ParametroSinTipo>())
+
+    println(sentencia.javaClass.simpleName.equals("InvFuncion"))
+
+    var cadena = "Hola"
+    println(cadena.split("\\."))
+
+    //pruebaUnidadDeCompilacion()
     //pruebaDeclaracionVariable()
 }
 

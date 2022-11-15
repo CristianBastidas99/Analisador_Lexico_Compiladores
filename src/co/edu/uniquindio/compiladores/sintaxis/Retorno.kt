@@ -1,7 +1,10 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
+import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
+import java.util.ArrayList
 
 class Retorno(var identificado:Token?, var expresion: Expresion?) : Sentencia() {
 
@@ -17,6 +20,22 @@ class Retorno(var identificado:Token?, var expresion: Expresion?) : Sentencia() 
         }
 
         return raiz
+    }
+
+    override fun llenarTablaSimbolos(
+        listaErroresSemanticos: ArrayList<Error>,
+        tablaSimbolos: TablaSimbolos,
+        ambito: String
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun analizarSemantica(
+        listaErroresSemanticos: ArrayList<Error>,
+        tablaSimbolos: TablaSimbolos,
+        ambito: String
+    ) {
+        TODO("Not yet implemented")
     }
 
 }

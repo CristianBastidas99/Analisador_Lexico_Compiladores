@@ -24,4 +24,8 @@ class ExpresionLogica(var negacion:Token?, var exprRelacional:ExpresionRelaciona
         return raiz
     }
 
+    override fun obtenerTipo(): String {
+        return "bln"
+    }
+
 }

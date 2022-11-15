@@ -28,5 +28,9 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
         tablaSimbolos.guardasSimboloValor(nombre.lexema, tipo.lexema, true, lexema, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
     }
 
+    fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
+
+    }
+
 
 }

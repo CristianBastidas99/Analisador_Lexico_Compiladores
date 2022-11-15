@@ -1,7 +1,10 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
+import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
+import java.util.ArrayList
 
 class DeclaracionVariable(var tipoAcceso:Token, var tipo:Token, var nombre:Token?, var asignacion:Asignacion? ) :Sentencia() {
     override fun getArbolVisual(): TreeItem<String> {
@@ -18,6 +21,22 @@ class DeclaracionVariable(var tipoAcceso:Token, var tipo:Token, var nombre:Token
         }
 
         return  raiz
+    }
+
+    override fun llenarTablaSimbolos(
+        listaErroresSemanticos: ArrayList<Error>,
+        tablaSimbolos: TablaSimbolos,
+        ambito: String
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun analizarSemantica(
+        listaErroresSemanticos: ArrayList<Error>,
+        tablaSimbolos: TablaSimbolos,
+        ambito: String
+    ) {
+        TODO("Not yet implemented")
     }
 
 }

@@ -369,9 +369,9 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esSentencia(): Sentencia? {
 
-        var desicion:Desicion? = esDesicionSentencia()
-        if(desicion != null){
-            return desicion
+        var decision:Decision? = esDecisionSentencia()
+        if(decision != null){
+            return decision
         }
 
         var declaracionVariableInm:DeclaracionVariableInm? = esDeclaracionVariableInmSentencia()
@@ -422,7 +422,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      * <Decisión if> ::= if “(” <Expresión Lógica> “)” “{” <Lista de Sentencias> “}”
      * <Decisión else> ::= else “{” <Lista de Sentencias> “}”
      */
-    fun esDesicionSentencia(): Desicion? {
+    fun esDecisionSentencia(): Decision? {
 
         var posicionInicial = posicionActual
 
@@ -454,7 +454,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                                         if (tokenActual.categoria == Categoria.LLAVE_DERECHO) {
                                             obtenerSiguienteToken()
-                                            return Desicion(exprLogica, listaSentenciasIf, listaSentenciasElse)
+                                            return Decision(exprLogica, listaSentenciasIf, listaSentenciasElse)
                                         }else{
                                             reportarError("Debe definir la llave derecha de la desicion ELSE")
                                         }
@@ -465,7 +465,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                     reportarError("Debe indicar la palabra reservada ELSE de la desicion")
                                 }
 
-                                return Desicion(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
+                                return Decision(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
                             }else{
                                 reportarError("Debe definir la llave derecha de la desicion IF")
                             }

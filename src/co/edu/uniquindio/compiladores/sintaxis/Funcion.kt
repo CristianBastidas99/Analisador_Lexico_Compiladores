@@ -46,6 +46,27 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
     fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, lexema: String) {
         val listaTipoParametro : ArrayList<String> = obtenerTipoParametros()
         tablaSimbolos.guardasSimboloFuncion(nombre.lexema, valorRetornado.lexema, listaTipoParametro, lexema, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
+
+        if(listaParametrosConTipo.isNotEmpty()){
+            for(p in listaParametrosConTipo){
+                tablaSimbolos.guardasSimboloValor(p.nombre.lexema, p.tipo.lexema, true, nombre.lexema, "pvt", p.nombre.fila, p.nombre.columna)
+            }
+        }
+
+        if(listaSentencias.isNotEmpty()){
+            for(s in listaSentencias){
+                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+            }
+        }
+
+    }
+
+    fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos) {
+        if(listaSentencias.isNotEmpty()){
+            for(s in listaSentencias){
+                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+            }
+        }
     }
 
     fun obtenerTipoParametros():ArrayList<String> {

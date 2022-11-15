@@ -1,5 +1,7 @@
 package co.edu.uniquindio.compiladores.sintaxis
 
+import co.edu.uniquindio.compiladores.lexico.Error
+import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
 
 class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<Sentencia>) : Sentencia() {
@@ -18,6 +20,22 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
         }
 
         return raiz
+    }
+
+    override fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String ) {
+        if(listaSentencias.isNotEmpty()){
+            for(s in listaSentencias){
+                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "Sentencias en while")
+            }
+        }
+    }
+
+    override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
+        if(listaSentencias.isNotEmpty()){
+            for(s in listaSentencias){
+                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "Sentencias en while")
+            }
+        }
     }
 
 }

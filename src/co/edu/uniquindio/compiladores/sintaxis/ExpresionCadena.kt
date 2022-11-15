@@ -20,4 +20,8 @@ class ExpresionCadena(var tipo: Token, var operAgrupacion: Token?, var expresion
         return raiz
     }
 
+    override fun obtenerTipo(): String {
+        return "str"
+    }
+
 }

@@ -48,7 +48,16 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
     }
 
     fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos) {
-
+        if(listaVariablesGlobales.isNotEmpty()) {
+            for (variableGlobal in listaVariablesGlobales) {
+                variableGlobal.analizarSemantica(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+            }
+        }
+        if(listaFunciones.isNotEmpty()) {
+            for (funcion in listaFunciones) {
+                funcion.analizarSemantica(listaErroresSemanticos, tablaSimbolos)
+            }
+        }
     }
 
 

@@ -5,4 +5,6 @@ import javafx.scene.control.TreeItem
 abstract class Expresion() {
 
     abstract fun getArbolVisual(): TreeItem<String>
+
+    abstract  fun obtenerTipo(): String
 }
