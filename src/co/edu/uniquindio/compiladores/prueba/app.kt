@@ -72,8 +72,14 @@ fun main() {
     var cadena = "Hola"
     println(cadena.split("\\."))*/
 
-    pruebaUnidadDeCompilacion()
+    //pruebaUnidadDeCompilacion()
     //pruebaDeclaracionVariable()
+
+    var texto = "hol/tipo:ent/ciclo/ciclo/if"
+    var posicion = texto.indexOf(':')
+
+    println(texto.substring(posicion + 1, texto.indexOf('/', posicion)))
+
 }
 
 fun pruebaUnidadDeCompilacion(){
