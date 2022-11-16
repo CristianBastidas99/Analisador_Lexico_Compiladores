@@ -25,7 +25,7 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
     override fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String ) {
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
-                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "Sentencias en while")
+                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "$ambito/while")
             }
         }
     }
@@ -33,7 +33,7 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
     override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
-                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "Sentencias en while")
+                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "$ambito/while")
             }
         }
     }

@@ -55,7 +55,7 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
         }
         if(listaFunciones.isNotEmpty()) {
             for (funcion in listaFunciones) {
-                funcion.analizarSemantica(listaErroresSemanticos, tablaSimbolos)
+                funcion.analizarSemantica(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
             }
         }
     }

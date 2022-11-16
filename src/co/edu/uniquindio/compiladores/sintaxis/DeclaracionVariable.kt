@@ -28,7 +28,7 @@ class DeclaracionVariable(var tipoAcceso:Token, var tipo:Token, var nombre:Token
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
+
     }
 
     override fun analizarSemantica(
@@ -36,7 +36,7 @@ class DeclaracionVariable(var tipoAcceso:Token, var tipo:Token, var nombre:Token
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
+
     }
 
 }

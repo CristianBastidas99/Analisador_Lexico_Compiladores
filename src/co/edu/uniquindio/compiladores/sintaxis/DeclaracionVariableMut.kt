@@ -27,7 +27,6 @@ class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Senten
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
     }
 
 }

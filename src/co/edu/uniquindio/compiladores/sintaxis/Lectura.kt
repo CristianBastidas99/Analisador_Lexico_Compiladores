@@ -21,7 +21,7 @@ class Lectura(var cadena:Token) : Sentencia() {
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
+
     }
 
     override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {

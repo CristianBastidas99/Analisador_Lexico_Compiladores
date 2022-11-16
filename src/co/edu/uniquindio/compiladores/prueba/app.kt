@@ -3,6 +3,7 @@ package co.edu.uniquindio.compiladores.prueba
 import co.edu.uniquindio.compiladores.lexico.AnalizadorLexico
 import co.edu.uniquindio.compiladores.lexico.Categoria
 import co.edu.uniquindio.compiladores.lexico.Token
+import co.edu.uniquindio.compiladores.semantico.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import co.edu.uniquindio.compiladores.sintaxis.InvFuncion
 import co.edu.uniquindio.compiladores.sintaxis.ParametroSinTipo
@@ -63,29 +64,78 @@ pub cls ^alumno {
 
 fun main() {
 
-    var nombre = Token("^var", Categoria.IDENTIFICADOR, 0, 0)
+    /*var nombre = Token("^var", Categoria.IDENTIFICADOR, 0, 0)
     var sentencia: Sentencia = InvFuncion(nombre, ArrayList<ParametroSinTipo>())
 
     println(sentencia.javaClass.simpleName.equals("InvFuncion"))
 
     var cadena = "Hola"
-    println(cadena.split("\\."))
+    println(cadena.split("\\."))*/
 
-    //pruebaUnidadDeCompilacion()
+    pruebaUnidadDeCompilacion()
     //pruebaDeclaracionVariable()
 }
 
 fun pruebaUnidadDeCompilacion(){
-    var codigo_fuente = "&Unidad de Compilacion\n"
-    println(codigo_fuente)
+    var codigo_fuente = "&&Unidad de Compilacion\n" +
+            "pub cls ^alumno {\n" +
+            "\n" +
+            "\t&Parametros Globales\n" +
+            "\tpvt str ^nombre |\n" +
+            "\tpvt ent ^edad |\n" +
+            "\tpvt ent ^matric |\n" +
+            "\n" +
+            "\t&Funcion\n" +
+            "\tpub ent ^mult (ent ^a : ent ^b) {\n" +
+            "\n" +
+            "\t&Desicion\n" +
+            "        if ( ( (#3 + ( #7 ) ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) ) {\n" +
+            "\n" +
+            "\t\tent ^result | &Declaracion de Variable Mutable\n" +
+            "\n" +
+            "\t\tent ^result =  ^a | &Declaracion de Variable Inmutable\n" +
+            "\n" +
+            "\t} else {\n" +
+            "\n" +
+            "\t\t^result =  ( (#3 + ( #7 ) ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) | &Asignacion Expresion\n" +
+            "\n" +
+            "\t\t^result =  ^a | &Asignacion Identificador\n" +
+            "\n" +
+            "\t}\n" +
+            "\n" +
+            "\timp ( (#3 + ( #7 ) ) > ( #2 ) ) | &Impresion Expresion\n" +
+            "\n" +
+            "\timp ( ^result ) | &Impresion Identificador\n" +
+            "\n" +
+            "\t&Ciclo\n" +
+            "\twhl ( not ( (#2 ) > ( #3 ) )  ) {\n" +
+            "\n" +
+            "\t\tret ^result | &Retorno Identificador\n" +
+            "\n" +
+            "\t\tret   not ( (#2 ) > ( #3 ) ) | &Retorno Expresion\n" +
+            "\n" +
+            "\t}\n" +
+            "\n" +
+            "\t^result =  rad ( 'Muy buenos dias' ) | &Asignacion Lectura\n" +
+            "\n" +
+            "\t^mult ( ^a : ^b ) | &Invocacion Funcion\n" +
+            "\n" +
+            "\t^a ++ | &Incremento\n" +
+            "\n" +
+            "    }\n" +
+            "}"
+    //println(codigo_fuente)
     var analizadorLexico = AnalizadorLexico(codigo_fuente)
     analizadorLexico.analizar()
-    println(analizadorLexico.listaTokens)
+    //println(analizadorLexico.listaTokens)
 
     var analizadorSintactico = AnalizadorSintactico(analizadorLexico.listaTokens)
     var uc = analizadorSintactico.esUnidadDeCompilacion()
     if (uc != null) {
-        println(uc)
+        //println(uc)
+        val semantica = AnalizadorSemantico(uc)
+        semantica.llenarTablaSimbolos()
+        println(semantica.tablaSimbolos)
     }
 }
 

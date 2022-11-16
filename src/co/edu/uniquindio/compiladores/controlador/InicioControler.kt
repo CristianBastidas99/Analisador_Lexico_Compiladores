@@ -5,6 +5,7 @@ import co.edu.uniquindio.compiladores.lexico.Categoria
 import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
 import co.edu.uniquindio.compiladores.semantico.AnalizadorSemantico
+import co.edu.uniquindio.compiladores.semantico.Simbolo
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import javafx.collections.FXCollections
 import javafx.event.ActionEvent
@@ -33,6 +34,21 @@ class InicioControler {
     @FXML lateinit var colm_errorErroresSint : TableColumn<Error, String>
     @FXML lateinit var colm_filaErroresSint : TableColumn<Error, Int>
     @FXML lateinit var colm_columnaErroresSint : TableColumn<Error, Int>
+
+    @FXML lateinit var tablaSimbolos : TableView<Simbolo>
+    @FXML lateinit var colm_tsNombre : TableColumn<Simbolo, String>
+    @FXML lateinit var colm_tsTipo : TableColumn<Simbolo, String>
+    @FXML lateinit var colm_tsModificable : TableColumn<Simbolo, Boolean>
+    @FXML lateinit var colm_tsAmbito : TableColumn<Simbolo, String>
+    @FXML lateinit var colm_tsAcceso : TableColumn<Simbolo, String>
+    @FXML lateinit var colm_tsFila : TableColumn<Simbolo, Int>
+    @FXML lateinit var colm_tsColumna : TableColumn<Simbolo, Int>
+    @FXML lateinit var colm_tsTiposParametros : TableColumn<Simbolo, ArrayList<String>>
+
+    @FXML lateinit var tablaErroresSem : TableView<Error>
+    @FXML lateinit var colm_esemError : TableColumn<Error, String>
+    @FXML lateinit var colm_esemFila : TableColumn<Error, Int>
+    @FXML lateinit var colm_esemColumna : TableColumn<Error, Int>
 
 
     @FXML
@@ -75,7 +91,46 @@ class InicioControler {
 
                 val semantica = AnalizadorSemantico(uc)
                 semantica.llenarTablaSimbolos()
+                semantica.analizarSemantica()
                 println(semantica.tablaSimbolos)
+
+                if(semantica.tablaSimbolos.listaSimbolos.isNotEmpty()) {
+
+                    val listTablaSim = FXCollections.observableArrayList<Simbolo>()
+                    listTablaSim.addAll(semantica.tablaSimbolos.listaSimbolos)
+
+                    tablaSimbolos.items.clear()
+
+                    colm_tsNombre.setCellValueFactory(PropertyValueFactory<Simbolo, String>("nombre"))
+                    colm_tsTipo.setCellValueFactory(PropertyValueFactory<Simbolo, String>("tipo"))
+                    colm_tsModificable.setCellValueFactory(PropertyValueFactory<Simbolo, Boolean>("modificable"))
+                    colm_tsAmbito.setCellValueFactory(PropertyValueFactory<Simbolo, String>("ambito"))
+                    colm_tsAcceso.setCellValueFactory(PropertyValueFactory<Simbolo, String>("acceso"))
+                    colm_tsFila.setCellValueFactory(PropertyValueFactory<Simbolo, Int>("fila"))
+                    colm_tsColumna.setCellValueFactory(PropertyValueFactory<Simbolo, Int>("columna"))
+                    colm_tsTiposParametros.setCellValueFactory(PropertyValueFactory<Simbolo, ArrayList<String>>("tiposParametros"))
+
+                    tablaSimbolos.items.addAll(listTablaSim)
+
+                }else{
+                    tablaErroresSem.items.clear()
+                }
+
+                if(semantica.tablaSimbolos.listaErrores.isNotEmpty()) {
+
+                    val listErrorSema = FXCollections.observableArrayList<Error>()
+                    listErrorSema.addAll(semantica.tablaSimbolos.listaErrores)
+
+                    tablaErroresSem.items.clear()
+
+                    colm_esemError.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
+                    colm_esemFila.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
+                    colm_esemColumna.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+
+                    tablaErroresSem.items.addAll(listErrorSema)
+                }else{
+                    tablaErroresSem.items.clear()
+                }
 
             }
         }

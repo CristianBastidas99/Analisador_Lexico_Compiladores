@@ -29,7 +29,7 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
+
     }
 
     override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {

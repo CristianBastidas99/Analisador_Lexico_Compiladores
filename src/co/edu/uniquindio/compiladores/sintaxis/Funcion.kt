@@ -43,28 +43,28 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
         return "Funcion(visibilidad=${visibilidad.lexema}, valorRetornado=${valorRetornado.lexema}, nombre=${nombre.lexema}, listaParametros=$listaParametrosConTipo, listaSentencias=$listaSentencias)"
     }
 
-    fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, lexema: String) {
+    fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
         val listaTipoParametro : ArrayList<String> = obtenerTipoParametros()
-        tablaSimbolos.guardasSimboloFuncion(nombre.lexema, valorRetornado.lexema, listaTipoParametro, lexema, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
+        tablaSimbolos.guardasSimboloFuncion(nombre.lexema, valorRetornado.lexema, listaTipoParametro, ambito, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
 
         if(listaParametrosConTipo.isNotEmpty()){
             for(p in listaParametrosConTipo){
-                tablaSimbolos.guardasSimboloValor(p.nombre.lexema, p.tipo.lexema, true, nombre.lexema, "pvt", p.nombre.fila, p.nombre.columna)
+                tablaSimbolos.guardasSimboloValor(p.nombre.lexema, p.tipo.lexema, true, ambito + "/" + nombre.lexema + ":" + valorRetornado.lexema, "pvt", p.nombre.fila, p.nombre.columna)
             }
         }
 
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
-                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, ambito + "/" + nombre.lexema + ":" + valorRetornado.lexema)
             }
         }
 
     }
 
-    fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos) {
+    fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
-                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, nombre.lexema)
+                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambito + "/" + nombre.lexema + ":" + valorRetornado.lexema)
             }
         }
     }

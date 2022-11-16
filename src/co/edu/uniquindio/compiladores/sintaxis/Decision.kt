@@ -34,12 +34,12 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
     override fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String ) {
         if(listaSentenciasIf.isNotEmpty()){
             for(i in listaSentenciasIf){
-                i.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "Sentencias en if")
+                i.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "$ambito/if")
             }
         }
         if(listaSentenciasElse.isNotEmpty()){
             for(e in listaSentenciasElse){
-                e.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "Sentencias en else")
+                e.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "$ambito/else")
             }
         }
     }
@@ -51,12 +51,12 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
     ) {
         if(listaSentenciasIf.isNotEmpty()){
             for(i in listaSentenciasIf){
-                i.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "Sentencias en if")
+                i.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "$ambito/if")
             }
         }
         if(listaSentenciasElse.isNotEmpty()){
             for(e in listaSentenciasElse){
-                e.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "Sentencias en else")
+                e.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "$ambito/else")
             }
         }
     }

@@ -26,15 +26,23 @@ class Impresion(var expresion: Expresion?, var identificado: Token?) : Sentencia
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
     }
 
-    override fun analizarSemantica(
-        listaErroresSemanticos: ArrayList<Error>,
-        tablaSimbolos: TablaSimbolos,
-        ambito: String
-    ) {
-        TODO("Not yet implemented")
+    override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
+
+        if(identificado != null) {
+            var simbolo = tablaSimbolos.buscarSimboloValor(identificado!!.lexema, ambito)
+
+            if (simbolo == null) {
+                listaErroresSemanticos.add(
+                    Error(
+                        "La variable que intenta imprimir no se ha declarado",
+                        identificado!!.fila,
+                        identificado!!.columna
+                    )
+                )
+            }
+        }
     }
 
 }

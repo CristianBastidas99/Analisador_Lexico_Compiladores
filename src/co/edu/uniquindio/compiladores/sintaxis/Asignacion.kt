@@ -36,12 +36,13 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
+
     }
 
     override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
         var simbolo = tablaSimbolos.buscarSimboloValor(identificador.lexema, ambito)
+
 
         if(simbolo != null) {
             if (expresion != null) {
@@ -70,7 +71,7 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
                 }
             }
         }else{
-            listaErroresSemanticos.add(Error("La variable que intenta dar asignacion no se ha declarado", identificador.fila, identificador.columna))
+            listaErroresSemanticos.add(Error("La variable (${identificador.lexema}) que intenta dar asignacion no se ha declarado en el ambito $ambito", identificador.fila, identificador.columna))
         }
     }
 

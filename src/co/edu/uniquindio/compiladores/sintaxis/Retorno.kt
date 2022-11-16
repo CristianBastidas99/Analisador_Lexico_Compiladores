@@ -27,15 +27,11 @@ class Retorno(var identificado:Token?, var expresion: Expresion?) : Sentencia() 
         tablaSimbolos: TablaSimbolos,
         ambito: String
     ) {
-        TODO("Not yet implemented")
+
     }
 
-    override fun analizarSemantica(
-        listaErroresSemanticos: ArrayList<Error>,
-        tablaSimbolos: TablaSimbolos,
-        ambito: String
-    ) {
-        TODO("Not yet implemented")
+    override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
+
     }
 
 }
