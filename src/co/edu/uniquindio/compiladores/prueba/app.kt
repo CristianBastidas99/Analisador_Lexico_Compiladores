@@ -30,6 +30,8 @@ pub cls ^alumno {
 
 	} else {
 
+	    ent ^result | &Declaracion de Variable Mutable
+
 		^result =  ( (#3 + ( #7 ) ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) | &Asignacion Expresion
 
 		^result =  ^a | &Asignacion Identificador
@@ -72,18 +74,20 @@ fun main() {
     var cadena = "Hola"
     println(cadena.split("\\."))*/
 
-    //pruebaUnidadDeCompilacion()
+    pruebaUnidadDeCompilacion()
     //pruebaDeclaracionVariable()
 
-    var texto = "hol/tipo:ent/ciclo/ciclo/if"
+    /*var texto = "hol/tipo:ent/ciclo/ciclo/if"
     var posicion = texto.indexOf(':')
 
     println(texto.substring(posicion + 1, texto.indexOf('/', posicion)))
 
+    println(texto.substring(0,0))*/
+
 }
 
 fun pruebaUnidadDeCompilacion(){
-    var codigo_fuente = "&&Unidad de Compilacion\n" +
+    var codigo_fuente = "&Unidad de Compilacion\n" +
             "pub cls ^alumno {\n" +
             "\n" +
             "\t&Parametros Globales\n" +
@@ -102,6 +106,8 @@ fun pruebaUnidadDeCompilacion(){
             "\t\tent ^result =  ^a | &Declaracion de Variable Inmutable\n" +
             "\n" +
             "\t} else {\n" +
+            "\n" +
+            "\t    ent ^result | &Declaracion de Variable Mutable\n" +
             "\n" +
             "\t\t^result =  ( (#3 + ( #7 ) ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) | &Asignacion Expresion\n" +
             "\n" +
@@ -141,6 +147,7 @@ fun pruebaUnidadDeCompilacion(){
         //println(uc)
         val semantica = AnalizadorSemantico(uc)
         semantica.llenarTablaSimbolos()
+        semantica.analizarSemantica()
         println(semantica.tablaSimbolos)
     }
 }

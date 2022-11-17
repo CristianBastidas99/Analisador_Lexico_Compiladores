@@ -32,5 +32,35 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
 
     }
 
+    fun getCodeJava(): String {
+        var codigo = obtenerVisibilidad() + " "
+        codigo += obtenerStringTipo() + " "
+        codigo += nombre.lexema.substring(1) + " ;\n"
+        return codigo
+    }
+
+    fun obtenerVisibilidad(): String{
+        var stringVisibilidad = "public"
+        if(visibilidad.lexema.equals("pvt")){
+            stringVisibilidad = "private"
+        }
+        return stringVisibilidad
+    }
+
+    fun obtenerStringTipo(): String{
+        var stringTipo = "int"
+        if(tipo.lexema.equals("dbe")){
+            stringTipo = "double"
+        }else if(tipo.lexema.equals("str")){
+            stringTipo = "String"
+        }else if(tipo.lexema.equals("bln")){
+            stringTipo = "boolean"
+        }
+        else if(tipo.lexema.equals("crt")){
+            stringTipo = "char"
+        }
+        return stringTipo
+    }
+
 
 }

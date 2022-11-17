@@ -16,4 +16,25 @@ class ParametroConTipo(var tipo: Token, var nombre: Token) {
         return raiz
     }
 
+    fun getCodeJava(): String {
+        var codigo = obtenerStringTipo() + " "
+        codigo += nombre.lexema.substring(1)
+        return  codigo
+    }
+
+    fun obtenerStringTipo(): String{
+        var stringTipo = "int"
+        if(tipo.lexema.equals("dbe")){
+            stringTipo = "double"
+        }else if(tipo.lexema.equals("str")){
+            stringTipo = "String"
+        }else if(tipo.lexema.equals("bln")){
+            stringTipo = "boolean"
+        }
+        else if(tipo.lexema.equals("crt")){
+            stringTipo = "char"
+        }
+        return stringTipo
+    }
+
 }

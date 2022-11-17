@@ -962,7 +962,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                 if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                     obtenerSiguienteToken()
-                    return Retorno(null, expresion)
+                    return Retorno(null, expresion, tokenActual.fila, tokenActual.columna)
                 }else{
                     reportarError("Falta el fin de sentencia")
                 }
@@ -974,7 +974,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                 if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                     obtenerSiguienteToken()
-                    return Retorno(identificador, null)
+                    return Retorno(identificador, null, tokenActual.fila, tokenActual.columna)
                 }else{
                     reportarError("Falta el fin de sentencia")
                 }

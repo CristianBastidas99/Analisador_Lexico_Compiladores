@@ -31,4 +31,8 @@ class Lectura(var cadena:Token) : Sentencia() {
         }
     }
 
+    override fun getCodeJava(): String {
+        return ""
+    }
+
 }

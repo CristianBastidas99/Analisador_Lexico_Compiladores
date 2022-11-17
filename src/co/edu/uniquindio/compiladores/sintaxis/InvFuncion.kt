@@ -66,6 +66,19 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
         }
     }
 
+    override fun getCodeJava(): String {
+        var codigo = nombre.lexema.substring(1) + "( "
+
+        if(listaParametrosSinTipo.isNotEmpty()){
+            for (p in listaParametrosSinTipo){
+                codigo += p.getCodeJava() + ", "
+            }
+            codigo = codigo.substring(0, codigo.length - 2)
+        }
+        codigo += " );\n"
+        return codigo
+    }
+
     fun obtenerTipoParametros(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String):ArrayList<String> {
         val listaTipoParametro : ArrayList<String> = ArrayList()
         if(listaParametrosSinTipo.isNotEmpty()){

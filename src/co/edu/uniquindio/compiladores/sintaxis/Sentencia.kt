@@ -10,4 +10,5 @@ abstract class Sentencia{
     abstract fun getArbolVisual(): TreeItem<String>
     abstract fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String )
     abstract fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String)
+    abstract fun getCodeJava(): String
 }

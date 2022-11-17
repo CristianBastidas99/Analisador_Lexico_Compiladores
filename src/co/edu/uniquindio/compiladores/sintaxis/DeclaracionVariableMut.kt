@@ -29,4 +29,23 @@ class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Senten
     ) {
     }
 
+    override fun getCodeJava(): String {
+        return obtenerStringTipo() + " " + identificador.lexema.substring(1) + ";\n"
+    }
+
+    fun obtenerStringTipo(): String{
+        var stringTipo = "int"
+        if(tipo.lexema.equals("dbe")){
+            stringTipo = "double"
+        }else if(tipo.lexema.equals("str")){
+            stringTipo = "String"
+        }else if(tipo.lexema.equals("bln")){
+            stringTipo = "boolean"
+        }
+        else if(tipo.lexema.equals("crt")){
+            stringTipo = "char"
+        }
+        return stringTipo
+    }
+
 }

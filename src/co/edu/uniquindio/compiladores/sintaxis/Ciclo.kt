@@ -38,4 +38,17 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
         }
     }
 
+    override fun getCodeJava(): String {
+        var codigo = "while ( " + expresionLogica.getCodeJava() + " ) {\n\n"
+
+        if(listaSentencias.isNotEmpty()){
+            for (s in listaSentencias){
+                codigo += s.getCodeJava()
+            }
+        }
+
+        codigo += "}\n\n"
+        return codigo
+    }
+
 }

@@ -60,6 +60,35 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
         }
     }
 
+    fun getCodeJava():String {
+        var codigo = obtenerVisibilidad() + " "
+        codigo += nombre.lexema.substring(1) + " {\n\n"
+
+        if(listaVariablesGlobales.isNotEmpty()){
+            for (v in listaVariablesGlobales){
+                codigo += v.getCodeJava()
+            }
+        }
+        codigo += "\n\n"
+        if(listaFunciones.isNotEmpty()){
+            for (f in listaFunciones){
+                codigo += f.getCodeJava()
+            }
+        }
+
+        codigo += "}"
+
+        return codigo
+    }
+
+    fun obtenerVisibilidad(): String{
+        var stringVisibilidad = "public"
+        if(visibilidad.lexema.equals("pvt")){
+            stringVisibilidad = "private"
+        }
+        return stringVisibilidad
+    }
+
 
     override fun toString(): String {
         return "UnidadDeCompilacion(visibilidad=${visibilidad.lexema}, nombre=${nombre.lexema}, listaVariablesGlobales=$listaVariablesGlobales, listaFunciones=$listaFunciones)"

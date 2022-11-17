@@ -30,4 +30,23 @@ class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sente
         asignacion.analizarSemantica(listaErroresSemanticos,tablaSimbolos, ambito)
     }
 
+    override fun getCodeJava(): String {
+        return obtenerStringTipo() + " " + asignacion.getCodeJava()
+    }
+
+    fun obtenerStringTipo(): String{
+        var stringTipo = "int"
+        if(tipo.lexema.equals("dbe")){
+            stringTipo = "double"
+        }else if(tipo.lexema.equals("str")){
+            stringTipo = "String"
+        }else if(tipo.lexema.equals("bln")){
+            stringTipo = "boolean"
+        }
+        else if(tipo.lexema.equals("crt")){
+            stringTipo = "char"
+        }
+        return stringTipo
+    }
+
 }

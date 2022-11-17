@@ -61,5 +61,27 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
         }
     }
 
+    override fun getCodeJava(): String {
+        var codigo = "if ( " + exprLogica.getCodeJava() + " ) {\n\n"
+
+        if(listaSentenciasIf.isNotEmpty()){
+            for (s in listaSentenciasIf){
+                codigo += s.getCodeJava()
+            }
+        }
+
+        codigo += "} "
+
+        if(listaSentenciasElse.isNotEmpty()){
+            codigo += "} else { \n\n"
+            for (s in listaSentenciasElse){
+                codigo += s.getCodeJava()
+            }
+            codigo += "}\n\n"
+        }
+
+        return codigo
+    }
+
 
 }

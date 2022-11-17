@@ -20,4 +20,9 @@ class ExpresionRelacional(var expAritmetica1:ExpresionAritmetica, var opeRelacio
         return "bln"
     }
 
+    override fun getCodeJava(): String {
+        var codigo = "(" + expAritmetica1.getCodeJava() + ") " + opeRelacional.lexema + " (" + expAritmetica2.getCodeJava() + ")"
+        return  codigo
+    }
+
 }

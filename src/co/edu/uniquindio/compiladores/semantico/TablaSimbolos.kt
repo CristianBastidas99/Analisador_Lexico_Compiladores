@@ -38,7 +38,7 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>) {
     fun buscarSimboloValor(nombre: String?, ambito: String?): Simbolo?{
         for(s in listaSimbolos){
             if(s.tiposParametros == null) {
-                if (s.nombre == nombre && s.ambito == ambito) {
+                if (s.nombre.equals(nombre) && s.ambito.equals(ambito)) {
                     return s
                 }
             }

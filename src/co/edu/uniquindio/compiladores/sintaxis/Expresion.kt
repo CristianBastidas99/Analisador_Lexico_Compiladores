@@ -7,4 +7,5 @@ abstract class Expresion() {
     abstract fun getArbolVisual(): TreeItem<String>
 
     abstract  fun obtenerTipo(): String
+    abstract fun getCodeJava(): String
 }

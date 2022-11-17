@@ -79,5 +79,60 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
         return listaTipoParametro
     }
 
+    fun getCodeJava(): String {
+        var codigo = obtenerVisibilidad() + " static "
+        codigo += obtenerValorRetornado() + " "
+        codigo += nombre.lexema.substring(1) + " ( "
+        if(nombre.lexema.substring(1).equals("main") && obtenerValorRetornado().equals("void")){
+            codigo += "String[] args"
+        }else{
+            if(listaParametrosConTipo.isNotEmpty()){
+                for(p in listaParametrosConTipo){
+                    codigo += p.getCodeJava() + ", "
+                }
+                codigo = codigo.substring(0, codigo.length - 2)
+            }
+        }
+        codigo += " ){\n\n"
+        if(listaSentencias.isNotEmpty()){
+            for (s in listaSentencias){
+                codigo += s.getCodeJava()
+            }
+        }
+        codigo += "}\n\n"
+        return codigo
+    }
+
+    fun obtenerVisibilidad(): String{
+        var stringVisibilidad = "public"
+        if(visibilidad.lexema.equals("pvt")){
+            stringVisibilidad = "private"
+        }
+        return stringVisibilidad
+    }
+
+    fun obtenerStringTipo(): String{
+        var stringTipo = "int"
+        if(valorRetornado.lexema.equals("dbe")){
+            stringTipo = "double"
+        }else if(valorRetornado.lexema.equals("str")){
+            stringTipo = "String"
+        }else if(valorRetornado.lexema.equals("bln")){
+            stringTipo = "boolean"
+        }
+        else if(valorRetornado.lexema.equals("crt")){
+            stringTipo = "char"
+        }
+        return stringTipo
+    }
+
+    fun obtenerValorRetornado(): String{
+        var stringValorRetornado = "void"
+        if(!valorRetornado.lexema.equals("vd")){
+            stringValorRetornado = obtenerStringTipo()
+        }
+        return stringValorRetornado
+    }
+
 
 }
