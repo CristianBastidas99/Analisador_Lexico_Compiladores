@@ -61,7 +61,8 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
     }
 
     fun getCodeJava():String {
-        var codigo = obtenerVisibilidad() + " "
+        var codigo = "import javax.swing.JOptionPane;\n" +
+                "\n" + obtenerVisibilidad() + " class "
         codigo += nombre.lexema.substring(1) + " {\n\n"
 
         if(listaVariablesGlobales.isNotEmpty()){

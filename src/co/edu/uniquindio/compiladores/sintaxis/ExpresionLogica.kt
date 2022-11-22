@@ -35,7 +35,7 @@ class ExpresionLogica(var negacion:Token?, var exprRelacional:ExpresionRelaciona
             codigo += "!"
         }
 
-        codigo += "(" + exprRelacional + ") "
+        codigo += "(" + exprRelacional.getCodeJava() + ") "
 
         if(operLogico != null){
             codigo += stringOpeLogico() + " "

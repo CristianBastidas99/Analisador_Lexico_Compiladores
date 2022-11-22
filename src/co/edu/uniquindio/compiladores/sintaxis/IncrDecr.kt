@@ -34,6 +34,10 @@ class IncrDecr (var identificador:Token, var tipo:Token) : Sentencia() {
         var ambitoActS = ambito
 
         do {
+
+            ambitoActS = ambitoActS.substring(0, posicionS)
+            simbolo = tablaSimbolos.buscarSimboloValor(identificador!!.lexema, ambitoActS)
+
             if (simbolo != null) {
                 if (!simbolo.tipo.equals("ent")) {
                     listaErroresSemanticos.add(
@@ -48,6 +52,7 @@ class IncrDecr (var identificador:Token, var tipo:Token) : Sentencia() {
             } else {
                 posicionS = ambitoActS.lastIndexOf('/')
             }
+            print(posicionS)
         }while (posicionS != -1)
 
         if (simbolo == null) {

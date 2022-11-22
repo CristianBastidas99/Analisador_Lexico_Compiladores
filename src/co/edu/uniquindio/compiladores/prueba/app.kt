@@ -17,6 +17,7 @@ pub cls ^alumno {
 	pvt str ^nombre |
 	pvt ent ^edad |
 	pvt ent ^matric |
+	pvt ent ^result |
 
 	&Funcion
 	pub ent ^mult (ent ^a : ent ^b) {
@@ -26,13 +27,13 @@ pub cls ^alumno {
 
 		ent ^result | &Declaracion de Variable Mutable
 
-		ent ^result =  ^a | &Declaracion de Variable Inmutable
+		ent ^result2 =  ^a | &Declaracion de Variable Inmutable
 
 	} else {
 
 	    ent ^result | &Declaracion de Variable Mutable
 
-		^result =  ( (#3 + ( #7 ) ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) | &Asignacion Expresion
+		&^result =  ( (#3 + ( #7 ) ) > ( #2 ) ) and ( (#2 ) > ( #3 ) ) | &Asignacion Expresion
 
 		^result =  ^a | &Asignacion Identificador
 
@@ -47,11 +48,11 @@ pub cls ^alumno {
 
 		ret ^result | &Retorno Identificador
 
-		ret   not ( (#2 ) > ( #3 ) ) | &Retorno Expresion
+		&ret   not ( (#2 ) > ( #3 ) ) | &Retorno Expresion
 
 	}
 
-	^result =  rad ( 'Muy buenos dias' ) | &Asignacion Lectura
+	str^read =  rad ( 'Muy buenos dias' ) | &Asignacion Lectura
 
 	^mult ( ^a : ^b ) | &Invocacion Funcion
 

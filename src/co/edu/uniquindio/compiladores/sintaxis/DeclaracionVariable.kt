@@ -39,4 +39,8 @@ class DeclaracionVariable(var tipoAcceso:Token, var tipo:Token, var nombre:Token
 
     }
 
+    override fun getCodeJava(): String {
+        return ""
+    }
+
 }

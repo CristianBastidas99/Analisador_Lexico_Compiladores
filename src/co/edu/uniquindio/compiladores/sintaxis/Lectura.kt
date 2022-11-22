@@ -32,7 +32,7 @@ class Lectura(var cadena:Token) : Sentencia() {
     }
 
     override fun getCodeJava(): String {
-        return ""
+        return "JOptionPane.showInputDialog(\"" + cadena.lexema.substring(1, cadena.lexema.length - 1) + "\");\n\n"
     }
 
 }

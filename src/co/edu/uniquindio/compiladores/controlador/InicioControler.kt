@@ -7,6 +7,7 @@ import co.edu.uniquindio.compiladores.lexico.Token
 import co.edu.uniquindio.compiladores.semantico.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.semantico.Simbolo
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
+import co.edu.uniquindio.compiladores.sintaxis.UnidadDeCompilacion
 import javafx.collections.FXCollections
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
@@ -17,6 +18,7 @@ import javafx.scene.control.TableView
 import javafx.scene.control.TextArea
 import javafx.scene.control.TreeView
 import javafx.scene.control.cell.PropertyValueFactory
+import java.io.File
 
 
 class InicioControler {
@@ -50,14 +52,18 @@ class InicioControler {
     @FXML lateinit var colm_esemFila : TableColumn<Error, Int>
     @FXML lateinit var colm_esemColumna : TableColumn<Error, Int>
 
+    @FXML lateinit var codigoJava : TextArea
+    var isCodigoJava: Boolean = false
+    lateinit var ucg: UnidadDeCompilacion
+
 
     @FXML
-    fun analizarCodigo(e : ActionEvent){
+    fun analizarCodigo(e : ActionEvent?){
 
         if(codigo_fuente.length > 0) {
             var analizador = AnalizadorLexico(codigo_fuente.text)
             analizador.analizar()
-            //println(analizador.listaTokens)
+            println(analizador.listaTokens)
 
             val list = FXCollections.observableArrayList<Token>()
             list.addAll(analizador.listaTokens)
@@ -77,6 +83,8 @@ class InicioControler {
 
             if(uc != null) {
                 arbolVisual.setRoot(uc!!.getArbolVisual())
+
+                println(uc.toString())
 
                 val listErrorSint = FXCollections.observableArrayList<Error>()
                 listErrorSint.addAll(analizadorSintactico.listaErrores)
@@ -130,9 +138,30 @@ class InicioControler {
                     tablaErroresSem.items.addAll(listErrorSema)
                 }else{
                     tablaErroresSem.items.clear()
+                    isCodigoJava = true
+                    ucg = uc
                 }
 
             }
+        }
+    }
+
+    @FXML
+    fun traducirCodigo(e : ActionEvent?){
+        if(isCodigoJava){
+            val codigoFuente = ucg.getCodeJava()
+            codigoJava.setText(codigoFuente)
+            File("src/Principal.java").writeText(codigoFuente)
+
+            try{
+                val p = Runtime.getRuntime().exec("javac src/Principal.java")
+                p.waitFor()
+                Runtime.getRuntime().exec("java Principal", null, File("src"))
+            }catch (es : Exception){
+                es.printStackTrace()
+            }
+        }else{
+            codigoJava.setText("Hay errores semanticos")
         }
     }
 

@@ -33,7 +33,11 @@ class Retorno(var identificador:Token?, var expresion: Expresion?, var fila:Int,
 
     override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
-        var retornoFuncion = ambito.substring(ambito.indexOf(':') + 1,  ambito.indexOf('/', ambito.indexOf(':')))
+        var derecha = ambito.indexOf('/', ambito.indexOf(':'))
+        if(derecha == -1){
+            derecha = ambito.length
+        }
+        var retornoFuncion = ambito.substring(ambito.indexOf(':') + 1, derecha )
 
 
             if (retornoFuncion != "vd") {

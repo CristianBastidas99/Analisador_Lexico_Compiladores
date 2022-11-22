@@ -73,7 +73,7 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
         codigo += "} "
 
         if(listaSentenciasElse.isNotEmpty()){
-            codigo += "} else { \n\n"
+            codigo += " else { \n\n"
             for (s in listaSentenciasElse){
                 codigo += s.getCodeJava()
             }

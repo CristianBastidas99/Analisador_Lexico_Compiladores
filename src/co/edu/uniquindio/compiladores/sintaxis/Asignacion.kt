@@ -136,7 +136,7 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
         if(expresion != null){
             codigo += expresion!!.getCodeJava() + ";\n"
         }
-        if(identificador != null){
+        if(identificador2 != null){
             codigo += identificador2!!.lexema.substring(1) + ";\n"
         }
         if(sentencia != null){
