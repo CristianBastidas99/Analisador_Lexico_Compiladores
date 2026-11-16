@@ -1,3 +1,11 @@
+# ==========================================================
+#  Notas personales (fuera del repositorio)
+# ==========================================================
+notas/
+
+# ==========================================================
+#  Java / Kotlin
+# ==========================================================
 # Compiled class file
 *.class
 
@@ -21,3 +29,49 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+replay_pid*
+
+# Kotlin
+.kotlin/
+*.kotlin_module
+
+# ==========================================================
+#  Salida de compilación
+# ==========================================================
+out/
+build/
+target/
+bin/
+.gradle/
+
+# Código Java generado por el botón "Traducir" (InicioControler.traducirCodigo)
+src/Principal.java
+src/*.class
+
+# ==========================================================
+#  IntelliJ IDEA
+#  (.idea/ y el .iml se mantienen versionados porque el proyecto
+#   no usa Gradle/Maven y son necesarios para abrirlo y ejecutarlo)
+# ==========================================================
+.idea/workspace.xml
+.idea/shelf/
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/httpRequests/
+.idea/caches/
+.idea/artifacts/
+.idea/sonarlint/
+.idea/**/dataSources/
+.idea/**/dataSources.local.xml
+*.iws
+
+# ==========================================================
+#  Sistema operativo / editores
+# ==========================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
