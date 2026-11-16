@@ -1,0 +1,9 @@
+& Ejemplo con un error sintáctico típico.
+& A la declaración de ^b le falta el terminador | (no hay errores léxicos).
+pub cls ^errsint {
+	pub vd ^main ( ) {
+		ent ^a = #5 |
+		ent ^b = #6
+		imp ( ^a ) |
+	}
+}

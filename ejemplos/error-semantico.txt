@@ -1,0 +1,26 @@
+& Ejemplo con errores semánticos típicos.
+& Es sintácticamente correcto, pero tiene: un retorno de tipo incorrecto, una
+& redeclaración, una asignación a una variable no declarada, una asignación de
+& tipo incompatible, una asignación a una variable inmutable y la impresión
+& de una variable no declarada.
+pub cls ^errsem {
+	pub ent ^doble ( ent ^n ) {
+		& El tipo del retorno no coincide con el de la función (ent)
+		ret 'texto' |
+	}
+
+	pub vd ^main ( ) {
+		ent ^a = #5 |
+		& Redeclaración de ^a en el mismo ámbito
+		ent ^a = #6 |
+		& Variable no declarada
+		^b = #1 |
+		& Asignación de un str a una variable ent
+		ent ^c |
+		^c = 'hola' |
+		& Asignación a una variable inmutable
+		^a = #9 |
+		& Impresión de una variable no declarada
+		imp ( ^z ) |
+	}
+}

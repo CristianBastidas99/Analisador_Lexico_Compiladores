@@ -148,6 +148,23 @@ class AnalizadorLexico (var codigoFuente:String) {
             }
             '°' -> {
                 reportarError(diagnosticarCaracter(posicion), fila, columna)
+                // El caracter mal formado se consume completo (hasta el siguiente ° o el fin de la linea) como un unico DESCONOCIDO
+                var lexema = "°"
+                obtenerSiguienteCaracter()
+                var cerrado = false
+                while (!cerrado && caracterActual != finCodigo && caracterActual != '\n') {
+                    if (caracterActual == '\\') {
+                        lexema += caracterActual
+                        obtenerSiguienteCaracter()
+                        if (caracterActual == finCodigo || caracterActual == '\n') break
+                    } else if (caracterActual == '°') {
+                        cerrado = true
+                    }
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                }
+                almacenarToken(lexema, Categoria.DESCONOCIDO, fila, columna)
+                return
             }
             else -> {
                 reportarError("Carácter no reconocido: '${mostrarCaracter(caracterActual)}'", fila, columna)
@@ -156,6 +173,9 @@ class AnalizadorLexico (var codigoFuente:String) {
         almacenarToken(caracterActual + "", Categoria.DESCONOCIDO, fila, columna)
         obtenerSiguienteCaracter()
     }
+
+    /** Letras (o caracteres) validos despues de la barra invertida en cadenas y caracteres: \n \t \" \' \\ */
+    fun esLetraDeEscape(c:Char):Boolean = c == 'n' || c == 't' || c == '"' || c == '\'' || c == '\\'
 
     /** Explica por qué la cadena que empieza en la posicion dada (comilla simple) no es válida */
     private fun diagnosticarCadena(inicio:Int):String{
@@ -166,10 +186,8 @@ class AnalizadorLexico (var codigoFuente:String) {
             if (c == '\\') {
                 if (i + 1 >= n) break
                 val e = codigoFuente[i + 1]
-                if (e == '\n' || e == '\t' || e == '"' || e == '\'' || e == '\\') i += 2
+                if (esLetraDeEscape(e)) i += 2
                 else return "Cadena mal formada: secuencia de escape no válida '\\${mostrarCaracter(e)}'"
-            } else if (c == '\n' || c == '\t' || c == '"') {
-                return "Cadena sin cerrar: carácter no permitido '${mostrarCaracter(c)}' dentro de la cadena"
             } else i++
         }
         return "Cadena sin cerrar: falta la comilla simple de cierre"
@@ -185,11 +203,10 @@ class AnalizadorLexico (var codigoFuente:String) {
         if (c == '\\') {
             if (i + 1 >= n) return "Carácter sin cerrar: falta el símbolo ° de cierre"
             val e = codigoFuente[i + 1]
-            if (!(e == '°' || e == '\n' || e == '\t' || e == '"' || e == '\\'))
+            if (!esLetraDeEscape(e))
                 return "Carácter mal formado: secuencia de escape no válida '\\${mostrarCaracter(e)}'"
             return "Carácter sin cerrar: falta el símbolo ° de cierre"
         }
-        if (c == '\n' || c == '\t' || c == '"') return "Carácter mal formado: '${mostrarCaracter(c)}' no se permite sin escapar"
         return "Carácter sin cerrar o mal formado: se esperaba un solo símbolo seguido de °"
     }
 
@@ -208,6 +225,10 @@ class AnalizadorLexico (var codigoFuente:String) {
         if(esPalabraReservadaAbs()) return true
 
         if(esPalabraReservadaCth()) return true
+
+        if(esPalabraReservadaBrk()) return true
+
+        if(esPalabraReservadaCas()) return true
 
         if(esPalabraReservadaPtt()) return true
 
@@ -886,11 +907,11 @@ class AnalizadorLexico (var codigoFuente:String) {
             lexema += caracterActual
             obtenerSiguienteCaracter()
 
-            if(caracterActual == 'h') {
+            if(caracterActual == 't') {
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 
-                if(caracterActual == 't') {
+                if(caracterActual == 'h') {
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
                     almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
@@ -1552,7 +1573,7 @@ class AnalizadorLexico (var codigoFuente:String) {
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 
-                if(caracterActual != finCodigo && (caracterActual == '°' || caracterActual == '\n' || caracterActual == '\t' || caracterActual == '\"' || caracterActual == '\\')){
+                if(esLetraDeEscape(caracterActual)){
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
 
@@ -1566,7 +1587,7 @@ class AnalizadorLexico (var codigoFuente:String) {
                     restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
                 }
                 restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-            }else if(caracterActual != finCodigo && caracterActual != '°' && caracterActual != '\n' && caracterActual != '\t' && caracterActual != '\"'){
+            }else if(caracterActual != finCodigo && caracterActual != '°'){
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 
@@ -1601,7 +1622,7 @@ class AnalizadorLexico (var codigoFuente:String) {
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
 
-                    if(caracterActual == '\n' || caracterActual == '\t' || caracterActual == '\"' || caracterActual == '\'' || caracterActual == '\\'){
+                    if(esLetraDeEscape(caracterActual)){
 
                         lexema += caracterActual
                         obtenerSiguienteCaracter()
@@ -1610,13 +1631,10 @@ class AnalizadorLexico (var codigoFuente:String) {
                         return false;
                     }
 
-                }else if(caracterActual != '\n' && caracterActual != '\t' && caracterActual != '\"' && caracterActual != '\''){
-
+                }else{
+                    // C = cualquier caracter excepto '\' y ''' (incluye saltos de linea reales, tabuladores y comillas dobles)
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
-                }else{
-                    restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-                    return false;
                 }
             }
 

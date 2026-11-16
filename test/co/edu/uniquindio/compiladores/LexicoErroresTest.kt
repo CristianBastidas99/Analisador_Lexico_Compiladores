@@ -210,6 +210,75 @@ class LexicoErroresTest {
     }
 
     @Test
+    fun escapeInvalidoEnCadena() {
+        // \ seguido de una letra que no es n ni t
+        val lexico = analizar("'a\\xb'")
+        assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
+        assertTrue(lexico.listaErrores[0].error.contains("secuencia de escape no"), lexico.listaErrores[0].error)
+        assertEquals(1, lexico.listaErrores[0].columna)
+        // \ seguido de un salto de linea real tampoco es valido
+        val l2 = analizar("'a\\\nb'")
+        assertTrue(l2.listaErrores.any { it.error.contains("secuencia de escape no") }, l2.listaErrores.toString())
+    }
+
+    @Test
+    fun escapeInvalidoEnCaracter() {
+        val lexico = analizar("°\\x°")
+        assertTrue(lexico.listaErrores.any { it.error.contains("secuencia de escape no") }, lexico.listaErrores.toString())
+        assertEquals(1, lexico.listaErrores[0].fila)
+        assertEquals(1, lexico.listaErrores[0].columna)
+    }
+
+    private fun assertUnErrorUnToken(fuente: String) {
+        val lexico = analizar(fuente)
+        assertEquals(1, lexico.listaErrores.size, "<$fuente>: ${lexico.listaErrores}")
+        assertEquals(1, lexico.listaTokens.size, "<$fuente>: ${lexico.listaTokens}")
+        assertEquals(Categoria.DESCONOCIDO, lexico.listaTokens[0].categoria)
+        assertEquals(fuente, lexico.listaTokens[0].lexema)
+        assertEquals(1, lexico.listaErrores[0].fila)
+        assertEquals(1, lexico.listaErrores[0].columna)
+    }
+
+    @Test
+    fun cadenaVaciaEsValida() {
+        val lexico = analizar("''")
+        assertTrue(lexico.listaErrores.isEmpty())
+        assertEquals(Categoria.CADENA_CARCTERES, lexico.listaTokens[0].categoria)
+    }
+
+    @Test
+    fun caracterMalFormadoGeneraUnSoloError() {
+        assertUnErrorUnToken("°°")
+        assertUnErrorUnToken("°\\°°")
+        assertUnErrorUnToken("°ab°")
+        assertUnErrorUnToken("°\\x°")
+    }
+
+    @Test
+    fun cadenaConBarraAlFinalSinCerrar() {
+        assertUnErrorUnToken("'\\'")
+        assertUnErrorUnToken("'abc\\")
+    }
+
+    @Test
+    fun escapeAlFinalDelArchivo() {
+        assertUnErrorUnToken("°\\")
+        assertUnErrorUnToken("°")
+    }
+
+    @Test
+    fun palabraReservadaSeguidaDeLetraDejaErrorPorLaLetra() {
+        // Igual que 'entx': se reconoce la palabra reservada y la letra sobrante es un error
+        for (palabra in listOf("cas", "ent")) {
+            val lexico = analizar(palabra + "x")
+            assertEquals(listOf(palabra, "x"), lexico.listaTokens.map { it.lexema })
+            assertEquals(Categoria.PALABRA_RESERVADA, lexico.listaTokens[0].categoria)
+            assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
+            assertEquals(4, lexico.listaErrores[0].columna)
+        }
+    }
+
+    @Test
     fun tabuladorCuentaComoUnaColumna() {
         // Convencion: el tabulador ocupa 1 columna (no se expande a 4 u 8)
         val lexico = analizar("\t^a")

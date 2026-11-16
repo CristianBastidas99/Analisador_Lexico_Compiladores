@@ -1,0 +1,11 @@
+& Ejemplo con errores léxicos.
+& Los símbolos $ y ~ no pertenecen al lenguaje: el analizador léxico los
+& reporta como desconocidos y sigue analizando el resto del programa.
+pub cls ^errlex {
+	pub vd ^main ( ) {
+		ent ^a = #5 $ |
+		ent ^b = #6 |
+		~
+		imp ( ^b ) |
+	}
+}

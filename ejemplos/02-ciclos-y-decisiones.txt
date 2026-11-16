@@ -1,0 +1,63 @@
+& Ejemplo 2: ciclos y decisiones.
+& Muestra if/else, el ciclo whl, los operadores relacionales (incluido ==),
+& los operadores lógicos (and, or, xor, not) y el incremento/decremento.
+& Nota: las condiciones del lenguaje se forman con números, por eso se usan literales.
+pub cls ^flujo {
+
+	& Función con un ciclo whl: la condición es verdadera y el ciclo termina con ret
+	pub ent ^buscar ( ) {
+		whl ( ( ( #2 ) > ( #1 ) ) ) {
+			imp ( 'Dentro del ciclo whl\n' ) |
+			ret #9 |
+		}
+	}
+
+	pub vd ^main ( ) {
+		& Variable mutable: se declara y luego se asigna
+		ent ^i |
+		^i = #5 |
+		& Incremento (dos veces) y decremento (una vez): 5 -> 6 -> 7 -> 6
+		^i ++ |
+		^i ++ |
+		^i -- |
+		imp ( 'i = ' ) |
+		imp ( ^i ) |
+		imp ( '\n' ) |
+		& Decisión con el operador relacional == y rama else
+		if ( ( ( #3 ) == ( #3 ) ) ) {
+			imp ( '3 == 3: verdadero\n' ) |
+		} else {
+			imp ( '3 == 3: falso\n' ) |
+		}
+		& Operadores lógico and y relacional <=
+		if ( ( ( #3 ) > ( #2 ) ) and ( ( #1 ) <= ( #1 ) ) ) {
+			imp ( 'and: verdadero\n' ) |
+		} else {
+			imp ( 'and: falso\n' ) |
+		}
+		& Operador not
+		if ( not ( ( #1 ) > ( #2 ) ) ) {
+			imp ( 'not: verdadero\n' ) |
+		}
+		& Operador or con != (las dos condiciones son falsas: rama else)
+		if ( ( ( #1 ) >= ( #2 ) ) or ( ( #1 ) != ( #1 ) ) ) {
+			imp ( 'or: verdadero\n' ) |
+		} else {
+			imp ( 'or: falso\n' ) |
+		}
+		& Operador xor (exactamente una de las dos es verdadera)
+		if ( ( ( #1 ) < ( #2 ) ) xor ( ( #2 ) < ( #1 ) ) ) {
+			imp ( 'xor: verdadero\n' ) |
+		}
+		& Ciclo cuya condición es falsa: el cuerpo nunca se ejecuta
+		whl ( ( ( #1 ) > ( #2 ) ) ) {
+			imp ( 'esto no se imprime\n' ) |
+			^i ++ |
+		}
+		& Invocación de la función con el ciclo whl
+		ent ^v = ^buscar ( ) |
+		imp ( 'buscar retornó ' ) |
+		imp ( ^v ) |
+		imp ( '\n' ) |
+	}
+}

@@ -29,6 +29,7 @@
             </Label>
             <HBox alignment="CENTER_LEFT" spacing="10.0">
                <children>
+                  <Button fx:id="button_abrir" mnemonicParsing="false" onAction="#abrirArchivo" text="Abrir archivo" />
                   <Button fx:id="button_analizarCodigo" mnemonicParsing="false" onAction="#analizarCodigo" text="Analizar Código" />
                   <Button fx:id="button_traducir" mnemonicParsing="false" onAction="#traducirCodigo" text="Traducir" />
                   <Label fx:id="estado" maxWidth="1.7976931348623157E308" text="Listo." wrapText="true" HBox.hgrow="ALWAYS" />

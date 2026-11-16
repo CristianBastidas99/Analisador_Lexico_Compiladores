@@ -1,0 +1,10 @@
+& Ejemplo 1: Hola mundo.
+& Muestra la estructura mínima: una clase (cls) con una función ^main de tipo vd
+& (sin retorno) que imprime texto con imp.
+& imp no agrega salto de línea: para saltar de línea se escribe \n dentro de la cadena.
+pub cls ^holaMundo {
+	pub vd ^main ( ) {
+		imp ( 'Hola mundo\n' ) |
+		imp ( 'Mi primer programa compilado a Java\n' ) |
+	}
+}

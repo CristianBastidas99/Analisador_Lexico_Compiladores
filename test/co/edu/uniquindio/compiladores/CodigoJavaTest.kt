@@ -12,6 +12,31 @@ class CodigoJavaTest {
     private fun decimal(l: String) = CodigoJava.numero(Token(l, Categoria.DECIMAL, 1, 1))
 
     @Test
+    fun cadenasConEscapes() {
+        assertEquals("\"a\\nb\"", CodigoJava.cadena("'a\\nb'"))
+        assertEquals("\"a\\tb\"", CodigoJava.cadena("'a\\tb'"))
+        assertEquals("\"it's\"", CodigoJava.cadena("'it\\'s'"))
+        assertEquals("\"di\\\"jo\"", CodigoJava.cadena("'di\\\"jo'"))
+        assertEquals("\"a\\\\b\"", CodigoJava.cadena("'a\\\\b'"))
+        // Salto de linea real, tabulador real y comillas dobles sin escapar
+        assertEquals("\"l1\\nl2\"", CodigoJava.cadena("'l1\nl2'"))
+        assertEquals("\"a\\tb\"", CodigoJava.cadena("'a\tb'"))
+        assertEquals("\"x\\\"y\"", CodigoJava.cadena("'x\"y'"))
+    }
+
+    @Test
+    fun caracteresConEscapes() {
+        assertEquals("'a'", CodigoJava.caracter("°a°"))
+        assertEquals("'\\n'", CodigoJava.caracter("°\\n°"))
+        assertEquals("'\\t'", CodigoJava.caracter("°\\t°"))
+        assertEquals("'\\''", CodigoJava.caracter("°\\'°"))
+        assertEquals("'\\\"'", CodigoJava.caracter("°\\\"°"))
+        assertEquals("'\\\\'", CodigoJava.caracter("°\\\\°"))
+        assertEquals("'n'", CodigoJava.caracter("°n°"))
+        assertEquals("'\\n'", CodigoJava.caracter("°\n°"))
+    }
+
+    @Test
     fun enteros() {
         assertEquals("7", entero("#007"))
         assertEquals("0", entero("#0"))

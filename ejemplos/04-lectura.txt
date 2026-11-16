@@ -1,0 +1,20 @@
+& Ejemplo 4: lectura de datos.
+& rad abre un diálogo para pedir un dato. Se puede asignar a un str, a un ent
+& o a un dbe (el programa convierte el texto al tipo de la variable).
+& Al ejecutarlo aparecen tres diálogos: escriba un nombre, un entero
+& (por ejemplo 20) y un decimal (por ejemplo 4.5).
+pub cls ^lectura {
+	pub vd ^main ( ) {
+		str ^nombre = rad ( 'Escriba su nombre' ) |
+		ent ^edad |
+		^edad = rad ( 'Escriba su edad (entero)' ) |
+		dbe ^nota = rad ( 'Escriba su nota (decimal)' ) |
+		imp ( 'Nombre: ' ) |
+		imp ( ^nombre ) |
+		imp ( '\nEdad: ' ) |
+		imp ( ^edad ) |
+		imp ( '\nNota: ' ) |
+		imp ( ^nota ) |
+		imp ( '\n' ) |
+	}
+}

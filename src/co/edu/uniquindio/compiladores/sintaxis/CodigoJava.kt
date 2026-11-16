@@ -90,8 +90,8 @@ object CodigoJava {
             if (c == '\\' && i + 1 < contenido.length) {
                 val sig = contenido[i + 1]
                 when (sig) {
-                    '\n' -> sb.append("\\n")
-                    '\t' -> sb.append("\\t")
+                    'n' -> sb.append("\\n")
+                    't' -> sb.append("\\t")
                     '"' -> sb.append("\\\"")
                     '\'' -> sb.append("'")
                     '\\' -> sb.append("\\\\")
@@ -109,13 +109,14 @@ object CodigoJava {
     /** Convierte un literal de caracter del lenguaje (°x° o °\x°) a un literal Java */
     fun caracter(lexema: String): String {
         val contenido = lexema.substring(1, lexema.length - 1)
-        val c = if (contenido.length > 1 && contenido[0] == '\\') contenido[1] else contenido[0]
-        val texto = when (c) {
-            '\'' -> "\\'"
-            '\\' -> "\\\\"
-            '"' -> "\\\""
-            '\n' -> "\\n"
-            '\t' -> "\\t"
+        val escapado = contenido.length > 1 && contenido[0] == '\\'
+        val c = if (escapado) contenido[1] else contenido[0]
+        val texto = when {
+            escapado && c == 'n' -> "\\n"
+            escapado && c == 't' -> "\\t"
+            c == '\'' -> "\\'"
+            c == '\\' -> "\\\\"
+            c == '"' -> "\\\""
             else -> escapar(c)
         }
         return "'$texto'"

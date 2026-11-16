@@ -269,7 +269,7 @@ class SemanticoTest {
     }
 
     /**
-     * Programa de ejemplo de prueba/app.kt. Los seis errores son los mismos que producia antes de la Fase 3
+     * Programa de ejemplo del antiguo prueba/app.kt (ya eliminado). Los seis errores son los mismos que producia antes de la Fase 3
      * (solo cambian la numeracion desde 1 y la ortografia); ninguno era un falso positivo.
      */
     @Test

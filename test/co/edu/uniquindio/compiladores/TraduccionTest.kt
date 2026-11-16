@@ -280,4 +280,18 @@ class TraduccionTest {
                 "}"
         assertEquals("274a\\b51.5zab", compilarYEjecutar(fuente, "borde"))
     }
+
+    @Test
+    fun escapesDeCadenasYCaracteres() {
+        // \n \t \' \" \\ como secuencias de escape, y un salto de linea real dentro de la cadena
+        val fuente = "pub cls ^escapes {\n" +
+                "pub vd ^main ( ) {\n" +
+                "imp ( 'a\\nb\\tc\\'d\\\"e\\\\f' ) |\n" +
+                "imp ( 'x\ny' ) |\n" +
+                "imp ( °\\t° + °\\'° + °\\\\° ) |\n" +
+                "}\n" +
+                "}"
+        assertEquals("a\nb\tc'd\"e\\f" + "x\ny" + "\t'\\",
+            compilarYEjecutar(fuente, "escapes"))
+    }
 }

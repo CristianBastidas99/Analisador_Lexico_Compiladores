@@ -1,0 +1,43 @@
+& Ejemplo 3: funciones.
+& Muestra variables globales, funciones con parámetros y retorno, funciones vd,
+& invocación como sentencia y como valor, y variables inmutables.
+pub cls ^calc {
+	& Variable global (visible en todas las funciones)
+	pvt ent ^total |
+
+	& Función con dos parámetros (separados por :) que retorna un ent
+	pub ent ^sumar ( ent ^a : ent ^b ) {
+		ent ^res |
+		^res = ^a |
+		^res += ^b |
+		ret ^res |
+	}
+
+	& Función vd con un parámetro: no retorna nada
+	pub vd ^saludar ( str ^nombre ) {
+		imp ( 'Hola, ' ) |
+		imp ( ^nombre ) |
+		imp ( '\n' ) |
+	}
+
+	pub vd ^main ( ) {
+		& Invocación como sentencia (los argumentos son identificadores)
+		str ^quien = 'estudiante' |
+		^saludar ( ^quien ) |
+		& Variables inmutables (se asignan al declararlas)
+		ent ^x = #3 |
+		ent ^y = #4 |
+		& Invocación como valor, asignada a la global
+		^total = ^sumar ( ^x : ^y ) |
+		imp ( 'sumar(3, 4) = ' ) |
+		imp ( ^total ) |
+		imp ( '\n' ) |
+		& Invocación como sentencia (el valor retornado se descarta)
+		^sumar ( ^x : ^total ) |
+		& Invocación como valor al declarar una variable inmutable
+		ent ^doble = ^sumar ( ^total : ^total ) |
+		imp ( 'doble = ' ) |
+		imp ( ^doble ) |
+		imp ( '\n' ) |
+	}
+}

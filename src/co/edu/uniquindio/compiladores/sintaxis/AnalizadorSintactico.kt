@@ -550,9 +550,9 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                     }else{
                                         reportarError("Debe definir la llave izquierda de la desicion ELSE")
                                     }
+                                }else{
+                                    return Decision(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
                                 }
-
-                                return Decision(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
                             }else{
                                 reportarError("Debe definir la llave derecha de la desicion IF")
                             }

@@ -10,6 +10,7 @@ import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import co.edu.uniquindio.compiladores.sintaxis.UnidadDeCompilacion
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.scene.control.Alert
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.Tab
@@ -20,6 +21,7 @@ import javafx.scene.control.TextArea
 import javafx.scene.control.TreeView
 import javafx.scene.control.cell.PropertyValueFactory
 import javafx.application.Platform
+import javafx.stage.FileChooser
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -115,6 +117,35 @@ class InicioControler {
         colm_esemError.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
         colm_esemFila.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
         colm_esemColumna.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+    }
+
+    @FXML
+    fun abrirArchivo(e : ActionEvent?){
+        val selector = FileChooser()
+        selector.title = "Abrir archivo de código"
+        selector.extensionFilters.addAll(
+            FileChooser.ExtensionFilter("Archivos de texto (*.txt)", "*.txt"),
+            FileChooser.ExtensionFilter("Todos los archivos", "*.*")
+        )
+        val ejemplos = File("ejemplos")
+        if (ejemplos.isDirectory) selector.initialDirectory = ejemplos.absoluteFile
+
+        val archivo = selector.showOpenDialog(codigo_fuente.scene?.window) ?: return
+        val texto: String
+        try {
+            texto = String(Files.readAllBytes(archivo.toPath()), StandardCharsets.UTF_8).replace("\r\n", "\n")
+        } catch (ex: Exception) {
+            val aviso = Alert(Alert.AlertType.ERROR, "No se pudo leer el archivo ${archivo.name}: ${ex.message ?: ex.javaClass.simpleName}")
+            aviso.headerText = "Error al abrir el archivo"
+            aviso.showAndWait()
+            estado.text = "No se pudo abrir ${archivo.name}."
+            return
+        }
+        // Cargar un archivo equivale a editar: se invalida el análisis anterior
+        cancelarEjecucion()
+        limpiarTodo()
+        codigo_fuente.text = texto
+        estado.text = "Archivo cargado: ${archivo.name}. Pulse Analizar Código."
     }
 
     private fun titulo(base: String, n: Int) = if (n > 0) "$base ($n)" else base
