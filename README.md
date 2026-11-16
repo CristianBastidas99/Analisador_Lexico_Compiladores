@@ -58,16 +58,21 @@ La interfaz tiene:
 
 ### Capturas
 
-<!--
-Pendiente: el autor debe tomar estas capturas de la aplicación en ejecución, guardarlas en docs/img/
-(interfaz.png, errores.png, traduccion.png) y descomentar este bloque.
-
 ![Interfaz principal](docs/img/interfaz.png)
+
+*Interfaz principal: código fuente, árbol sintáctico expandido y tokens del analizador léxico.*
+
+![Tabla de símbolos](docs/img/tabla-simbolos.png)
+
+*Tabla de símbolos generada para un programa sin errores.*
 
 ![Errores detectados](docs/img/errores.png)
 
+*Errores semánticos detectados, con fila y columna; la pestaña muestra el total entre paréntesis.*
+
 ![Traducción y ejecución](docs/img/traduccion.png)
--->
+
+*Código Java generado y salida de la compilación y ejecución del programa.*
 
 ## Requisitos
 
