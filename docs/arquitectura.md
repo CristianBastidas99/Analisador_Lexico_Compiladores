@@ -24,7 +24,7 @@ El controlador detiene la cadena en cuanto una fase produce errores: si hay erro
 
 ## Diagrama de clases del AST
 
-Las clases viven en el paquete `sintaxis`. Todas las sentencias heredan de `Sentencia` y todas las expresiones de `Expresion`. `Funcion`, `VariableGlobal` y los parámetros no son sentencias ni expresiones. `Parametro` existe en el código pero ninguna otra clase la usa (el analizador crea `ParametroConTipo` y `ParametroSinTipo`).
+Las clases viven en el paquete `sintaxis`. Todas las sentencias heredan de `Sentencia` y todas las expresiones de `Expresion`. `Funcion`, `VariableGlobal` y los parámetros no son sentencias ni expresiones.
 
 ```mermaid
 classDiagram
@@ -40,7 +40,6 @@ classDiagram
     class Funcion
     class ParametroConTipo
     class ParametroSinTipo
-    class Parametro
 
     class Sentencia {
         <<abstract>>
@@ -120,7 +119,7 @@ Cada nodo del AST implementa las tres operaciones que recorren el árbol: `llena
 
 | Paquete | Responsabilidad |
 | --- | --- |
-| `app` | Punto de entrada: `Aplicacion` carga `inicio.fxml` y abre la ventana. |
+| `app` | Punto de entrada: `Aplicacion` carga `inicio.fxml` y abre la ventana; `Lanzador` es la `Main-Class` del `.jar`. |
 | `controlador` | `InicioController` conecta la interfaz con las fases y gestiona la compilación y ejecución. |
 | `lexico` | Convierte el texto en tokens: `AnalizadorLexico`, `Token`, `Categoria`, `Error`. |
 | `sintaxis` | Análisis sintáctico (`AnalizadorSintactico`), nodos del AST y `CodigoJava` (utilidades de traducción). |
@@ -153,6 +152,7 @@ Fuera de `src/`: `resources/inicio.fxml` (diseño de la interfaz), `test/` (prue
 
 - **`InicioController`**: controlador del FXML. Atiende los tres botones, llena las tablas, selecciona la pestaña con errores y actualiza la barra de estado. Contiene además el flujo de compilación y ejecución (ver más abajo).
 - **`Aplicacion`**: subclase de `javafx.application.Application`; carga `/inicio.fxml`, crea la escena con el título "Mi compilador" y la muestra. Su `main` llama a `launch`.
+- **`Lanzador`**: `object` con `main` estático que llama a `Application.launch(Aplicacion::class.java)`. Es la `Main-Class` del `.jar` ejecutable (no extiende `Application`, requisito de JavaFX desde el classpath).
 
 ## Retroceso y "error más lejano" en el sintáctico
 

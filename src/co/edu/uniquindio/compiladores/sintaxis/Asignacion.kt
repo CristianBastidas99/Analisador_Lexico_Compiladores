@@ -125,7 +125,7 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
         return izquierda + " " + operAsignacion.lexema + " " + getCodeJavaDerecha()
     }
 
-    /** Lado derecho de la asignacion (con el ; final); permite generarlo antes de declarar la variable destino */
+    /** Lado derecho de la asignacion (con el `;` final del Java generado); permite generarlo antes de declarar la variable destino */
     fun getCodeJavaDerecha(): String {
         var codigo = ""
 

@@ -105,6 +105,26 @@ mvn test
 
 Hay **179 pruebas** unitarias y de integración (léxico, sintáctico, semántico, traducción a Java y los archivos de `ejemplos/`). Las de traducción compilan y ejecutan programas reales, por lo que necesitan un JDK.
 
+### Ejecutable (.jar)
+
+Se puede empaquetar la aplicación completa (con Kotlin y OpenJFX incluidos) en un único `.jar` ejecutable:
+
+```bash
+JAVA_HOME="/ruta/al/jdk-17" mvn clean package
+```
+
+El archivo queda en `target/compilador-1.0.0-SNAPSHOT.jar` (unos 11 MB). `maven-shade-plugin` reemplaza el jar principal; el original sin dependencias se conserva como `target/original-compilador-1.0.0-SNAPSHOT.jar`. Para ejecutarlo:
+
+```bash
+java -jar target/compilador-1.0.0-SNAPSHOT.jar
+```
+
+También funciona con doble clic si los `.jar` están asociados a un JDK 17.
+
+- **Requiere un JDK 17, no un JRE**: el botón **Traducir** compila el Java generado en tiempo de ejecución con `javax.tools`, que solo existe en un JDK.
+- La clase principal del manifiesto es `Lanzador`, que no extiende `Application` (JavaFX lo exige cuando se carga desde el classpath). `mvn javafx:run` sigue usando `Aplicacion`. Al arrancar aparece una advertencia de JavaFX ("Unsupported JavaFX configuration") que es inofensiva.
+- **Es específico de la plataforma**: las dependencias de OpenJFX llevan un clasificador por sistema operativo (por ejemplo `win`), así que el jar solo funciona en el sistema donde se construyó. Para otra plataforma, ejecute `mvn clean package` en ese sistema: Maven resuelve el clasificador correspondiente.
+
 ### IntelliJ IDEA
 
 Abra la carpeta con *File > Open*, elija el `pom.xml` e impórtelo como **proyecto Maven** con **JDK 17**. Para ejecutar, use la clase `co.edu.uniquindio.compiladores.app.Aplicacion` o el objetivo Maven `javafx:run`.
@@ -126,7 +146,7 @@ Abra la carpeta con *File > Open*, elija el `pom.xml` e impórtelo como **proyec
 | `ejemplos/04-lectura.txt` | Lectura con `rad` (diálogos de entrada) asignada a `str`, `ent` y `dbe`. |
 | `ejemplos/error-lexico.txt` | Símbolos desconocidos (`$`, `~`) reportados por el léxico. |
 | `ejemplos/error-sintactico.txt` | Falta el terminador `\|` en una declaración. |
-| `ejemplos/error-semantico.txt` | Retorno de tipo incorrecto, redeclaración, variable no declarada, tipos incompatibles y asignación a una variable inmutable. |
+| `ejemplos/error-semantico.txt` | Retorno de tipo incorrecto, redeclaración, variable no declarada, tipos incompatibles, asignación a una variable inmutable e impresión de una variable no declarada. |
 
 ## Estructura del proyecto
 
@@ -135,7 +155,7 @@ Analisador_Lexico_Compiladores/
 ├── pom.xml                      Configuración de Maven (Kotlin, OpenJFX 21, JUnit 5)
 ├── README.md                    Este archivo
 ├── src/co/edu/uniquindio/compiladores/
-│   ├── app/                     Aplicacion: punto de entrada JavaFX
+│   ├── app/                     Aplicacion (JavaFX) y Lanzador (Main-Class del .jar)
 │   ├── controlador/             InicioController: lógica de la interfaz y ejecución
 │   ├── lexico/                  AnalizadorLexico, Token, Categoria, Error
 │   ├── sintaxis/                AnalizadorSintactico, nodos del AST y CodigoJava
@@ -170,4 +190,4 @@ Son decisiones del diseño original del lenguaje, no errores del compilador:
 
 ## Licencia
 
-Pendiente de definir.
+Este proyecto se distribuye bajo la [licencia MIT](LICENSE).

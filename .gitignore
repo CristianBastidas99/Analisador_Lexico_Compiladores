@@ -44,10 +44,6 @@ target/
 bin/
 .gradle/
 
-# Código Java generado por el botón "Traducir" (InicioControler.traducirCodigo)
-src/Principal.java
-src/*.class
-
 # ==========================================================
 #  IntelliJ IDEA
 #  (.idea/ y el .iml se mantienen versionados para poder abrir y ejecutar

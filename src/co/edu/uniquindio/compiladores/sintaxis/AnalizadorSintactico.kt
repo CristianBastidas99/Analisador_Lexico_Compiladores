@@ -106,7 +106,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-     * <Unidad de Compilación> ::= <Visibilidad> Class Identificador “{” [ <Lista de Variables Globales>] [ <Lista de Funciones> ] “}”
+     * <Unidad de Compilación> ::= <Visibilidad> cls Identificador “{” [ <Lista de Variables Globales>] [ <Lista de Funciones> ] “}”
      */
     fun esUnidadDeCompilacion(): UnidadDeCompilacion?{
 
@@ -235,7 +235,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-     * <Tipo> ::= ent | dbe| str| booleano | Caracter
+     * <Tipo> ::= ent | dbe| str| bln | crt
      */
     fun esTipo(): Token? {
 
@@ -325,7 +325,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-     * <Valor Retornado> ::= Void | <Tipo>
+     * <Valor Retornado> ::= vd | <Tipo>
      */
     fun esValorRetornado(): Token? {
 
@@ -938,7 +938,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-     * <Impresión> ::= print “(” <TipoImpresion> “)” “|”
+     * <Impresión> ::= imp “(” <TipoImpresion> “)” “|”
      * <TipoImpresion> ::= <Expresion> | identificador
      */
     fun esImpresionSentencia(): Impresion? {
@@ -1088,7 +1088,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     }
 
     /**
-     * <Lectura> ::= read “(” cadena “)” “|
+     * <Lectura> ::= rad “(” cadena “)” “|”
      */
     fun esLecturaSentencia(): Lectura? {
         var posicionInicial = posicionActual

@@ -166,7 +166,6 @@ Observaciones:
 
 | Sentencia | Ejemplo |
 |-----------|---------|
-| Unidad de compilación | `pub cls ^a { }` |
 | Variable global | `pvt ent ^g \|` |
 | Función con parámetros | `pub ent ^sumar ( ent ^a : ent ^b ) { ret ^a \| }` |
 | Función sin parámetros | `pub vd ^main ( ) { }` |
@@ -222,26 +221,21 @@ Más programas completos y válidos están en la carpeta `ejemplos/`.
 
 ## 4. Diferencias entre los comentarios KDoc del código y lo que hace el código
 
-Los comentarios del analizador sintáctico usan nombres de una versión anterior en inglés. Se documenta aquí lo
+Algunos comentarios del analizador sintáctico describen la gramática de forma aproximada. Se documenta aquí lo
 que el **código** hace:
 
 | Regla | KDoc dice | El código hace |
 |-------|-----------|----------------|
-| Unidad de compilación | `Class` | la palabra reservada es `cls` |
 | Variable global | `<Visibilidad> <Tipo> Identificador "\|"` | igual (el KDoc omite la comilla de cierre) |
-| Tipo | `ent \| dbe \| str \| booleano \| Caracter` | `ent \| dbe \| str \| bln \| crt` |
-| Valor retornado | `Void \| <Tipo>` | `vd \| <Tipo>` |
 | Lista de parámetros con tipo | `<Parámetro Con Tipo> [":" <Lista de Parámetros>]` | lo que sigue al `:` es de nuevo una lista de parámetros **con tipo** (el nombre `<Lista de Parámetros>` del KDoc no está definido) |
 | Decisión / ciclo | `if "(" <Expresión Lógica> ")" …` | igual, pero la expresión lógica ya trae sus propios paréntesis (tres en total) |
 | Expresión relacional | `<ExpAritmetica> OpeRacional "(" <ExpAritmetica> ")"` | **ambos** lados van entre paréntesis: `"(" <ExpAritmetica> ")" OpeRel "(" <ExpAritmetica> ")"` |
 | Expresión cadena (`<TipoExpCadena>`) | `ent \| dbe \| str \| crt` (nombres de tipo) | son los **literales** `ENTERO \| DECIMAL \| CADENA \| CARACTER` |
 | Declaración mutable / inmutable | usan `<TipoVariable>` | `<Tipo>`; la inmutable es `<Tipo> <Asignacion>` (la asignación aporta su `\|`) |
 | Asignación | `<TipoAsig> ::= <Expresión> \| identificador \| <Lectura> \| <InvFunción>` y luego `"\|"` | `<Lectura>` y `<InvFunción>` ya consumen su propio `\|`; las otras dos alternativas llevan `\|` propio |
-| Impresión | `print "(" <TipoImpresion> ")" "\|"` | la palabra es `imp`; `<TipoImpresion>` es `<Expresión> \| identificador` |
-| Lectura | `read "(" cadena ")" "\|"` | la palabra es `rad` y la cadena es un literal `'…'` |
 | Lista de parámetros sin tipo | `<Parámetro Sin Tipo> [":" <Lista de Parámetros sin Tipo>]` | igual; además, si un argumento empieza por un tipo (`ent`, `str`…) se informa `Este parámetro no lleva tipo` |
 
-Las diferencias son solo de nombres y notación; ninguna cambia el lenguaje aceptado respecto de lo descrito en
+Las diferencias son solo de notación; ninguna cambia el lenguaje aceptado respecto de lo descrito en
 las secciones 1 y 2. (La especificación de los autómatas léxicos está en `docs/lenguaje.md`.)
 
 ## 5. Reglas semánticas
