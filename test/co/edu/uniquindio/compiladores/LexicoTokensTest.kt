@@ -99,7 +99,7 @@ class LexicoTokensTest {
 
     @Test
     fun operadorIncremento() {
-        assertUnico("++", Categoria.OPERADOR_INCREMETO)
+        assertUnico("++", Categoria.OPERADOR_INCREMENTO)
     }
 
     @Test
@@ -186,15 +186,15 @@ class LexicoTokensTest {
 
     @Test
     fun cadenaDeCaracteres() {
-        assertUnico("'hola mundo'", Categoria.CADENA_CARCTERES)
-        assertUnico("''", Categoria.CADENA_CARCTERES)
+        assertUnico("'hola mundo'", Categoria.CADENA_CARACTERES)
+        assertUnico("''", Categoria.CADENA_CARACTERES)
         // Secuencia de escape valida dentro de la cadena
-        assertUnico("'a\\\\b'", Categoria.CADENA_CARCTERES)
-        assertUnico("'a\\nb\\tc\\'d\\\"e'", Categoria.CADENA_CARCTERES)
+        assertUnico("'a\\\\b'", Categoria.CADENA_CARACTERES)
+        assertUnico("'a\\nb\\tc\\'d\\\"e'", Categoria.CADENA_CARACTERES)
         // Segun el PDF un salto de linea real, un tabulador y comillas dobles son C validos
-        assertUnico("'l1\nl2\t\"x\"'", Categoria.CADENA_CARCTERES)
+        assertUnico("'l1\nl2\t\"x\"'", Categoria.CADENA_CARACTERES)
         val lexico = analizar("  'x'")
-        assertToken(lexico.listaTokens[0], "'x'", Categoria.CADENA_CARCTERES, 1, 3)
+        assertToken(lexico.listaTokens[0], "'x'", Categoria.CADENA_CARACTERES, 1, 3)
     }
 
     @Test
@@ -231,7 +231,7 @@ class LexicoTokensTest {
             listOf("& nota\n", Categoria.COMENTARIO_LINEA, 3, 3),
             listOf("imp", Categoria.PALABRA_RESERVADA, 4, 3),
             listOf("(", Categoria.PARENTESIS_IZQUIERDO, 4, 7),
-            listOf("'hola'", Categoria.CADENA_CARCTERES, 4, 9),
+            listOf("'hola'", Categoria.CADENA_CARACTERES, 4, 9),
             listOf(")", Categoria.PARENTESIS_DERECHO, 4, 16),
             listOf("|", Categoria.FIN_SENTENCIA, 4, 18),
             listOf("}", Categoria.LLAVE_DERECHO, 5, 1)
@@ -249,7 +249,7 @@ class LexicoTokensTest {
         assertTrue(lexico.listaErrores.isEmpty(), "${lexico.listaErrores}")
         assertEquals(6, lexico.listaTokens.size, "${lexico.listaTokens}")
         assertToken(lexico.listaTokens[0], "^i", Categoria.IDENTIFICADOR, 1, 1)
-        assertToken(lexico.listaTokens[1], "++", Categoria.OPERADOR_INCREMETO, 1, 3)
+        assertToken(lexico.listaTokens[1], "++", Categoria.OPERADOR_INCREMENTO, 1, 3)
         assertToken(lexico.listaTokens[2], "|", Categoria.FIN_SENTENCIA, 1, 5)
         assertToken(lexico.listaTokens[3], "^j", Categoria.IDENTIFICADOR, 1, 7)
         assertToken(lexico.listaTokens[4], "+=", Categoria.OPERADOR_ASIGNACION, 1, 9)

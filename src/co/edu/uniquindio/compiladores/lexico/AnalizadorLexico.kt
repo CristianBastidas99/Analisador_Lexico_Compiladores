@@ -1,10 +1,8 @@
 package co.edu.uniquindio.compiladores.lexico
 
-import java.util.ArrayList
+class AnalizadorLexico(var codigoFuente:String) {
 
-class AnalizadorLexico (var codigoFuente:String) {
-
-    var posicionAcual = 0
+    var posicionActual = 0
     var caracterActual = if (codigoFuente.isEmpty()) 0.toChar() else codigoFuente[0]
     var listaTokens = ArrayList<Token>()
     var listaErrores = ArrayList<Error>()
@@ -12,7 +10,7 @@ class AnalizadorLexico (var codigoFuente:String) {
     var filaActual = 1
     var columnaActual = 1
 
-    fun  almacenarToken(lexema:String, categoria: Categoria, fila:Int, columna:Int) = listaTokens.add(Token(lexema, categoria, fila, columna))
+    fun almacenarToken(lexema:String, categoria: Categoria, fila:Int, columna:Int) = listaTokens.add(Token(lexema, categoria, fila, columna))
 
     fun analizar(){
         while(caracterActual != finCodigo){
@@ -43,11 +41,11 @@ class AnalizadorLexico (var codigoFuente:String) {
 
             if(esParentesisIzquierdo()) continue
 
-            if(esParantesisDerecho()) continue
+            if(esParentesisDerecho()) continue
 
-            if(esLlavesDerecha()) continue
+            if(esLlaveDerecha()) continue
 
-            if(esLlavesIzquierda()) continue
+            if(esLlaveIzquierda()) continue
 
             if(esCorcheteIzquierdo()) continue
 
@@ -102,7 +100,7 @@ class AnalizadorLexico (var codigoFuente:String) {
     fun manejarDesconocido(){
         val fila = filaActual
         val columna = columnaActual
-        val posicion = posicionAcual
+        val posicion = posicionActual
 
         when (caracterActual) {
             '"' -> {
@@ -210,751 +208,76 @@ class AnalizadorLexico (var codigoFuente:String) {
         return "Carácter sin cerrar o mal formado: se esperaba un solo símbolo seguido de °"
     }
 
-    fun esPalabraReservada():Boolean{
+    private val palabrasReservadas = listOf(
+        "ent", "dbe", "str", "pub", "pvt", "abs", "cth", "brk", "cas", "ptt", "cls", "bln", "crt", "mut", "inm",
+        "whl", "ret", "rad", "tre", "fls", "if", "else", "vd", "imp", "cat", "array"
+    )
 
-        if(esPalabraReservadaEnt()) return true
+    private val operadoresLogicos = listOf("not", "or", "xor", "and")
 
-        if(esPalabraReservadaDbe()) return true
+    fun esPalabraReservada():Boolean = esAlgunaPalabra(palabrasReservadas, Categoria.PALABRA_RESERVADA)
 
-        if(esPalabraReservadaStr()) return true
+    fun esOperadorLogico():Boolean = esAlgunaPalabra(operadoresLogicos, Categoria.OPERADOR_LOGICO)
 
-        if(esPalabraReservadaPub()) return true
+    private fun esAlgunaPalabra(palabras:List<String>, categoria:Categoria):Boolean = palabras.any { esPalabra(it, categoria) }
 
-        if(esPalabraReservadaPvt()) return true
-
-        if(esPalabraReservadaAbs()) return true
-
-        if(esPalabraReservadaCth()) return true
-
-        if(esPalabraReservadaBrk()) return true
-
-        if(esPalabraReservadaCas()) return true
-
-        if(esPalabraReservadaPtt()) return true
-
-        if(esPalabraReservadaCls()) return true
-
-        if(esPalabraReservadaBln()) return true
-
-        if(esPalabraReservadaCrt()) return true
-
-        if(esPalabraReservadaMut()) return true
-
-        if(esPalabraReservadaInm()) return true
-
-        if(esPalabraReservadaWhl()) return true
-
-        if(esPalabraReservadaRet()) return true
-
-        if(esPalabraReservadaRad()) return true
-
-        if(esPalabraReservadaTre()) return true
-
-        if(esPalabraReservadaFls()) return true
-
-        if(esPalabraReservadaIf()) return true
-
-        if(esPalabraReservadaElse()) return true
-
-        if(esPalabraReservadaVd()) return true
-
-        if(esPalabraReservadaImp()) return true
-
-        if(esPalabraReservadaCat()) return true
-
-        if(esPalabraReservadaArray()) return true
-
-        return false
-
-    }
-    fun esPalabraReservadaBln():Boolean{
-        if(caracterActual == 'b'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'l') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'n') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
+    /**
+     * Reconoce la palabra exacta en la posicion actual. Si coincide completa, almacena el token; si no,
+     * deja el analizador en la posicion inicial (lo que sigue lo trata el resto de automatas).
+     */
+    private fun esPalabra(palabra:String, categoria:Categoria):Boolean{
+        if(caracterActual != palabra[0]) return false
+        val filaInicial = filaActual
+        val columnaInicial = columnaActual
+        val posicionInicial = posicionActual
+        var lexema = ""
+        for (c in palabra) {
+            if (caracterActual != c) {
+                restablecerCaracterActual(posicionInicial, filaInicial, columnaInicial)
+                return false
             }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-
-
-    fun esPalabraReservadaCls():Boolean{
-        if(caracterActual == 'c'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
             lexema += caracterActual
             obtenerSiguienteCaracter()
-
-            if(caracterActual == 'l') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 's') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
         }
-        return false
+        almacenarToken(lexema, categoria, filaInicial, columnaInicial)
+        return true
     }
 
-    fun esPalabraReservadaCrt():Boolean{
-        if(caracterActual == 'c'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'r') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
+    /** Reconoce un unico caracter perteneciente a [simbolos] como un token de la categoria dada */
+    private fun esSimbolo(simbolos:String, categoria:Categoria):Boolean{
+        if(simbolos.indexOf(caracterActual) < 0) return false
+        val filaInicial = filaActual
+        val columnaInicial = columnaActual
+        val lexema = caracterActual.toString()
+        obtenerSiguienteCaracter()
+        almacenarToken(lexema, categoria, filaInicial, columnaInicial)
+        return true
     }
 
-    fun esPalabraReservadaMut():Boolean{
-        if(caracterActual == 'm'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
+    /** Reconoce el caracter [inicio] seguido de [segundo] (p. ej. "++", "==", "+=") */
+    private fun esParDeCaracteres(inicio:String, segundo:Char, categoria:Categoria):Boolean{
+        if(inicio.indexOf(caracterActual) < 0) return false
+        val filaInicial = filaActual
+        val columnaInicial = columnaActual
+        val posicionInicial = posicionActual
+        var lexema = caracterActual.toString()
+        obtenerSiguienteCaracter()
+        if(caracterActual == segundo) {
             lexema += caracterActual
             obtenerSiguienteCaracter()
-
-            if(caracterActual == 'u') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+            almacenarToken(lexema, categoria, filaInicial, columnaInicial)
+            return true
         }
-        return false
-    }
-
-    fun esPalabraReservadaInm():Boolean{
-        if(caracterActual == 'i'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'n') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'm') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaWhl():Boolean{
-        if(caracterActual == 'w'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'h') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'l') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaRet():Boolean{
-        if(caracterActual == 'r'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'e') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaRad():Boolean{
-        if(caracterActual == 'r'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'a') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'd') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaTre():Boolean{
-        if(caracterActual == 't'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'r') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'e') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaFls():Boolean{
-        if(caracterActual == 'f'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'l') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 's') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaIf():Boolean{
-        if(caracterActual == 'i'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'f') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                 return true
-                }
-
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaElse():Boolean{
-        if(caracterActual == 'e'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'l') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if (caracterActual == 's') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-
-                    if (caracterActual == 'e') {
-                        lexema += caracterActual
-                        obtenerSiguienteCaracter()
-                        almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                        return true
-                    }
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaVd():Boolean{
-        if(caracterActual == 'v'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'd') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                return true
-            }
-
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaImp():Boolean{
-        if(caracterActual == 'i'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'm') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'p') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaCat():Boolean{
-        if(caracterActual == 'c'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'a') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaArray():Boolean {
-        if (caracterActual == 'a') {
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if (caracterActual == 'r') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if (caracterActual == 'r') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-
-                    if (caracterActual == 'a') {
-                        lexema += caracterActual
-                        obtenerSiguienteCaracter()
-
-                        if (caracterActual == 'y') {
-                            lexema += caracterActual
-                            obtenerSiguienteCaracter()
-                            almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                            return true
-
-                        }
-                    }
-                }
-            }
-
-            restablecerCaracterActual(posicionInicial, filaInicial, columnaInicial)
-        }
-
-        return false
-    }
-
-        fun esPalabraReservadaEnt():Boolean{
-        if(caracterActual == 'e'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'n') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-    fun esPalabraReservadaDbe():Boolean{
-        if(caracterActual == 'd'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'b') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'e') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaStr():Boolean{
-        if(caracterActual == 's'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 't') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'r') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaPub():Boolean{
-        if(caracterActual == 'p'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'u') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'b') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaPvt():Boolean{
-        if(caracterActual == 'p'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'v') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaAbs():Boolean{
-        if(caracterActual == 'a'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'b') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 's') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-
-    fun esPalabraReservadaBrk():Boolean{
-        if(caracterActual == 'b'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'r') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'k') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaCas():Boolean{
-        if(caracterActual == 'c'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'a') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 's') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaCth():Boolean{
-        if(caracterActual == 'c'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 't') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'h') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esPalabraReservadaPtt():Boolean{
-        if(caracterActual == 'p'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 't') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.PALABRA_RESERVADA, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
+        restablecerCaracterActual(posicionInicial, filaInicial, columnaInicial)
         return false
     }
 
     fun esEntero():Boolean{
         if(caracterActual == '#'){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -977,13 +300,11 @@ class AnalizadorLexico (var codigoFuente:String) {
 
     fun esDecimal():Boolean{
 
-        var posicion = posicionAcual;
-
         if(caracterActual == '@'){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -1011,12 +332,11 @@ class AnalizadorLexico (var codigoFuente:String) {
     }
 
     fun esIdentificador():Boolean{
-        var posicion = posicionAcual;
         if(caracterActual == '^'){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -1050,174 +370,11 @@ class AnalizadorLexico (var codigoFuente:String) {
         return false
     }
 
-    fun esOperadorLogico():Boolean{
+    fun esOperadorIncremento():Boolean = esParDeCaracteres("+", '+', Categoria.OPERADOR_INCREMENTO)
 
-        if(esOperadorLogicoNegacion()) return true
+    fun esOperadorDecremento():Boolean = esParDeCaracteres("-", '-', Categoria.OPERADOR_DECREMENTO)
 
-        if(esOperadorLogicoSuma()) return true
-
-        if(esOperadorLogicoSumaExclusiva()) return true
-
-        if(esOperadorLogicoProducto()) return true
-
-        return false
-    }
-
-    fun esOperadorLogicoNegacion():Boolean{
-        if(caracterActual == 'n'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'o') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 't') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.OPERADOR_LOGICO, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorLogicoSuma():Boolean{
-        if(caracterActual == 'o'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'r') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.OPERADOR_LOGICO, filaInicial, columnaInicial)
-                return true
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorLogicoSumaExclusiva():Boolean{
-        if(caracterActual == 'x'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'o') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'r') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.OPERADOR_LOGICO, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorLogicoProducto():Boolean{
-        if(caracterActual == 'a'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == 'n') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-
-                if(caracterActual == 'd') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    almacenarToken(lexema, Categoria.OPERADOR_LOGICO, filaInicial, columnaInicial)
-                    return true
-                }
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorIncremento():Boolean{
-        if(caracterActual == '+'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == '+') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.OPERADOR_INCREMETO, filaInicial, columnaInicial)
-                return true
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorDecremento():Boolean{
-        if(caracterActual == '-'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == '-') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.OPERADOR_DECREMENTO, filaInicial, columnaInicial)
-                return true
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorAritmetico():Boolean{
-        if(caracterActual == '-' || caracterActual == '+' || caracterActual == '*'
-            || caracterActual == '/' || caracterActual == '%'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-            almacenarToken(lexema, Categoria.OPERADOR_ARITMETICO, filaInicial, columnaInicial)
-            return true
-        }
-        return false
-    }
+    fun esOperadorAritmetico():Boolean = esSimbolo("-+*/%", Categoria.OPERADOR_ARITMETICO)
 
     fun esOperadorRelacional():Boolean{
 
@@ -1230,55 +387,15 @@ class AnalizadorLexico (var codigoFuente:String) {
         return false
     }
 
-    fun esOperadorRelacionalIgualQue():Boolean{
-        if(caracterActual == '='){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+    fun esOperadorRelacionalIgualQue():Boolean = esParDeCaracteres("=", '=', Categoria.OPERADOR_RELACIONAL)
 
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == '=') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.OPERADOR_RELACIONAL, filaInicial, columnaInicial)
-                return true
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
-
-    fun esOperadorRelacionalDistintoQue():Boolean{
-        if(caracterActual == '!'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == '=') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.OPERADOR_RELACIONAL, filaInicial, columnaInicial)
-                return true
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }
-        return false
-    }
+    fun esOperadorRelacionalDistintoQue():Boolean = esParDeCaracteres("!", '=', Categoria.OPERADOR_RELACIONAL)
 
     fun esOperadorRelacionalMenorMayorQue():Boolean{
         if(caracterActual == '<' || caracterActual == '>'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            var lexema = caracterActual.toString()
             obtenerSiguienteCaracter()
 
             if(caracterActual == '=') {
@@ -1292,204 +409,35 @@ class AnalizadorLexico (var codigoFuente:String) {
     }
 
     fun esOperadorAsignacion():Boolean{
-
-        if(caracterActual == '-' || caracterActual == '+' || caracterActual == '*'
-            || caracterActual == '/' || caracterActual == '%'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            if(caracterActual == '=') {
-                lexema += caracterActual
-                obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.OPERADOR_ASIGNACION, filaInicial, columnaInicial)
-                return true
-            }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-        }else if(caracterActual == '='){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-            almacenarToken(lexema, Categoria.OPERADOR_ASIGNACION, filaInicial, columnaInicial)
-            return true
-        }
-        return false
-    }
-    fun esParentesisIzquierdo() : Boolean{
-
-        if (caracterActual == '(') {
-            var lexema = ""
-            val filaInicial = filaActual
-            val columnaInicial = columnaActual
-            val posicionInicial = posicionAcual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            almacenarToken(lexema, Categoria.PARENTESIS_IZQUIERDO, filaInicial, columnaInicial)
-            return true
-        }
-
-        return false
-    }
-    fun esParantesisDerecho() : Boolean{
-
-        if (caracterActual == ')') {
-            var lexema = ""
-            val filaInicial = filaActual
-            val columnaInicial = columnaActual
-            val posicionInicial = posicionAcual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            almacenarToken(lexema, Categoria.PARENTESIS_DERECHO, filaInicial, columnaInicial)
-            return true
-        }
-
-        return false
-    }
-    fun esLlavesIzquierda() : Boolean{
-
-        if (caracterActual == '{') {
-            var lexema = ""
-            val filaInicial = filaActual
-            val columnaInicial = columnaActual
-            val posicionInicial = posicionAcual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            almacenarToken(lexema, Categoria.LLAVE_IZQUIERDO, filaInicial, columnaInicial)
-            return true
-        }
-
-        return false
+        if(esParDeCaracteres("-+*/%", '=', Categoria.OPERADOR_ASIGNACION)) return true
+        return esSimbolo("=", Categoria.OPERADOR_ASIGNACION)
     }
 
-    fun esLlavesDerecha() : Boolean{
+    fun esParentesisIzquierdo():Boolean = esSimbolo("(", Categoria.PARENTESIS_IZQUIERDO)
 
-        if (caracterActual == '}') {
-            var lexema = ""
-            val filaInicial = filaActual
-            val columnaInicial = columnaActual
-            val posicionInicial = posicionAcual
+    fun esParentesisDerecho():Boolean = esSimbolo(")", Categoria.PARENTESIS_DERECHO)
 
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
+    fun esLlaveIzquierda():Boolean = esSimbolo("{", Categoria.LLAVE_IZQUIERDO)
 
-            almacenarToken(lexema, Categoria.LLAVE_DERECHO, filaInicial, columnaInicial)
-            return true
-        }
+    fun esLlaveDerecha():Boolean = esSimbolo("}", Categoria.LLAVE_DERECHO)
 
-        return false
-    }
+    fun esCorcheteDerecho():Boolean = esSimbolo("]", Categoria.CORCHETE_DERECHO)
 
-    fun esCorcheteDerecho() : Boolean{
+    fun esCorcheteIzquierdo():Boolean = esSimbolo("[", Categoria.CORCHETE_IZQUIERDO)
 
-        if (caracterActual == ']') {
-            var lexema = ""
-            val filaInicial = filaActual
-            val columnaInicial = columnaActual
-            val posicionInicial = posicionAcual
+    fun esFinSentencia():Boolean = esSimbolo("|", Categoria.FIN_SENTENCIA)
 
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
+    fun esPunto():Boolean = esSimbolo("_", Categoria.PUNTO)
 
-            almacenarToken(lexema, Categoria.CORCHETE_DERECHO, filaInicial, columnaInicial)
-            return true
-        }
+    fun esDosPuntos():Boolean = esSimbolo(";", Categoria.DOS_PUNTOS)
 
-        return false
-    }
-
-    fun esCorcheteIzquierdo() : Boolean{
-
-        if (caracterActual == '[') {
-            var lexema = ""
-            val filaInicial = filaActual
-            val columnaInicial = columnaActual
-            val posicionInicial = posicionAcual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-
-            almacenarToken(lexema, Categoria.CORCHETE_IZQUIERDO, filaInicial, columnaInicial)
-            return true
-        }
-
-        return false
-    }
-
-    fun esFinSentencia():Boolean{
-        if(caracterActual == '|'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-            almacenarToken(lexema, Categoria.FIN_SENTENCIA, filaInicial, columnaInicial)
-            return true
-        }
-        return false
-    }
-
-    fun esPunto():Boolean{
-        if(caracterActual == '_'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-            almacenarToken(lexema, Categoria.PUNTO, filaInicial, columnaInicial)
-            return true
-        }
-        return false
-    }
-
-    fun esDosPuntos():Boolean{
-        if(caracterActual == ';'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-            almacenarToken(lexema, Categoria.DOS_PUNTOS, filaInicial, columnaInicial)
-            return true
-        }
-        return false
-    }
-
-    fun esSeparador():Boolean{
-        if(caracterActual == ':'){
-            var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-
-            lexema += caracterActual
-            obtenerSiguienteCaracter()
-            almacenarToken(lexema, Categoria.SEPARADOR, filaInicial, columnaInicial)
-            return true
-        }
-        return false
-    }
+    fun esSeparador():Boolean = esSimbolo(":", Categoria.SEPARADOR)
 
     fun esComentarioLinea():Boolean{
         if(caracterActual == '&'){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -1516,9 +464,9 @@ class AnalizadorLexico (var codigoFuente:String) {
     fun esComentarioBloque():Boolean{
         if(caracterActual == '"'){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -1530,8 +478,8 @@ class AnalizadorLexico (var codigoFuente:String) {
                 if(caracterActual == '"') {
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
-                    var lista = ArrayList<Char>();
-                    var bandera = true;
+                    val lista = ArrayList<Char>()
+                    var bandera = true
 
                     while (bandera && caracterActual != finCodigo) {
                         lexema += caracterActual
@@ -1559,12 +507,11 @@ class AnalizadorLexico (var codigoFuente:String) {
     }
 
     fun esCaracter():Boolean{
-        var posicion = posicionAcual;
         if(caracterActual == '°'){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -1584,7 +531,6 @@ class AnalizadorLexico (var codigoFuente:String) {
                         almacenarToken(lexema, Categoria.CARACTER, filaInicial, columnaInicial)
                         return true
                     }
-                    restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
                 }
                 restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
             }else if(caracterActual != finCodigo && caracterActual != '°'){
@@ -1605,12 +551,11 @@ class AnalizadorLexico (var codigoFuente:String) {
     }
 
     fun esCadenaCaracter():Boolean{
-        var posicion = posicionAcual;
         if(caracterActual == '\''){
             var lexema = ""
-            var filaInicial = filaActual
-            var columnaInicial = columnaActual
-            var posicionInicial = posicionAcual;
+            val filaInicial = filaActual
+            val columnaInicial = columnaActual
+            val posicionInicial = posicionActual
 
             lexema += caracterActual
             obtenerSiguienteCaracter()
@@ -1628,7 +573,7 @@ class AnalizadorLexico (var codigoFuente:String) {
                         obtenerSiguienteCaracter()
                     }else{
                         restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-                        return false;
+                        return false
                     }
 
                 }else{
@@ -1641,7 +586,7 @@ class AnalizadorLexico (var codigoFuente:String) {
             if(caracterActual == '\'' && caracterActual != finCodigo){
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.CADENA_CARCTERES, filaInicial, columnaInicial)
+                almacenarToken(lexema, Categoria.CADENA_CARACTERES, filaInicial, columnaInicial)
                 return true
             }
 
@@ -1651,7 +596,7 @@ class AnalizadorLexico (var codigoFuente:String) {
     }
 
     fun obtenerSiguienteCaracter(){
-        if(posicionAcual == codigoFuente.length - 1){
+        if(posicionActual == codigoFuente.length - 1){
             caracterActual = finCodigo
         }else{
             if(caracterActual == '\n'){
@@ -1661,16 +606,16 @@ class AnalizadorLexico (var codigoFuente:String) {
                 columnaActual++
             }
 
-            posicionAcual++
-            caracterActual = codigoFuente[posicionAcual]
+            posicionActual++
+            caracterActual = codigoFuente[posicionActual]
         }
     }
 
     fun restablecerCaracterActual(posicionInicial:Int, filaInicial:Int, columnaInicial:Int){
         filaActual = filaInicial
         columnaActual = columnaInicial
-        posicionAcual = posicionInicial
-        caracterActual = codigoFuente[posicionAcual]
+        posicionActual = posicionInicial
+        caracterActual = codigoFuente[posicionActual]
     }
 
 }

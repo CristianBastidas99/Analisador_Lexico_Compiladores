@@ -5,7 +5,7 @@ import javafx.scene.control.TreeItem
 
 class ExpresionRelacional(var expAritmetica1:ExpresionAritmetica, var opeRelacional:Token, var expAritmetica2:ExpresionAritmetica) : Expresion() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Expresion relacional")
+        val raiz = TreeItem("Expresión relacional")
 
         raiz.children.add( expAritmetica1.getArbolVisual() )
 
@@ -21,7 +21,7 @@ class ExpresionRelacional(var expAritmetica1:ExpresionAritmetica, var opeRelacio
     }
 
     override fun getCodeJava(): String {
-        var codigo = "(" + expAritmetica1.getCodeJava() + ") " + opeRelacional.lexema + " (" + expAritmetica2.getCodeJava() + ")"
+        val codigo = "(" + expAritmetica1.getCodeJava() + ") " + opeRelacional.lexema + " (" + expAritmetica2.getCodeJava() + ")"
         return  codigo
     }
 

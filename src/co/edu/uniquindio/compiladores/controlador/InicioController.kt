@@ -32,7 +32,7 @@ import javax.tools.JavaFileObject
 import javax.tools.ToolProvider
 
 
-class InicioControler {
+class InicioController {
 
     @FXML lateinit var codigo_fuente : TextArea
     @FXML lateinit var arbolVisual : TreeView<String>
@@ -194,7 +194,6 @@ class InicioControler {
 
         val analizador = AnalizadorLexico(codigo_fuente.text)
         analizador.analizar()
-        println(analizador.listaTokens)
 
         tablaTabLexico.items.addAll(analizador.listaTokens)
         tablaErroresLex.items.addAll(analizador.listaErrores)
@@ -203,10 +202,7 @@ class InicioControler {
         val analizadorSintactico = AnalizadorSintactico(analizador.listaTokens)
         val uc = analizadorSintactico.esUnidadDeCompilacion()
 
-        if(uc != null) {
-            arbolVisual.root = uc.getArbolVisual()
-            println(uc.toString())
-        }
+        if(uc != null) arbolVisual.root = uc.getArbolVisual()
 
         // Los errores sintácticos se muestran siempre
         tablaErroresSint.items.addAll(analizadorSintactico.listaErrores)
@@ -228,7 +224,6 @@ class InicioControler {
         val semantica = AnalizadorSemantico(uc)
         semantica.llenarTablaSimbolos()
         semantica.analizarSemantica()
-        println(semantica.tablaSimbolos)
 
         tablaSimbolos.items.addAll(semantica.tablaSimbolos.listaSimbolos)
 
@@ -269,7 +264,8 @@ class InicioControler {
             try {
                 compilarYEjecutar(codigoFuente, nombreClase, gen)
             } catch (ex: Exception) {
-                escribirSalida("Error inesperado: ${ex.message}\n", gen)
+                ex.printStackTrace()
+                escribirSalida("Error inesperado: ${ex.message ?: ex.javaClass.simpleName}\n", gen)
             } finally {
                 Platform.runLater { if (generacion.get() == gen) button_traducir.isDisable = false }
             }

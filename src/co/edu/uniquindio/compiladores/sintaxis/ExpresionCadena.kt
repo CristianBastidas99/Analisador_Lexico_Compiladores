@@ -6,16 +6,16 @@ import javafx.scene.control.TreeItem
 
 class ExpresionCadena(var valorTipo: Token, var operAgrupacion: Token?, var expresionCadena: ExpresionCadena?) : Expresion() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Expresion cadena")
+        val raiz = TreeItem("Expresión cadena")
 
         raiz.children.add( TreeItem("${valorTipo.lexema}"))
 
-        if(operAgrupacion != null){
-            raiz.children.add( TreeItem("${operAgrupacion!!.lexema}"))
+        operAgrupacion?.let {
+            raiz.children.add( TreeItem("${it.lexema}"))
         }
 
-        if(expresionCadena != null){
-            raiz.children.add( expresionCadena!!.getArbolVisual())
+        expresionCadena?.let {
+            raiz.children.add( it.getArbolVisual())
         }
 
         return raiz
@@ -39,15 +39,16 @@ class ExpresionCadena(var valorTipo: Token, var operAgrupacion: Token?, var expr
 
     private fun partes(): String {
         var codigo = stringValorTipo()
-        if (operAgrupacion != null && expresionCadena != null) {
-            codigo += " + " + expresionCadena!!.partes()
+        val siguiente = expresionCadena
+        if (operAgrupacion != null && siguiente != null) {
+            codigo += " + " + siguiente.partes()
         }
         return codigo
     }
 
     fun stringValorTipo(): String{
         return when (valorTipo.categoria) {
-            Categoria.CADENA_CARCTERES -> CodigoJava.cadena(valorTipo.lexema)
+            Categoria.CADENA_CARACTERES -> CodigoJava.cadena(valorTipo.lexema)
             Categoria.CARACTER -> CodigoJava.caracter(valorTipo.lexema)
             else -> CodigoJava.numero(valorTipo)
         }

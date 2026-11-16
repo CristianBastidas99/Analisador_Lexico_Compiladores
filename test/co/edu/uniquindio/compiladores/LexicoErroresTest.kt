@@ -243,7 +243,7 @@ class LexicoErroresTest {
     fun cadenaVaciaEsValida() {
         val lexico = analizar("''")
         assertTrue(lexico.listaErrores.isEmpty())
-        assertEquals(Categoria.CADENA_CARCTERES, lexico.listaTokens[0].categoria)
+        assertEquals(Categoria.CADENA_CARACTERES, lexico.listaTokens[0].categoria)
     }
 
     @Test

@@ -10,10 +10,10 @@ class Aplicacion : Application() {
 
     override fun start(p0: Stage?) {
 
-        var loader = FXMLLoader( Aplicacion::class.java.getResource("/inicio.fxml") )
-        var parent:Parent = loader.load()
+        val loader = FXMLLoader( Aplicacion::class.java.getResource("/inicio.fxml") )
+        val parent:Parent = loader.load()
 
-        var scene = Scene( parent )
+        val scene = Scene( parent )
 
         p0?.scene = scene
         p0?.title = "Mi compilador"

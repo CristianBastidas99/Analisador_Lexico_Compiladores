@@ -136,6 +136,21 @@ object CodigoJava {
         }
     }
 
+    /** Tipo Java de un tipo del lenguaje: ent->int, dbe->double, str->String, bln->boolean, crt->char, vd->void (este ultimo solo lo usa Funcion) */
+    fun tipo(lexema: String): String {
+        return when (lexema) {
+            "dbe" -> "double"
+            "str" -> "String"
+            "bln" -> "boolean"
+            "crt" -> "char"
+            "vd" -> "void"
+            else -> "int"
+        }
+    }
+
+    /** Visibilidad Java de una visibilidad del lenguaje: pvt->private, cualquier otra->public */
+    fun visibilidad(lexema: String): String = if (lexema == "pvt") "private" else "public"
+
     fun valorPorDefecto(tipo: String): String {
         return when (tipo) {
             "dbe" -> "0.0"

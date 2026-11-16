@@ -14,7 +14,7 @@ class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sente
     }
 
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Declaracion Variable Inmutable")
+        val raiz = TreeItem("Declaración Variable Inmutable")
 
         raiz.children.add( TreeItem("${tipo.lexema}"))
 
@@ -24,7 +24,7 @@ class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sente
     }
 
     override fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
-        tablaSimbolos.guardasSimboloValor(asignacion.identificador.lexema, tipo.lexema, false, ambito, "pvt", asignacion.identificador.fila, asignacion.identificador.columna)
+        tablaSimbolos.guardarSimboloValor(asignacion.identificador.lexema, tipo.lexema, false, ambito, "pvt", asignacion.identificador.fila, asignacion.identificador.columna)
     }
 
     override fun analizarSemantica(
@@ -39,22 +39,7 @@ class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sente
         // La parte derecha se genera antes de declarar el nombre nuevo: puede referirse a una variable externa homonima
         val derecha = asignacion.getCodeJavaDerecha()
         val nombreJava = CodigoJava.declarar(asignacion.identificador.lexema)
-        return "final " + obtenerStringTipo() + " " + nombreJava + " " + asignacion.operAsignacion.lexema + " " + derecha
-    }
-
-    fun obtenerStringTipo(): String{
-        var stringTipo = "int"
-        if(tipo.lexema.equals("dbe")){
-            stringTipo = "double"
-        }else if(tipo.lexema.equals("str")){
-            stringTipo = "String"
-        }else if(tipo.lexema.equals("bln")){
-            stringTipo = "boolean"
-        }
-        else if(tipo.lexema.equals("crt")){
-            stringTipo = "char"
-        }
-        return stringTipo
+        return "final " + CodigoJava.tipo(tipo.lexema) + " " + nombreJava + " " + asignacion.operAsignacion.lexema + " " + derecha
     }
 
 }

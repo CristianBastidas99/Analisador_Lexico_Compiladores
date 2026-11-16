@@ -25,7 +25,7 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
     }
 
     fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, lexema: String) {
-        tablaSimbolos.guardasSimboloValor(nombre.lexema, tipo.lexema, true, lexema, visibilidad.lexema, nombre.fila, nombre.columna)
+        tablaSimbolos.guardarSimboloValor(nombre.lexema, tipo.lexema, true, lexema, visibilidad.lexema, nombre.fila, nombre.columna)
     }
 
     fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
@@ -33,34 +33,10 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
     }
 
     fun getCodeJava(): String {
-        var codigo = obtenerVisibilidad() + " static "
-        codigo += obtenerStringTipo() + " "
+        var codigo = CodigoJava.visibilidad(visibilidad.lexema) + " static "
+        codigo += CodigoJava.tipo(tipo.lexema) + " "
         codigo += CodigoJava.identificador(nombre.lexema) + ";\n"
         return codigo
     }
-
-    fun obtenerVisibilidad(): String{
-        var stringVisibilidad = "public"
-        if(visibilidad.lexema.equals("pvt")){
-            stringVisibilidad = "private"
-        }
-        return stringVisibilidad
-    }
-
-    fun obtenerStringTipo(): String{
-        var stringTipo = "int"
-        if(tipo.lexema.equals("dbe")){
-            stringTipo = "double"
-        }else if(tipo.lexema.equals("str")){
-            stringTipo = "String"
-        }else if(tipo.lexema.equals("bln")){
-            stringTipo = "boolean"
-        }
-        else if(tipo.lexema.equals("crt")){
-            stringTipo = "char"
-        }
-        return stringTipo
-    }
-
 
 }

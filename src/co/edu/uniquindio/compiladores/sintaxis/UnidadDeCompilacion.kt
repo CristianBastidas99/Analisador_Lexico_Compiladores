@@ -10,7 +10,7 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
 
     fun getArbolVisual(): TreeItem<String>{
 
-        val raiz = TreeItem("Unidad de compilacion")
+        val raiz = TreeItem("Unidad de compilación")
 
         raiz.children.add( TreeItem("${visibilidad.lexema}"))
 
@@ -71,7 +71,7 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
 
     private fun generarCodigo(): String {
         var codigo = "import javax.swing.JOptionPane;\n" +
-                "\n" + obtenerVisibilidad() + "class "
+                "\n" + modificadorClase() + "class "
         codigo += nombre.lexema.substring(1) + " {\n\n"
 
         for (v in listaVariablesGlobales){
@@ -88,7 +88,7 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
         return codigo
     }
 
-    fun obtenerVisibilidad(): String{
+    fun modificadorClase(): String{
         // Una clase de nivel superior en Java no puede ser private: pvt se traduce a visibilidad de paquete (sin modificador)
         return if (visibilidad.lexema.equals("pvt")) "" else "public "
     }

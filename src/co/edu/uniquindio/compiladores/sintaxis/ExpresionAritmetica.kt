@@ -7,16 +7,16 @@ import javafx.scene.control.TreeItem
 
 class ExpresionAritmetica (var numero:Token, var operAritmetico:Token?, var exprAritmetica:ExpresionAritmetica?) : Expresion() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Expresion aritmetica")
+        val raiz = TreeItem("Expresión aritmética")
 
         raiz.children.add( TreeItem( "${numero.lexema}" ) )
 
-        if(operAritmetico != null) {
-            raiz.children.add(TreeItem("${operAritmetico!!.lexema}"))
+        operAritmetico?.let { operador ->
+            raiz.children.add(TreeItem("${operador.lexema}"))
         }
 
-        if(exprAritmetica != null) {
-            raiz.children.add( exprAritmetica!!.getArbolVisual() )
+        exprAritmetica?.let { siguiente ->
+            raiz.children.add( siguiente.getArbolVisual() )
         }
 
         return raiz
@@ -31,8 +31,8 @@ class ExpresionAritmetica (var numero:Token, var operAritmetico:Token?, var expr
             returnValue = "dbe"
             return returnValue
         }else{
-            if(exprAritmetica != null) {
-                returnValue = exprAritmetica!!.obtenerTipo()
+            exprAritmetica?.let { siguiente ->
+                returnValue = siguiente.obtenerTipo()
             }
         }
 
@@ -42,10 +42,10 @@ class ExpresionAritmetica (var numero:Token, var operAritmetico:Token?, var expr
     override fun getCodeJava(): String {
         var codigo = CodigoJava.numero(numero) + " "
 
-        if(operAritmetico != null){
-            codigo += operAritmetico!!.lexema + " "
-            if(exprAritmetica != null){
-                codigo += "(" + exprAritmetica!!.getCodeJava() + ")"
+        operAritmetico?.let { operador ->
+            codigo += operador.lexema + " "
+            exprAritmetica?.let { siguiente ->
+                codigo += "(" + siguiente.getCodeJava() + ")"
             }
         }
 

@@ -5,20 +5,20 @@ import javafx.scene.control.TreeItem
 
 class ExpresionLogica(var negacion:Token?, var exprRelacional:ExpresionRelacional, var operLogico:Token?, var exprLogica:ExpresionLogica?) : Expresion() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Expresion logica")
+        val raiz = TreeItem("Expresión lógica")
 
-        if(negacion != null){
-            raiz.children.add( TreeItem("${negacion!!.lexema}") )
+        negacion?.let {
+            raiz.children.add( TreeItem("${it.lexema}") )
         }
 
         raiz.children.add( exprRelacional.getArbolVisual() )
 
-        if(operLogico != null){
-            raiz.children.add( TreeItem("${operLogico!!.lexema}") )
+        operLogico?.let {
+            raiz.children.add( TreeItem("${it.lexema}") )
         }
 
-        if(exprLogica != null){
-            raiz.children.add( exprLogica!!.getArbolVisual() )
+        exprLogica?.let {
+            raiz.children.add( it.getArbolVisual() )
         }
 
         return raiz
@@ -34,8 +34,9 @@ class ExpresionLogica(var negacion:Token?, var exprRelacional:ExpresionRelaciona
             codigo += "!"
         }
         codigo += "(" + exprRelacional.getCodeJava() + ")"
-        if(operLogico != null && exprLogica != null){
-            codigo += " " + stringOpeLogico() + " (" + exprLogica!!.getCodeJava() + ")"
+        val siguiente = exprLogica
+        if(operLogico != null && siguiente != null){
+            codigo += " " + stringOpeLogico() + " (" + siguiente.getCodeJava() + ")"
         }
         return codigo
     }
@@ -43,9 +44,10 @@ class ExpresionLogica(var negacion:Token?, var exprRelacional:ExpresionRelaciona
     fun stringOpeLogico():String{
         var codigo = "&&"
 
-        if(operLogico!!.lexema.equals("xor")){
+        val operador = operLogico?.lexema
+        if(operador == "xor"){
             codigo = "^"
-        }else if(operLogico!!.lexema.equals("or")){
+        }else if(operador == "or"){
             codigo = "||"
         }
         return codigo

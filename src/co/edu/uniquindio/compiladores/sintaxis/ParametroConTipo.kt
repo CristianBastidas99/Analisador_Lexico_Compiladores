@@ -7,7 +7,7 @@ class ParametroConTipo(var tipo: Token, var nombre: Token) {
 
     fun getArbolVisual(): TreeItem<String>? {
 
-        val raiz = TreeItem("Parametro con tipo")
+        val raiz = TreeItem("Parámetro con tipo")
 
         raiz.children.add( TreeItem("${tipo.lexema}"))
 
@@ -17,24 +17,9 @@ class ParametroConTipo(var tipo: Token, var nombre: Token) {
     }
 
     fun getCodeJava(): String {
-        var codigo = obtenerStringTipo() + " "
+        var codigo = CodigoJava.tipo(tipo.lexema) + " "
         codigo += CodigoJava.declarar(nombre.lexema)
         return  codigo
-    }
-
-    fun obtenerStringTipo(): String{
-        var stringTipo = "int"
-        if(tipo.lexema.equals("dbe")){
-            stringTipo = "double"
-        }else if(tipo.lexema.equals("str")){
-            stringTipo = "String"
-        }else if(tipo.lexema.equals("bln")){
-            stringTipo = "boolean"
-        }
-        else if(tipo.lexema.equals("crt")){
-            stringTipo = "char"
-        }
-        return stringTipo
     }
 
 }

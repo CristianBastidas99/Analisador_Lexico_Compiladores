@@ -7,7 +7,7 @@ class ParametroSinTipo(var nombre: Token) {
 
     fun getArbolVisual(): TreeItem<String>? {
 
-        val raiz = TreeItem("Parametro sin tipo")
+        val raiz = TreeItem("Parámetro sin tipo")
 
         raiz.children.add( TreeItem("${nombre.lexema}"))
 

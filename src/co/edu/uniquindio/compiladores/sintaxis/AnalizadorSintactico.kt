@@ -161,7 +161,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         if(i < listaTokens.size){
             val sobrante = listaTokens[i]
-            agregarError(Error("Hay codigo despues de la llave que cierra la clase", sobrante.fila, sobrante.columna))
+            agregarError(Error("Hay código después de la llave que cierra la clase", sobrante.fila, sobrante.columna))
         }
     }
 
@@ -183,7 +183,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      * <Lista de Variables Globales> ::= <Variable Global> [<Lista de Variables Globales>]
      */
     fun esListaVariablesGlobales():ArrayList<VariableGlobal>{
-        var lista:ArrayList<VariableGlobal> =  ArrayList<VariableGlobal>()
+        val lista:ArrayList<VariableGlobal> =  ArrayList<VariableGlobal>()
         var vg: VariableGlobal? = esVariableGlobal()
 
         while (vg != null){
@@ -254,7 +254,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esListaFunciones():ArrayList<Funcion>{
 
-        var lista:ArrayList<Funcion> =  ArrayList<Funcion>()
+        val lista:ArrayList<Funcion> =  ArrayList<Funcion>()
         var f: Funcion? = esFuncion()
 
         while (f != null){
@@ -277,7 +277,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         if(visibilidad != null){
             obtenerSiguienteToken()
-            var valorRetornado = esValorRetornado()
+            val valorRetornado = esValorRetornado()
 
             if(valorRetornado != null){
                 obtenerSiguienteToken()
@@ -301,22 +301,22 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                     obtenerSiguienteToken()
                                     return Funcion(visibilidad, valorRetornado, nombre, listaParametroConTipo, listaSentencias)
                                 }else{
-                                    reportarError("Debe definir la llave derecha de la funcion")
+                                    reportarError("Debe definir la llave derecha de la función")
                                 }
                             }else{
-                                reportarError("Debe definir la llave izquierda de la funcion")
+                                reportarError("Debe definir la llave izquierda de la función")
                             }
                         }else{
-                            reportarError("Debe definir el parentesis derecho de la funcion")
+                            reportarError("Debe definir el paréntesis derecho de la función")
                         }
                     }else{
-                        reportarError("Debe definir el parentesis izquierdo de la funcion")
+                        reportarError("Debe definir el paréntesis izquierdo de la función")
                     }
                 }else{
-                    reportarError("Debe definir el identificador de la funcion")
+                    reportarError("Debe definir el identificador de la función")
                 }
             }else{
-                reportarError("Debe definir el valor retornado de la funcion")
+                reportarError("Debe definir el valor retornado de la función")
             }
             restablecerToken(posicionInicial, erroresIniciales)
         }
@@ -343,7 +343,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esListaParametrosConTipo(): ArrayList<ParametroConTipo> {
 
-        var lista:ArrayList<ParametroConTipo> =  ArrayList<ParametroConTipo>()
+        val lista:ArrayList<ParametroConTipo> =  ArrayList<ParametroConTipo>()
         var p: ParametroConTipo? = esParametroConTipo()
 
         while (p != null){
@@ -352,7 +352,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroConTipo()
             }else{
-                //reportarError("Debe definir el separador del parametro")
                 p = null
             }
         }
@@ -378,7 +377,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 return ParametroConTipo(tipo, nombre)
             }else{
-                reportarError("Debe definir el identificador del parametro")
+                reportarError("Debe definir el identificador del parámetro")
             }
         }
 
@@ -391,7 +390,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esListaParametrosSinTipo(): ArrayList<ParametroSinTipo> {
 
-        var lista:ArrayList<ParametroSinTipo> =  ArrayList<ParametroSinTipo>()
+        val lista:ArrayList<ParametroSinTipo> =  ArrayList<ParametroSinTipo>()
         var p: ParametroSinTipo? = esParametroSinTipo()
 
         while (p != null){
@@ -400,7 +399,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 p = esParametroSinTipo()
             }else{
-                //reportarError("Debe definir el separador del parametro")
                 p = null
             }
         }
@@ -425,10 +423,10 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 obtenerSiguienteToken()
                 return ParametroSinTipo(nombre)
             }else{
-                reportarError("Debe definir el identificador del parametro")
+                reportarError("Debe definir el identificador del parámetro")
             }
         }else{
-            reportarError("Este parametro no lleva tipo")
+            reportarError("Este parámetro no lleva tipo")
         }
 
         restablecerToken(posicionInicial, erroresIniciales)
@@ -440,7 +438,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     */
     fun esListaSentencias(): ArrayList<Sentencia> {
 
-        var lista:ArrayList<Sentencia> =  ArrayList<Sentencia>()
+        val lista:ArrayList<Sentencia> =  ArrayList<Sentencia>()
         var s: Sentencia? = esSentencia()
 
         while (s != null){
@@ -457,47 +455,47 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esSentencia(): Sentencia? {
 
-        var decision:Decision? = esDecisionSentencia()
+        val decision:Decision? = esDecisionSentencia()
         if(decision != null){
             return decision
         }
 
-        var declaracionVariableInm:DeclaracionVariableInm? = esDeclaracionVariableInmSentencia()
+        val declaracionVariableInm:DeclaracionVariableInm? = esDeclaracionVariableInmSentencia()
         if(declaracionVariableInm != null){
             return declaracionVariableInm
         }
 
-        var declaracionVariableMut:DeclaracionVariableMut? = esDeclaracionVariableMutSentencia()
+        val declaracionVariableMut:DeclaracionVariableMut? = esDeclaracionVariableMutSentencia()
         if(declaracionVariableMut != null){
             return declaracionVariableMut
         }
 
-        var asignacion:Asignacion? = esAsignacionSentencia()
+        val asignacion:Asignacion? = esAsignacionSentencia()
         if(asignacion != null){
             return asignacion
         }
 
-        var impresion:Impresion? = esImpresionSentencia()
+        val impresion:Impresion? = esImpresionSentencia()
         if(impresion != null){
             return impresion
         }
 
-        var ciclo:Ciclo? = esCicloSentencia()
+        val ciclo:Ciclo? = esCicloSentencia()
         if(ciclo != null){
             return ciclo
         }
 
-        var retorno:Retorno? = esRetornoSentencia()
+        val retorno:Retorno? = esRetornoSentencia()
         if(retorno != null){
             return retorno
         }
 
-        var invFuncion:InvFuncion? = esInvFuncionSentencia()
+        val invFuncion:InvFuncion? = esInvFuncionSentencia()
         if(invFuncion != null){
             return invFuncion
         }
 
-        var incrDecr:IncrDecr? = esIncrDecrSentencia()
+        val incrDecr:IncrDecr? = esIncrDecrSentencia()
         if(incrDecr != null){
             return incrDecr
         }
@@ -520,7 +518,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
             if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
                 obtenerSiguienteToken()
-                var exprLogica:ExpresionLogica? = esExpresionLogica()
+                val exprLogica:ExpresionLogica? = esExpresionLogica()
 
                 if(exprLogica != null){
 
@@ -545,28 +543,28 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                             obtenerSiguienteToken()
                                             return Decision(exprLogica, listaSentenciasIf, listaSentenciasElse)
                                         }else{
-                                            reportarError("Debe definir la llave derecha de la desicion ELSE")
+                                            reportarError("Debe definir la llave derecha de la decisión ELSE")
                                         }
                                     }else{
-                                        reportarError("Debe definir la llave izquierda de la desicion ELSE")
+                                        reportarError("Debe definir la llave izquierda de la decisión ELSE")
                                     }
                                 }else{
                                     return Decision(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
                                 }
                             }else{
-                                reportarError("Debe definir la llave derecha de la desicion IF")
+                                reportarError("Debe definir la llave derecha de la decisión IF")
                             }
                         }else{
-                            reportarError("Debe definir la llave izquierda de la desicion IF")
+                            reportarError("Debe definir la llave izquierda de la decisión IF")
                         }
                     }else{
-                        reportarError("Debe definir el parentesis derecho de la desicion")
+                        reportarError("Debe definir el paréntesis derecho de la decisión")
                     }
                 }else{
-                    reportarError("Debe definir una expresion logica valida en la desicion")
+                    reportarError("Debe definir una expresión lógica válida en la decisión")
                 }
             }else{
-                reportarError("Debe definir el parentesis izquierdo de la desicion")
+                reportarError("Debe definir el paréntesis izquierdo de la decisión")
             }
         }
 
@@ -590,36 +588,36 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
             obtenerSiguienteToken()
-            var expRelacional:ExpresionRelacional? = esExpresionRelacional()
+            val expRelacional:ExpresionRelacional? = esExpresionRelacional()
 
             if(expRelacional != null){
 
                 if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
                     obtenerSiguienteToken()
-                    var opeLogico:Token? = esOperadorLogico()
+                    val opeLogico:Token? = esOperadorLogico()
 
                     if(opeLogico != null){
                         val posicionOperador = posicionActual
                         obtenerSiguienteToken()
-                        var expLogica:ExpresionLogica?  = esExpresionLogica()
+                        val expLogica:ExpresionLogica?  = esExpresionLogica()
 
                         if(expLogica != null){
                             return ExpresionLogica(negacion, expRelacional, opeLogico, expLogica)
                         }else{
-                            reportarError("Expresion logica no valida")
+                            reportarError("Expresión lógica no válida")
                             restablecerToken(posicionOperador)
                         }
                     }
 
                     return ExpresionLogica(negacion, expRelacional, opeLogico, null)
                 }else{
-                    reportarError("Debe cerrar con parentesis derecho la expresion logica")
+                    reportarError("Debe cerrar con paréntesis derecho la expresión lógica")
                 }
             }else{
-                reportarError("Expresion relacional no valida")
+                reportarError("Expresión relacional no válida")
             }
         }else{
-            reportarError("Debe iniciar con un parentecis izquierdo la expresion logica")
+            reportarError("Debe iniciar con un paréntesis izquierdo la expresión lógica")
         }
 
         restablecerToken(posicionInicial, erroresIniciales)
@@ -652,7 +650,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
             obtenerSiguienteToken()
-            var exprAritmetica:ExpresionAritmetica? = esExpresionAritmetica()
+            val exprAritmetica:ExpresionAritmetica? = esExpresionAritmetica()
 
             if (exprAritmetica != null) {
 
@@ -660,12 +658,12 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     obtenerSiguienteToken()
 
                     if (tokenActual.categoria == Categoria.OPERADOR_RELACIONAL) {
-                        var opeRelacional = tokenActual
+                        val opeRelacional = tokenActual
                         obtenerSiguienteToken()
 
                         if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                             obtenerSiguienteToken()
-                            var exprAritmetica2: ExpresionAritmetica? = esExpresionAritmetica()
+                            val exprAritmetica2: ExpresionAritmetica? = esExpresionAritmetica()
 
                             if (exprAritmetica2 != null) {
 
@@ -673,25 +671,25 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                     obtenerSiguienteToken()
                                     return ExpresionRelacional(exprAritmetica, opeRelacional, exprAritmetica2)
                                 }else{
-                                    reportarError("Debe encerrar en parentesis la expresion aritmetica")
+                                    reportarError("Debe encerrar en paréntesis la expresión aritmética")
                                 }
                             }else{
-                                reportarError("Expresion aritmetica no es valida")
+                                reportarError("Expresión aritmética no es válida")
                             }
                         }else{
-                            reportarError("Debe encerrar en parentesis la expresion aritmetica")
+                            reportarError("Debe encerrar en paréntesis la expresión aritmética")
                         }
                     }else{
-                        reportarError("Falta el operador relacional en la expresion Relacional")
+                        reportarError("Falta el operador relacional en la expresión relacional")
                     }
                 }else{
-                    reportarError("Debe encerrar en parentesis la expresion aritmetica")
+                    reportarError("Debe encerrar en paréntesis la expresión aritmética")
                 }
             }else{
-                reportarError("Expresion aritmetica no es valida")
+                reportarError("Expresión aritmética no es válida")
             }
         }else{
-            reportarError("Debe encerrar en parentesis la expresion aritmetica")
+            reportarError("Debe encerrar en paréntesis la expresión aritmética")
         }
 
         restablecerToken(posicionInicial, erroresIniciales)
@@ -707,17 +705,17 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL){
-            var numero = tokenActual
+            val numero = tokenActual
             obtenerSiguienteToken()
             posicionInicial = posicionActual
 
             if(tokenActual.categoria == Categoria.OPERADOR_ARITMETICO){
-                var operAritmetico = tokenActual
+                val operAritmetico = tokenActual
                 obtenerSiguienteToken()
 
                 if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
                     obtenerSiguienteToken()
-                    var exprAritmetica:ExpresionAritmetica? = esExpresionAritmetica()
+                    val exprAritmetica:ExpresionAritmetica? = esExpresionAritmetica()
 
                     if(exprAritmetica != null){
 
@@ -725,20 +723,20 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             obtenerSiguienteToken()
                             return ExpresionAritmetica(numero, operAritmetico, exprAritmetica)
                         }else{
-                            reportarError("Debe encerrar en parentesis la expresion aritmetica")
+                            reportarError("Debe encerrar en paréntesis la expresión aritmética")
                         }
                     }else{
-                        reportarError("Expresion aritmetica no valida")
+                        reportarError("Expresión aritmética no válida")
                     }
                 }else{
-                    reportarError("Debe encerrar en parentesis la expresion aritmetica")
+                    reportarError("Debe encerrar en paréntesis la expresión aritmética")
                 }
                 restablecerToken(posicionInicial, erroresIniciales)
             }
 
             return ExpresionAritmetica(numero, null, null)
         }else{
-            reportarError("Una expresion aritmetica debe tener minimo un numero")
+            reportarError("Una expresión aritmética debe tener mínimo un número")
         }
 
         restablecerToken(posicionInicial, erroresIniciales)
@@ -785,12 +783,12 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         if(tipo != null){
             obtenerSiguienteToken()
-            var asignacion:Asignacion? = esAsignacionSentencia();
+            val asignacion:Asignacion? = esAsignacionSentencia();
 
             if(asignacion != null) {
                 return DeclaracionVariableInm(tipo, asignacion)
             }else{
-                reportarError("La asignacion no es valida")
+                reportarError("La asignación no es válida")
             }
         }
 
@@ -811,7 +809,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             obtenerSiguienteToken()
 
             if(tokenActual.categoria == Categoria.OPERADOR_ASIGNACION){
-                var opeAsignacion = tokenActual
+                val opeAsignacion = tokenActual
                 obtenerSiguienteToken()
                 var expresion:Expresion? = esExpresion()
 
@@ -838,7 +836,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 }
 
                 if(tokenActual.categoria == Categoria.IDENTIFICADOR){
-                    var identificador2 = tokenActual
+                    val identificador2 = tokenActual
                     obtenerSiguienteToken()
 
                     if(tokenActual.categoria == Categoria.FIN_SENTENCIA) {
@@ -849,10 +847,10 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     }
                 }
 
-                reportarError("Por favor especifique el tipo de asignacion")
+                reportarError("Por favor especifique el tipo de asignación")
 
             }else{
-                reportarError("Falta el operador de asignacion")
+                reportarError("Falta el operador de asignación")
             }
         }
 
@@ -900,27 +898,27 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esExpresionCadena(): ExpresionCadena? {
         var posicionInicial = posicionActual
         val erroresIniciales = listaErrores.size
-        var tipoExpresionCadena:Token? = esTipoExpresionCadena()
+        val tipoExpresionCadena:Token? = esTipoExpresionCadena()
 
         if(tipoExpresionCadena != null){
             obtenerSiguienteToken()
 
             if(tokenActual.categoria == Categoria.OPERADOR_ARITMETICO && tokenActual.lexema == "+"){
-                var operAgrupacion = tokenActual
+                val operAgrupacion = tokenActual
                 val posicionOperador = posicionActual
                 obtenerSiguienteToken()
-                var expresionCadena:ExpresionCadena? = esExpresionCadena()
+                val expresionCadena:ExpresionCadena? = esExpresionCadena()
 
                 if(expresionCadena != null){
                     return ExpresionCadena(tipoExpresionCadena, operAgrupacion, expresionCadena)
                 }else{
-                    reportarError("Expresion cadena no valida")
+                    reportarError("Expresión cadena no válida")
                     restablecerToken(posicionOperador)
                 }
             }
             return ExpresionCadena(tipoExpresionCadena, null, null)
         }else{
-            reportarError("La expresion cadena debe tener minimo una cadena")
+            reportarError("La expresión cadena debe tener mínimo una cadena")
         }
 
         restablecerToken(posicionInicial, erroresIniciales)
@@ -933,7 +931,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esTipoExpresionCadena(): Token? {
 
         if(tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL ||
-            tokenActual.categoria == Categoria.CADENA_CARCTERES || tokenActual.categoria == Categoria.CARACTER){
+            tokenActual.categoria == Categoria.CADENA_CARACTERES || tokenActual.categoria == Categoria.CARACTER){
             return tokenActual
         }
         return null
@@ -966,7 +964,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             reportarError("Falta el fin de sentencia")
                         }
                     }else{
-                        reportarError("El tipo de impresion debe ir encerrado en parentesis")
+                        reportarError("El tipo de impresión debe ir encerrado en paréntesis")
                     }
                 }
 
@@ -984,14 +982,14 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             reportarError("Falta el fin de sentencia")
                         }
                     }else{
-                        reportarError("El tipo de impresion debe ir encerrado en parentesis")
+                        reportarError("El tipo de impresión debe ir encerrado en paréntesis")
                     }
                 }
 
-                reportarError("El elemento que desea imprimir no es valido")
+                reportarError("El elemento que desea imprimir no es válido")
 
             }else{
-                reportarError("El tipo de impresion debe ir encerrado en parentesis")
+                reportarError("El tipo de impresión debe ir encerrado en paréntesis")
             }
         }
 
@@ -1011,7 +1009,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
             if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
                 obtenerSiguienteToken()
-                var expresionLogica:ExpresionLogica? = esExpresionLogica()
+                val expresionLogica:ExpresionLogica? = esExpresionLogica()
 
                 if(expresionLogica != null){
 
@@ -1032,13 +1030,13 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             reportarError("Las sentencias deben ir encerradas en llaves")
                         }
                     }else{
-                        reportarError("La expresion logica debe ir encerrado en parentesis")
+                        reportarError("La expresión lógica debe ir encerrada en paréntesis")
                     }
                 }else{
-                    reportarError("Expresion logica no valida")
+                    reportarError("Expresión lógica no válida")
                 }
             }else{
-                reportarError("La expresion logica debe ir encerrado en parentesis")
+                reportarError("La expresión lógica debe ir encerrada en paréntesis")
             }
         }
 
@@ -1081,7 +1079,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 }
             }
 
-            reportarError("El elemento que intenta retornar no es valido")
+            reportarError("El elemento que intenta retornar no es válido")
 
         }
 
@@ -1102,8 +1100,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO){
                 obtenerSiguienteToken()
 
-                if(tokenActual.categoria == Categoria.CADENA_CARCTERES){
-                    var cadena = tokenActual
+                if(tokenActual.categoria == Categoria.CADENA_CARACTERES){
+                    val cadena = tokenActual
                     obtenerSiguienteToken()
 
                     if(tokenActual.categoria == Categoria.PARENTESIS_DERECHO){
@@ -1116,13 +1114,13 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             reportarError("Falta el fin de sentencia")
                         }
                     }else{
-                        reportarError("La cadena debe ir encerrada en parentesis")
+                        reportarError("La cadena debe ir encerrada en paréntesis")
                     }
                 }else{
                     reportarError("Se espera una cadena")
                 }
             }else{
-                reportarError("La cadena debe ir encerrada en parentesis")
+                reportarError("La cadena debe ir encerrada en paréntesis")
             }
         }
 
@@ -1155,7 +1153,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         reportarError("Falta el fin de sentencia")
                     }
                 }else{
-                    reportarError("los parametros deber estar encerrados en parentesis")
+                    reportarError("Los parámetros deben estar encerrados en paréntesis")
                 }
             }
         }
@@ -1176,7 +1174,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             var nombre = tokenActual
             obtenerSiguienteToken()
 
-            if(tokenActual.categoria == Categoria.OPERADOR_INCREMETO || tokenActual.categoria == Categoria.OPERADOR_DECREMENTO) {
+            if(tokenActual.categoria == Categoria.OPERADOR_INCREMENTO || tokenActual.categoria == Categoria.OPERADOR_DECREMENTO) {
                 var tipo = tokenActual
                 obtenerSiguienteToken()
 

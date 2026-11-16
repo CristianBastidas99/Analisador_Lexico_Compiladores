@@ -13,22 +13,22 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
 
     override fun getArbolVisual(): TreeItem<String> {
 
-        val raiz = TreeItem("Asignacion")
+        val raiz = TreeItem("Asignación")
 
         raiz.children.add( TreeItem("${identificador.lexema}") )
 
         raiz.children.add( TreeItem("${operAsignacion.lexema}") )
 
-        if(expresion != null){
-            raiz.children.add( expresion!!.getArbolVisual() )
+        expresion?.let {
+            raiz.children.add( it.getArbolVisual() )
         }
 
-        if(identificador2 != null){
-            raiz.children.add( TreeItem("${identificador2!!.lexema}") )
+        identificador2?.let {
+            raiz.children.add( TreeItem("${it.lexema}") )
         }
 
-        if(sentencia != null){
-            raiz.children.add( sentencia!!.getArbolVisual() )
+        sentencia?.let {
+            raiz.children.add( it.getArbolVisual() )
         }
 
         return raiz
@@ -72,8 +72,8 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
             )
         }
 
-        if (expresion != null) {
-            val tipoExpresion = expresion!!.obtenerTipo()
+        expresion?.let { expr ->
+            val tipoExpresion = expr.obtenerTipo()
             if (simbolo.tipo != tipoExpresion) {
                 listaErroresSemanticos.add(
                     Error(
@@ -85,8 +85,8 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
             }
         }
 
-        if (identificador2 != null) {
-            val simbolo2 = tablaSimbolos.buscarSimboloValorEnAmbitos(identificador2!!.lexema, ambito)
+        identificador2?.let { id2 ->
+            val simbolo2 = tablaSimbolos.buscarSimboloValorEnAmbitos(id2.lexema, ambito)
 
             if (simbolo2 != null) {
                 if (simbolo.tipo != simbolo2.tipo) {
@@ -101,7 +101,7 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
             } else {
                 listaErroresSemanticos.add(
                     Error(
-                        "La variable (${identificador2!!.lexema}) que intenta dar como asignación no se ha declarado",
+                        "La variable (${id2.lexema}) que intenta dar como asignación no se ha declarado",
                         identificador.fila,
                         identificador.columna
                     )
@@ -129,14 +129,14 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
     fun getCodeJavaDerecha(): String {
         var codigo = ""
 
-        if(expresion != null){
-            codigo += expresion!!.getCodeJava() + ";\n"
+        expresion?.let {
+            codigo += it.getCodeJava() + ";\n"
         }
-        if(identificador2 != null){
-            codigo += CodigoJava.usar(identificador2!!.lexema) + ";\n"
+        identificador2?.let {
+            codigo += CodigoJava.usar(it.lexema) + ";\n"
         }
-        if(sentencia != null){
-            codigo += sentencia!!.getCodeJava()
+        sentencia?.let {
+            codigo += it.getCodeJava()
         }
 
         return codigo

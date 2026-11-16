@@ -8,14 +8,14 @@ import java.util.ArrayList
 
 class Impresion(var expresion: Expresion?, var identificador: Token?) : Sentencia() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Impresion")
+        val raiz = TreeItem("Impresión")
 
-        if(expresion != null){
-            raiz.children.add( expresion!!.getArbolVisual() )
+        expresion?.let {
+            raiz.children.add( it.getArbolVisual() )
         }
 
-        if(identificador != null){
-            raiz.children.add( TreeItem("${identificador!!.lexema}"))
+        identificador?.let {
+            raiz.children.add( TreeItem("${it.lexema}"))
         }
 
         return raiz
@@ -30,15 +30,15 @@ class Impresion(var expresion: Expresion?, var identificador: Token?) : Sentenci
 
     override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
-        if (identificador != null) {
-            val simbolo = tablaSimbolos.buscarSimboloValorEnAmbitos(identificador!!.lexema, ambito)
+        identificador?.let { id ->
+            val simbolo = tablaSimbolos.buscarSimboloValorEnAmbitos(id.lexema, ambito)
 
             if (simbolo == null) {
                 listaErroresSemanticos.add(
                     Error(
-                        "La variable (${identificador!!.lexema}) que intenta imprimir no se ha declarado",
-                        identificador!!.fila,
-                        identificador!!.columna
+                        "La variable (${id.lexema}) que intenta imprimir no se ha declarado",
+                        id.fila,
+                        id.columna
                     )
                 )
             }
@@ -48,12 +48,12 @@ class Impresion(var expresion: Expresion?, var identificador: Token?) : Sentenci
     override fun getCodeJava(): String {
         var codigo = "System.out.print("
 
-        if(expresion != null){
-            codigo += expresion!!.getCodeJava()
+        expresion?.let {
+            codigo += it.getCodeJava()
         }
 
-        if(identificador != null){
-            codigo += CodigoJava.usar(identificador!!.lexema)
+        identificador?.let {
+            codigo += CodigoJava.usar(it.lexema)
         }
 
         codigo += ");\n"

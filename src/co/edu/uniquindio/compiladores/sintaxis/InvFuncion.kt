@@ -11,13 +11,13 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
     var tipoDestino: String? = null
 
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Invocacion Funcion")
+        val raiz = TreeItem("Invocación Función")
 
         raiz.children.add( TreeItem("${nombre.lexema}"))
 
         if(listaParametrosSinTipo.isNotEmpty()) {
 
-            val parametrosSinTipo = TreeItem("Parametros sin tipo")
+            val parametrosSinTipo = TreeItem("Parámetros sin tipo")
             raiz.children.add(parametrosSinTipo)
             for (parametrosinTipo in listaParametrosSinTipo) {
                 parametrosSinTipo.children.add(parametrosinTipo.getArbolVisual())
@@ -42,7 +42,7 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
         for (p in listaParametrosSinTipo) {
             val simbolo = tablaSimbolos.buscarSimboloValorEnAmbitos(p.nombre.lexema, ambito)
             if (simbolo != null) {
-                listaTipoParametro.add(simbolo.tipo!!)
+                listaTipoParametro.add(requireNotNull(simbolo.tipo))
             } else {
                 parametrosValidos = false
                 listaErroresSemanticos.add(Error("La variable (${p.nombre.lexema}) que intenta dar como argumento no se ha declarado", p.nombre.fila, p.nombre.columna))

@@ -9,7 +9,7 @@ import java.util.ArrayList
 class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Sentencia() {
 
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Declaracion Variable Mutable")
+        val raiz = TreeItem("Declaración Variable Mutable")
 
         raiz.children.add(TreeItem("${tipo.lexema}"))
 
@@ -19,7 +19,7 @@ class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Senten
     }
 
     override fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
-        tablaSimbolos.guardasSimboloValor(identificador.lexema, tipo.lexema, true, ambito, "pvt", identificador.fila, identificador.columna)
+        tablaSimbolos.guardarSimboloValor(identificador.lexema, tipo.lexema, true, ambito, "pvt", identificador.fila, identificador.columna)
     }
 
     override fun analizarSemantica(
@@ -30,22 +30,7 @@ class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Senten
     }
 
     override fun getCodeJava(): String {
-        return obtenerStringTipo() + " " + CodigoJava.declarar(identificador.lexema) + " = " + CodigoJava.valorPorDefecto(tipo.lexema) + ";\n"
-    }
-
-    fun obtenerStringTipo(): String{
-        var stringTipo = "int"
-        if(tipo.lexema.equals("dbe")){
-            stringTipo = "double"
-        }else if(tipo.lexema.equals("str")){
-            stringTipo = "String"
-        }else if(tipo.lexema.equals("bln")){
-            stringTipo = "boolean"
-        }
-        else if(tipo.lexema.equals("crt")){
-            stringTipo = "char"
-        }
-        return stringTipo
+        return CodigoJava.tipo(tipo.lexema) + " " + CodigoJava.declarar(identificador.lexema) + " = " + CodigoJava.valorPorDefecto(tipo.lexema) + ";\n"
     }
 
 }

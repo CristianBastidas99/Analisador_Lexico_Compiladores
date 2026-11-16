@@ -11,12 +11,12 @@ class Retorno(var identificador:Token?, var expresion: Expresion?, var fila:Int,
     override fun getArbolVisual(): TreeItem<String> {
         val raiz = TreeItem("Retorno")
 
-        if(identificador != null) {
-            raiz.children.add(TreeItem("${identificador!!.lexema}"))
+        identificador?.let {
+            raiz.children.add(TreeItem("${it.lexema}"))
         }
 
-        if(expresion != null) {
-            raiz.children.add( expresion!!.getArbolVisual() )
+        expresion?.let {
+            raiz.children.add( it.getArbolVisual() )
         }
 
         return raiz
@@ -36,12 +36,12 @@ class Retorno(var identificador:Token?, var expresion: Expresion?, var fila:Int,
         if(derecha == -1){
             derecha = ambito.length
         }
-        var retornoFuncion = ambito.substring(ambito.indexOf(':') + 1, derecha )
+        val retornoFuncion = ambito.substring(ambito.indexOf(':') + 1, derecha )
 
 
             if (retornoFuncion != "vd") {
-                if (expresion != null) {
-                    var tipoExpresion = expresion!!.obtenerTipo()
+                expresion?.let { expr ->
+                    val tipoExpresion = expr.obtenerTipo()
                     if (retornoFuncion != tipoExpresion) {
                         listaErroresSemanticos.add(
                             Error(
@@ -53,25 +53,25 @@ class Retorno(var identificador:Token?, var expresion: Expresion?, var fila:Int,
                     }
                 }
 
-                if (identificador != null) {
-                    val tipoIdentificador = tablaSimbolos.buscarSimboloValorEnAmbitos(identificador!!.lexema, ambito)
+                identificador?.let { id ->
+                    val tipoIdentificador = tablaSimbolos.buscarSimboloValorEnAmbitos(id.lexema, ambito)
 
                     if (tipoIdentificador != null) {
                         if (retornoFuncion != tipoIdentificador.tipo) {
                             listaErroresSemanticos.add(
                                 Error(
                                     "El tipo de dato del identificador (${tipoIdentificador.tipo}) no coincide con el valor de retorno de la función (${retornoFuncion})",
-                                    identificador!!.fila,
-                                    identificador!!.columna
+                                    id.fila,
+                                    id.columna
                                 )
                             )
                         }
                     } else {
                         listaErroresSemanticos.add(
                             Error(
-                                "La variable (${identificador!!.lexema}) que intenta retornar no se ha declarado",
-                                identificador!!.fila,
-                                identificador!!.columna
+                                "La variable (${id.lexema}) que intenta retornar no se ha declarado",
+                                id.fila,
+                                id.columna
                             )
                         )
                     }
@@ -92,12 +92,12 @@ class Retorno(var identificador:Token?, var expresion: Expresion?, var fila:Int,
     override fun getCodeJava(): String {
         var codigo = "return "
 
-        if(identificador != null) {
-            codigo += CodigoJava.usar(identificador!!.lexema)
+        identificador?.let {
+            codigo += CodigoJava.usar(it.lexema)
         }
 
-        if(expresion != null) {
-            codigo += expresion!!.getCodeJava()
+        expresion?.let {
+            codigo += it.getCodeJava()
         }
 
         codigo += ";\n"

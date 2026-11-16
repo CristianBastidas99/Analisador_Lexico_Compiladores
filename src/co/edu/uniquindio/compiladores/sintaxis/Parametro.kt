@@ -6,8 +6,9 @@ class Parametro(var tipo:Token?, var nombre:Token) {
 
 
     override fun toString(): String {
-        if(tipo != null) {
-            return "Parametro(tipo=${tipo!!.lexema}, nombre=${nombre.lexema})"
+        val tipoParametro = tipo
+        if(tipoParametro != null) {
+            return "Parametro(tipo=${tipoParametro.lexema}, nombre=${nombre.lexema})"
         }else{
             return "Parametro(nombre=${nombre.lexema})"
         }

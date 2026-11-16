@@ -186,7 +186,7 @@ class SintacticoErroresTest {
         val a = analizar("pub cls ^a {\npub vd ^main ( ) {\nif ( ( ( #1 ) <= ( #1 ) ) {\nimp ( 'x' ) |\n}\n}\n}")
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
-        assertEquals("Debe definir el parentesis derecho de la desicion", a.errores[0].error)
+        assertEquals("Debe definir el paréntesis derecho de la decisión", a.errores[0].error)
         assertEquals(3, a.errores[0].fila)
         assertSinDuplicados(a)
     }
@@ -196,7 +196,7 @@ class SintacticoErroresTest {
         val a = analizar("pub cls ^a {\npub ^main ( ) {\nimp ( 'x' ) |\n}\n}")
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
-        assertEquals("Debe definir el valor retornado de la funcion", a.errores[0].error)
+        assertEquals("Debe definir el valor retornado de la función", a.errores[0].error)
         assertEquals(2, a.errores[0].fila)
         assertEquals(5, a.errores[0].columna)
         assertSinDuplicados(a)
@@ -217,7 +217,7 @@ class SintacticoErroresTest {
     fun codigoDespuesDeLaClase() {
         val a = analizar("pub cls ^a {\n}\nimp ( 'x' ) |")
         assertEquals(1, a.errores.size, "${a.errores}")
-        assertEquals("Hay codigo despues de la llave que cierra la clase", a.errores[0].error)
+        assertEquals("Hay código después de la llave que cierra la clase", a.errores[0].error)
         assertEquals(3, a.errores[0].fila)
         assertEquals(1, a.errores[0].columna)
     }
@@ -410,30 +410,30 @@ class SintacticoErroresTest {
 
     @Test
     fun errorFuncion() {
-        assertUnicoError("pub cls ^a {\npub ent ^x |\npub\n}", "Debe definir el valor retornado de la funcion", 4, 1)
-        assertUnicoError("pub cls ^a {\npub vd f ( ) {\n}\n}", "Debe definir el identificador de la funcion", 2, 8)
-        assertUnicoError("pub cls ^a {\npub vd ^f ) {\n}\n}", "Debe definir el parentesis izquierdo de la funcion", 2, 11)
-        assertUnicoError("pub cls ^a {\npub vd ^f ( ent ^x {\n}\n}", "Debe definir el parentesis derecho de la funcion", 2, 20)
-        assertUnicoError("pub cls ^a {\npub vd ^f ( ) \n}\n}", "Debe definir la llave izquierda de la funcion", 3, 1)
+        assertUnicoError("pub cls ^a {\npub ent ^x |\npub\n}", "Debe definir el valor retornado de la función", 4, 1)
+        assertUnicoError("pub cls ^a {\npub vd f ( ) {\n}\n}", "Debe definir el identificador de la función", 2, 8)
+        assertUnicoError("pub cls ^a {\npub vd ^f ) {\n}\n}", "Debe definir el paréntesis izquierdo de la función", 2, 11)
+        assertUnicoError("pub cls ^a {\npub vd ^f ( ent ^x {\n}\n}", "Debe definir el paréntesis derecho de la función", 2, 20)
+        assertUnicoError("pub cls ^a {\npub vd ^f ( ) \n}\n}", "Debe definir la llave izquierda de la función", 3, 1)
         // "rad" suelto no es una sentencia: la lista termina y se esperaba la llave
-        assertErrorEnMain("rad ( 'a' ) |", "Debe definir la llave derecha de la funcion", 3, 1)
+        assertErrorEnMain("rad ( 'a' ) |", "Debe definir la llave derecha de la función", 3, 1)
     }
 
     @Test
     fun errorParametros() {
-        assertUnicoError("pub cls ^a {\npub vd ^f ( ent ) {\n}\n}", "Debe definir el identificador del parametro", 2, 17)
+        assertUnicoError("pub cls ^a {\npub vd ^f ( ent ) {\n}\n}", "Debe definir el identificador del parámetro", 2, 17)
         // Parametro sin tipo mal formado (invocacion de funcion)
-        assertErrorEnMain("^f (", "Debe definir el identificador del parametro", 4, 1)
-        assertErrorEnMain("^f ( ent ^x ) |", "Este parametro no lleva tipo", 3, 6)
+        assertErrorEnMain("^f (", "Debe definir el identificador del parámetro", 4, 1)
+        assertErrorEnMain("^f ( ent ^x ) |", "Este parámetro no lleva tipo", 3, 6)
     }
 
     @Test
     fun errorDecision() {
-        assertErrorEnMain("if {\nimp ( 'a' ) |\n}", "Debe definir el parentesis izquierdo de la desicion", 3, 4)
-        assertErrorEnMain("if ( ( ( #1 ) > ( #2 ) ) {\nimp ( 'a' ) |\n}", "Debe definir el parentesis derecho de la desicion", 3, 26)
-        assertErrorEnMain("if $condicion \nimp ( 'a' ) |", "Debe definir la llave izquierda de la desicion IF", 4, 1)
-        assertErrorEnMain("if $condicion {\nrad ( 'a' ) |\n}", "Debe definir la llave derecha de la desicion IF", 4, 1)
-        assertErrorEnMain("if $condicion {\nimp ( 'a' ) |\n} else {\nrad ( 'a' ) |\n}", "Debe definir la llave derecha de la desicion ELSE", 6, 1)
+        assertErrorEnMain("if {\nimp ( 'a' ) |\n}", "Debe definir el paréntesis izquierdo de la decisión", 3, 4)
+        assertErrorEnMain("if ( ( ( #1 ) > ( #2 ) ) {\nimp ( 'a' ) |\n}", "Debe definir el paréntesis derecho de la decisión", 3, 26)
+        assertErrorEnMain("if $condicion \nimp ( 'a' ) |", "Debe definir la llave izquierda de la decisión IF", 4, 1)
+        assertErrorEnMain("if $condicion {\nrad ( 'a' ) |\n}", "Debe definir la llave derecha de la decisión IF", 4, 1)
+        assertErrorEnMain("if $condicion {\nimp ( 'a' ) |\n} else {\nrad ( 'a' ) |\n}", "Debe definir la llave derecha de la decisión ELSE", 6, 1)
     }
 
     @Test
@@ -442,7 +442,7 @@ class SintacticoErroresTest {
         val a = analizar(enMain("if $condicion {\nimp ( 'a' ) |\n} else imp ( 'b' ) |"))
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
-        assertEquals("Debe definir la llave izquierda de la desicion ELSE", a.errores[0].error)
+        assertEquals("Debe definir la llave izquierda de la decisión ELSE", a.errores[0].error)
         assertEquals(5, a.errores[0].fila)
         assertEquals(8, a.errores[0].columna)
     }
@@ -452,7 +452,7 @@ class SintacticoErroresTest {
         val a = analizar(enMain("if $condicion {\nimp ( 'a' ) |\n} else imp ( 'b' ) |"))
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
-        assertEquals("Debe definir la llave izquierda de la desicion ELSE", a.errores[0].error)
+        assertEquals("Debe definir la llave izquierda de la decisión ELSE", a.errores[0].error)
     }
 
     @Test
@@ -465,46 +465,46 @@ class SintacticoErroresTest {
 
     @Test
     fun errorExpresionLogicaYRelacional() {
-        assertErrorEnMain("if ( ) {\nimp ( 'a' ) |\n}", "Debe iniciar con un parentecis izquierdo la expresion logica", 3, 6)
-        assertErrorEnMain("if ( ( ( #1 ) > ( #2 ) { imp ( 'a' ) |\n}", "Debe cerrar con parentesis derecho la expresion logica", 3, 24)
-        assertErrorEnMain("if ( ( ( #1 ) ) ) {\nimp ( 'a' ) |\n}", "Falta el operador relacional en la expresion Relacional", 3, 15)
-        assertErrorEnMain("if ( ( ( #1 ) > ) ) {\nimp ( 'a' ) |\n}", "Debe encerrar en parentesis la expresion aritmetica", 3, 17)
+        assertErrorEnMain("if ( ) {\nimp ( 'a' ) |\n}", "Debe iniciar con un paréntesis izquierdo la expresión lógica", 3, 6)
+        assertErrorEnMain("if ( ( ( #1 ) > ( #2 ) { imp ( 'a' ) |\n}", "Debe cerrar con paréntesis derecho la expresión lógica", 3, 24)
+        assertErrorEnMain("if ( ( ( #1 ) ) ) {\nimp ( 'a' ) |\n}", "Falta el operador relacional en la expresión relacional", 3, 15)
+        assertErrorEnMain("if ( ( ( #1 ) > ) ) {\nimp ( 'a' ) |\n}", "Debe encerrar en paréntesis la expresión aritmética", 3, 17)
     }
 
     @Test
     fun errorExpresionAritmetica() {
-        assertErrorEnMain("if ( ( ( #1 ) > ( ) ) ) {\nimp ( 'a' ) |\n}", "Una expresion aritmetica debe tener minimo un numero", 3, 19)
-        assertErrorEnMain("^x = #5 + |", "Debe encerrar en parentesis la expresion aritmetica", 3, 11)
-        assertErrorEnMain("if ( ( ( #1 ) > ( #2 + #3 ) ) ) {\nimp ( 'a' ) |\n}", "Debe encerrar en parentesis la expresion aritmetica", 3, 24)
+        assertErrorEnMain("if ( ( ( #1 ) > ( ) ) ) {\nimp ( 'a' ) |\n}", "Una expresión aritmética debe tener mínimo un número", 3, 19)
+        assertErrorEnMain("^x = #5 + |", "Debe encerrar en paréntesis la expresión aritmética", 3, 11)
+        assertErrorEnMain("if ( ( ( #1 ) > ( #2 + #3 ) ) ) {\nimp ( 'a' ) |\n}", "Debe encerrar en paréntesis la expresión aritmética", 3, 24)
     }
 
     @Test
     fun errorCiclo() {
         assertErrorEnMain("whl $condicion \nimp ( 'a' ) |", "Las sentencias deben ir encerradas en llaves", 4, 1)
-        assertErrorEnMain("whl ( ( ( #1 ) > ( #2 ) ) {\nimp ( 'a' ) |\n}", "La expresion logica debe ir encerrado en parentesis", 3, 27)
-        assertErrorEnMain("whl {\nimp ( 'a' ) |\n}", "La expresion logica debe ir encerrado en parentesis", 3, 5)
+        assertErrorEnMain("whl ( ( ( #1 ) > ( #2 ) ) {\nimp ( 'a' ) |\n}", "La expresión lógica debe ir encerrada en paréntesis", 3, 27)
+        assertErrorEnMain("whl {\nimp ( 'a' ) |\n}", "La expresión lógica debe ir encerrada en paréntesis", 3, 5)
     }
 
     @Test
     fun errorDeclaracionYAsignacion() {
-        assertErrorEnMain("ent 5 |", "La asignacion no es valida", 3, 5)
+        assertErrorEnMain("ent 5 |", "La asignación no es válida", 3, 5)
         assertErrorEnMain("ent ^x = #5", "Falta el fin de sentencia", 4, 1)
-        assertErrorEnMain("ent ^x #5 |", "Falta el operador de asignacion", 3, 8)
+        assertErrorEnMain("ent ^x #5 |", "Falta el operador de asignación", 3, 8)
         assertErrorEnMain("^x = ^y", "Falta el fin de sentencia", 4, 1)
     }
 
     @Test
     fun errorExpresionCadena() {
-        assertErrorEnMain("^x = 'a' + |", "La expresion cadena debe tener minimo una cadena", 3, 12)
+        assertErrorEnMain("^x = 'a' + |", "La expresión cadena debe tener mínimo una cadena", 3, 12)
     }
 
     @Test
     fun errorImpresion() {
-        assertErrorEnMain("imp ( #5", "El tipo de impresion debe ir encerrado en parentesis", 4, 1)
-        assertErrorEnMain("imp", "El tipo de impresion debe ir encerrado en parentesis", 4, 1)
+        assertErrorEnMain("imp ( #5", "El tipo de impresión debe ir encerrado en paréntesis", 4, 1)
+        assertErrorEnMain("imp", "El tipo de impresión debe ir encerrado en paréntesis", 4, 1)
         assertErrorEnMain("imp ( #5 )", "Falta el fin de sentencia", 4, 1)
         assertErrorEnMain("imp ( ^x )", "Falta el fin de sentencia", 4, 1)
-        assertErrorEnMain("imp ( ) |", "Una expresion aritmetica debe tener minimo un numero", 3, 7)
+        assertErrorEnMain("imp ( ) |", "Una expresión aritmética debe tener mínimo un número", 3, 7)
     }
 
     @Test
@@ -516,14 +516,14 @@ class SintacticoErroresTest {
     @Test
     fun errorLectura() {
         assertErrorEnMain("^x = rad ( #5 ) |", "Se espera una cadena", 3, 12)
-        assertErrorEnMain("^x = rad 'a'", "La cadena debe ir encerrada en parentesis", 3, 10)
+        assertErrorEnMain("^x = rad 'a'", "La cadena debe ir encerrada en paréntesis", 3, 10)
         assertErrorEnMain("^x = rad ( 'a' )", "Falta el fin de sentencia", 4, 1)
     }
 
     @Test
     fun errorInvocacionDeFuncion() {
-        assertErrorEnMain("^f ( ^x", "los parametros deber estar encerrados en parentesis", 4, 1)
-        assertErrorEnMain("^f ( ^x ^y ) |", "los parametros deber estar encerrados en parentesis", 3, 9)
+        assertErrorEnMain("^f ( ^x", "Los parámetros deben estar encerrados en paréntesis", 4, 1)
+        assertErrorEnMain("^f ( ^x ^y ) |", "Los parámetros deben estar encerrados en paréntesis", 3, 9)
         assertErrorEnMain("^f ( ^x ) ", "Falta el fin de sentencia", 4, 1)
     }
 
@@ -535,27 +535,27 @@ class SintacticoErroresTest {
 
     /**
      * Mensajes de reportarError que NO se alcanzan como error final visible (siempre los tapa otro):
-     *  - "Debe definir el tipo de la variable global": candidato=false, y la alternativa de funcion reporta
-     *    "Debe definir el valor retornado de la funcion" en la misma posicion.
+     *  - "Debe definir el tipo de la variable global": candidato=false, y la alternativa de función reporta
+     *    "Debe definir el valor retornado de la función" en la misma posicion.
      *  - Los de "... no valida/no es valida" (expresion logica, relacional, aritmetica, cadena, "elemento a imprimir",
      *    "elemento a retornar", "expresion logica de la desicion"/ciclo): la subregla que falla siempre reporta
      *    antes un error mas especifico en la misma posicion y, en un empate, gana el primero.
-     *  - "Se espera un identificador" (declaracion mutable) y "Por favor especifique el tipo de asignacion":
-     *    los tapa "La asignacion no es valida" / el error de la expresion en la misma posicion.
+     *  - "Se espera un identificador" (declaracion mutable) y "Por favor especifique el tipo de asignación":
+     *    los tapa "La asignación no es válida" / el error de la expresión en la misma posicion.
      * Esta prueba documenta ese comportamiento con un caso representativo.
      */
     @Test
     fun mensajesTapadosPorElErrorEspecifico() {
         val casos = listOf(
-            Triple("if ( ( ( #1 ) > ( #2 ) ) and ) {\nimp ( 'a' ) |\n}", "Debe iniciar con un parentecis izquierdo la expresion logica", 30),
-            Triple("whl ( ) {\nimp ( 'a' ) |\n}", "Debe iniciar con un parentecis izquierdo la expresion logica", 7),
-            Triple("^x = |", "Una expresion aritmetica debe tener minimo un numero", 6),
-            Triple("ret |", "Una expresion aritmetica debe tener minimo un numero", 5),
-            Triple("imp ( + ) |", "Una expresion aritmetica debe tener minimo un numero", 7)
+            Triple("if ( ( ( #1 ) > ( #2 ) ) and ) {\nimp ( 'a' ) |\n}", "Debe iniciar con un paréntesis izquierdo la expresión lógica", 30),
+            Triple("whl ( ) {\nimp ( 'a' ) |\n}", "Debe iniciar con un paréntesis izquierdo la expresión lógica", 7),
+            Triple("^x = |", "Una expresión aritmética debe tener mínimo un número", 6),
+            Triple("ret |", "Una expresión aritmética debe tener mínimo un número", 5),
+            Triple("imp ( + ) |", "Una expresión aritmética debe tener mínimo un número", 7)
         )
         for ((cuerpo, mensaje, columna) in casos) {
             assertErrorEnMain(cuerpo, mensaje, 3, columna)
         }
-        assertUnicoError("pub cls ^a {\npub ^x |\n}", "Debe definir el valor retornado de la funcion", 2, 5)
+        assertUnicoError("pub cls ^a {\npub ^x |\n}", "Debe definir el valor retornado de la función", 2, 5)
     }
 }

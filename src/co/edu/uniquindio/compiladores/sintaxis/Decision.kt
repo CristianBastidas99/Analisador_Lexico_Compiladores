@@ -6,7 +6,7 @@ import javafx.scene.control.TreeItem
 
 class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<Sentencia>, val listaSentenciasElse:ArrayList<Sentencia> ) :Sentencia() {
     override fun getArbolVisual(): TreeItem<String> {
-        val raiz = TreeItem("Decision")
+        val raiz = TreeItem("Decisión")
 
         raiz.children.add( exprLogica.getArbolVisual() )
 

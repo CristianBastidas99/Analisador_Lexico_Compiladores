@@ -9,7 +9,7 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>) {
     /**
      * Permite Guardar un simbolo que representa una variables, una constante, un parametro, un arreglo
      */
-    fun guardasSimboloValor( nombre: String, tipo: String, modificable: Boolean, ambito: String, acceso: String, fila: Int, columna: Int  ){
+    fun guardarSimboloValor( nombre: String, tipo: String, modificable: Boolean, ambito: String, acceso: String, fila: Int, columna: Int  ){
         val s = buscarSimboloValor(nombre, ambito)
 
         if(s == null){
@@ -22,7 +22,7 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>) {
     /**
      * Permite guardar un simbolo que representa una funcion (o metodo)
      */
-    fun guardasSimboloFuncion( nombre: String, tipo: String, tiposParametros: ArrayList<String>, ambito: String, acceso: String, fila: Int, columna: Int  ){
+    fun guardarSimboloFuncion( nombre: String, tipo: String, tiposParametros: ArrayList<String>, ambito: String, acceso: String, fila: Int, columna: Int  ){
         val s = buscarSimboloFuncion(nombre, tiposParametros)
 
         if(s == null){
