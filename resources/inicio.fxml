@@ -85,6 +85,11 @@
                   </TableView>
                </content>
             </Tab>
+            <Tab fx:id="tabSalida" text="Salida">
+               <content>
+                  <TextArea fx:id="salidaPrograma" editable="false" style="-fx-font-family: 'Monospaced';" />
+               </content>
+            </Tab>
         </tabs>
       </TabPane>
       <Separator layoutX="615.0" layoutY="81.0" orientation="VERTICAL" prefHeight="374.0" prefWidth="7.0" />

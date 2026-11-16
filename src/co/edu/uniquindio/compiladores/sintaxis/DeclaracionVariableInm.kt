@@ -31,7 +31,10 @@ class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sente
     }
 
     override fun getCodeJava(): String {
-        return obtenerStringTipo() + " " + asignacion.getCodeJava()
+        // La parte derecha se genera antes de declarar el nombre nuevo: puede referirse a una variable externa homonima
+        val derecha = asignacion.getCodeJavaDerecha()
+        val nombreJava = CodigoJava.declarar(asignacion.identificador.lexema)
+        return "final " + obtenerStringTipo() + " " + nombreJava + " " + asignacion.operAsignacion.lexema + " " + derecha
     }
 
     fun obtenerStringTipo(): String{

@@ -80,26 +80,27 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
     }
 
     fun getCodeJava(): String {
-        var codigo = obtenerVisibilidad() + " static "
+        val esMain = nombre.lexema.substring(1) == "main" && obtenerValorRetornado() == "void"
+        CodigoJava.reiniciarAmbitos()
+        CodigoJava.abrirAmbito()
+
+        // La funcion main debe ser public static void main(String[] args) para poder ejecutarse con java
+        var codigo = (if (esMain) "public" else obtenerVisibilidad()) + " static "
         codigo += obtenerValorRetornado() + " "
-        codigo += nombre.lexema.substring(1) + " ( "
-        if(nombre.lexema.substring(1).equals("main") && obtenerValorRetornado().equals("void")){
+        codigo += CodigoJava.identificador(nombre.lexema) + " ( "
+        if (esMain) {
             codigo += "String[] args"
-        }else{
-            if(listaParametrosConTipo.isNotEmpty()){
-                for(p in listaParametrosConTipo){
-                    codigo += p.getCodeJava() + ", "
-                }
-                codigo = codigo.substring(0, codigo.length - 2)
-            }
+        } else {
+            codigo += listaParametrosConTipo.joinToString(", ") { it.getCodeJava() }
         }
         codigo += " ){\n\n"
-        if(listaSentencias.isNotEmpty()){
-            for (s in listaSentencias){
-                codigo += s.getCodeJava()
-            }
+        codigo += CodigoJava.sentencias(listaSentencias)
+        // Java exige que toda funcion con tipo retorne en todos los caminos
+        if (obtenerValorRetornado() != "void" && CodigoJava.completaNormalmente(listaSentencias)) {
+            codigo += "return " + CodigoJava.valorPorDefecto(valorRetornado.lexema) + ";\n"
         }
         codigo += "}\n\n"
+        CodigoJava.cerrarAmbito()
         return codigo
     }
 

@@ -67,7 +67,7 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
     }
 
     override fun getCodeJava(): String {
-        var codigo = nombre.lexema.substring(1) + "( "
+        var codigo = CodigoJava.identificador(nombre.lexema) + "( "
 
         if(listaParametrosSinTipo.isNotEmpty()){
             for (p in listaParametrosSinTipo){

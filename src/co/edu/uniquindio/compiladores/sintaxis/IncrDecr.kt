@@ -67,7 +67,7 @@ class IncrDecr (var identificador:Token, var tipo:Token) : Sentencia() {
     }
 
     override fun getCodeJava(): String {
-        return identificador.lexema.substring(1) + tipo.lexema + ";\n"
+        return CodigoJava.usar(identificador.lexema) + tipo.lexema + ";\n"
     }
 
 }

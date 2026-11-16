@@ -11,6 +11,7 @@ import co.edu.uniquindio.compiladores.sintaxis.UnidadDeCompilacion
 import javafx.collections.FXCollections
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
+import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.control.TableColumn
@@ -18,7 +19,15 @@ import javafx.scene.control.TableView
 import javafx.scene.control.TextArea
 import javafx.scene.control.TreeView
 import javafx.scene.control.cell.PropertyValueFactory
+import javafx.application.Platform
 import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.concurrent.TimeUnit
+import javax.tools.DiagnosticCollector
+import javax.tools.JavaFileObject
+import javax.tools.ToolProvider
 
 
 class InicioControler {
@@ -53,6 +62,12 @@ class InicioControler {
     @FXML lateinit var colm_esemColumna : TableColumn<Error, Int>
 
     @FXML lateinit var codigoJava : TextArea
+    @FXML lateinit var salidaPrograma : TextArea
+    @FXML lateinit var tabSalida : Tab
+    @FXML lateinit var button_traducir : Button
+    @Volatile private var directorioTemporal: Path? = null
+    @Volatile private var procesoActual: Process? = null
+    private val hookRegistrado = java.util.concurrent.atomic.AtomicBoolean(false)
     var isCodigoJava: Boolean = false
     lateinit var ucg: UnidadDeCompilacion
 
@@ -148,20 +163,157 @@ class InicioControler {
 
     @FXML
     fun traducirCodigo(e : ActionEvent?){
-        if(isCodigoJava){
-            val codigoFuente = ucg.getCodeJava()
-            codigoJava.setText(codigoFuente)
-            File("src/Principal.java").writeText(codigoFuente)
+        if(!isCodigoJava){
+            val msg = "Hay errores semanticos"
+            codigoJava.setText(msg)
+            salidaPrograma.setText(msg)
+            tabPane.selectionModel.select(tabSalida)
+            return
+        }
 
-            try{
-                val p = Runtime.getRuntime().exec("javac src/Principal.java")
-                p.waitFor()
-                Runtime.getRuntime().exec("java Principal", null, File("src"))
-            }catch (es : Exception){
-                es.printStackTrace()
+        val codigoFuente = ucg.getCodeJava()
+        val nombreClase = ucg.nombre.lexema.substring(1)
+        codigoJava.setText(codigoFuente)
+        salidaPrograma.clear()
+        tabPane.selectionModel.select(tabSalida)
+        button_traducir.isDisable = true
+
+        val hilo = Thread {
+            try {
+                compilarYEjecutar(codigoFuente, nombreClase)
+            } catch (ex: Exception) {
+                escribirSalida("Error inesperado: ${ex.message}\n")
+            } finally {
+                Platform.runLater { button_traducir.isDisable = false }
             }
-        }else{
-            codigoJava.setText("Hay errores semanticos")
+        }
+        hilo.isDaemon = true
+        hilo.start()
+    }
+
+    private fun escribirSalida(texto: String) {
+        Platform.runLater { salidaPrograma.appendText(texto) }
+    }
+
+    private fun registrarHookCierre() {
+        if (hookRegistrado.compareAndSet(false, true)) {
+            Runtime.getRuntime().addShutdownHook(Thread {
+                try { procesoActual?.destroyForcibly() } catch (_: Exception) { }
+                directorioTemporal?.let { borrarDirectorio(it) }
+            })
+        }
+    }
+
+    /** Lanza el proceso, vuelca su salida a la UI y devuelve true si termino a tiempo. */
+    private fun ejecutarConLimite(pb: ProcessBuilder, charset: java.nio.charset.Charset, mostrar: Boolean, acumulado: StringBuilder?): Pair<Boolean, Int> {
+        pb.redirectErrorStream(true)
+        val proceso = pb.start()
+        procesoActual = proceso
+        val lector = Thread {
+            try {
+                proceso.inputStream.bufferedReader(charset).use { r ->
+                    val buf = CharArray(1024)
+                    while (true) {
+                        val n = r.read(buf)
+                        if (n < 0) break
+                        val trozo = String(buf, 0, n)
+                        acumulado?.append(trozo)
+                        if (mostrar) escribirSalida(trozo)
+                    }
+                }
+            } catch (_: Exception) {
+            }
+        }
+        lector.isDaemon = true
+        lector.start()
+
+        val aTiempo = proceso.waitFor(10, TimeUnit.SECONDS)
+        if (!aTiempo) {
+            proceso.destroyForcibly()
+            proceso.waitFor()
+        }
+        lector.join(5000)
+        procesoActual = null
+        return Pair(aTiempo, if (aTiempo) proceso.exitValue() else -1)
+    }
+
+    private fun compilarYEjecutar(codigoFuente: String, nombreClase: String) {
+        registrarHookCierre()
+        // Directorio temporal propio; se elimina el anterior
+        directorioTemporal?.let { borrarDirectorio(it) }
+        val dir = Files.createTempDirectory("compilador")
+        directorioTemporal = dir
+
+        val archivo = dir.resolve("$nombreClase.java")
+        Files.write(archivo, codigoFuente.toByteArray(StandardCharsets.UTF_8))
+
+        escribirSalida("Compilando...\n")
+        val javaHome = System.getProperty("java.home")
+        val exe = if (System.getProperty("os.name").lowercase().contains("win")) ".exe" else ""
+
+        val compilador = ToolProvider.getSystemJavaCompiler()
+        val compilado: Boolean
+        val mensajes: String
+        if (compilador != null) {
+            val diagnosticos = DiagnosticCollector<JavaFileObject>()
+            val gestor = compilador.getStandardFileManager(diagnosticos, null, StandardCharsets.UTF_8)
+            try {
+                val unidades = gestor.getJavaFileObjects(archivo.toFile())
+                val opciones = listOf("-encoding", "UTF-8", "-d", dir.toString())
+                compilado = compilador.getTask(null, gestor, diagnosticos, opciones, null, unidades).call()
+            } finally {
+                gestor.close()
+            }
+            mensajes = diagnosticos.diagnostics.joinToString("\n") {
+                "Línea ${it.lineNumber}, columna ${it.columnNumber}: ${it.kind} - ${it.getMessage(null)}"
+            }
+        } else {
+            val javac = File(javaHome, "bin/javac$exe")
+            if (!javac.exists()) {
+                escribirSalida("No se encontro un compilador de Java (javac). Ejecute la aplicacion con un JDK, no con un JRE.\n")
+                return
+            }
+            val acumulado = StringBuilder()
+            val pb = ProcessBuilder(javac.absolutePath, "-J-Dfile.encoding=UTF-8", "-encoding", "UTF-8", "-d", dir.toString(), archivo.toString())
+            val (aTiempo, codigo) = ejecutarConLimite(pb, StandardCharsets.UTF_8, false, acumulado)
+            if (!aTiempo) {
+                escribirSalida("Tiempo limite excedido (10 s) al compilar: el proceso javac fue terminado.\n")
+                return
+            }
+            compilado = codigo == 0
+            mensajes = acumulado.toString()
+        }
+
+        if (!compilado) {
+            escribirSalida("Errores de compilacion:\n$mensajes\n")
+            return
+        }
+        if (mensajes.isNotBlank()) escribirSalida("$mensajes\n")
+
+        if (!Regex("static\\s+void\\s+main\\s*\\(\\s*String\\[\\]\\s+args").containsMatchIn(codigoFuente)) {
+            escribirSalida("Compilado correctamente. El programa no tiene una función ^main de tipo vd, no se ejecuta.\n")
+            return
+        }
+
+        escribirSalida("Ejecutando...\n")
+        val pb = ProcessBuilder(
+            File(javaHome, "bin/java$exe").absolutePath,
+            "-Dfile.encoding=UTF-8", "-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8",
+            "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8",
+            "-cp", dir.toString(), nombreClase
+        )
+        val (aTiempo, codigo) = ejecutarConLimite(pb, StandardCharsets.UTF_8, true, null)
+        if (!aTiempo) {
+            escribirSalida("\nTiempo limite excedido (10 s): el proceso fue terminado.\n")
+            return
+        }
+        escribirSalida("\nProceso terminado (código $codigo)\n")
+    }
+
+    private fun borrarDirectorio(dir: Path) {
+        try {
+            dir.toFile().deleteRecursively()
+        } catch (_: Exception) {
         }
     }
 

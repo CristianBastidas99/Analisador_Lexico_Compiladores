@@ -30,7 +30,7 @@ class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Senten
     }
 
     override fun getCodeJava(): String {
-        return obtenerStringTipo() + " " + identificador.lexema.substring(1) + ";\n"
+        return obtenerStringTipo() + " " + CodigoJava.declarar(identificador.lexema) + " = " + CodigoJava.valorPorDefecto(tipo.lexema) + ";\n"
     }
 
     fun obtenerStringTipo(): String{

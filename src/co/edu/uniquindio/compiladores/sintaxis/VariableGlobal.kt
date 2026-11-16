@@ -33,9 +33,9 @@ class VariableGlobal(var visibilidad:Token, var tipo:Token, var nombre:Token) {
     }
 
     fun getCodeJava(): String {
-        var codigo = obtenerVisibilidad() + " "
+        var codigo = obtenerVisibilidad() + " static "
         codigo += obtenerStringTipo() + " "
-        codigo += nombre.lexema.substring(1) + " ;\n"
+        codigo += CodigoJava.identificador(nombre.lexema) + ";\n"
         return codigo
     }
 

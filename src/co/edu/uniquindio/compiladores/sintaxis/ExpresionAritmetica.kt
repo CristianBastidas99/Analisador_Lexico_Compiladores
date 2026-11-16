@@ -40,12 +40,12 @@ class ExpresionAritmetica (var numero:Token, var operAritmetico:Token?, var expr
     }
 
     override fun getCodeJava(): String {
-        var codigo = numero.lexema.substring(1) + " "
+        var codigo = CodigoJava.numero(numero) + " "
 
         if(operAritmetico != null){
             codigo += operAritmetico!!.lexema + " "
             if(exprAritmetica != null){
-                codigo += exprAritmetica!!.getCodeJava()
+                codigo += "(" + exprAritmetica!!.getCodeJava() + ")"
             }
         }
 

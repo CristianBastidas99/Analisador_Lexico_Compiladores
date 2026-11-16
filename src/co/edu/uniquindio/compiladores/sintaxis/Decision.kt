@@ -61,26 +61,25 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
         }
     }
 
+    override fun completaNormalmente(): Boolean {
+        if (listaSentenciasElse.isEmpty()) return true
+        return CodigoJava.completaNormalmente(listaSentenciasIf) || CodigoJava.completaNormalmente(listaSentenciasElse)
+    }
+
     override fun getCodeJava(): String {
         var codigo = "if ( " + exprLogica.getCodeJava() + " ) {\n\n"
-
-        if(listaSentenciasIf.isNotEmpty()){
-            for (s in listaSentenciasIf){
-                codigo += s.getCodeJava()
-            }
+        CodigoJava.abrirAmbito()
+        codigo += CodigoJava.sentencias(listaSentenciasIf)
+        CodigoJava.cerrarAmbito()
+        codigo += "}\n"
+        if (listaSentenciasElse.isNotEmpty()) {
+            codigo += "else {\n\n"
+            CodigoJava.abrirAmbito()
+            codigo += CodigoJava.sentencias(listaSentenciasElse)
+            CodigoJava.cerrarAmbito()
+            codigo += "}\n"
         }
-
-        codigo += "} "
-
-        if(listaSentenciasElse.isNotEmpty()){
-            codigo += " else { \n\n"
-            for (s in listaSentenciasElse){
-                codigo += s.getCodeJava()
-            }
-            codigo += "}\n\n"
-        }
-
-        return codigo
+        return codigo + "\n"
     }
 
 

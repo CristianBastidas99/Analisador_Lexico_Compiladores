@@ -39,14 +39,12 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
     }
 
     override fun getCodeJava(): String {
-        var codigo = "while ( " + expresionLogica.getCodeJava() + " ) {\n\n"
-
-        if(listaSentencias.isNotEmpty()){
-            for (s in listaSentencias){
-                codigo += s.getCodeJava()
-            }
-        }
-
+        // Las condiciones del lenguaje solo tienen literales (expresiones constantes); Boolean.valueOf evita que Java
+        // las trate como constantes y rechace el cuerpo (while(false)) o el codigo posterior (while(true)) como inalcanzable
+        var codigo = "while ( Boolean.valueOf(" + expresionLogica.getCodeJava() + ") ) {\n\n"
+        CodigoJava.abrirAmbito()
+        codigo += CodigoJava.sentencias(listaSentencias)
+        CodigoJava.cerrarAmbito()
         codigo += "}\n\n"
         return codigo
     }

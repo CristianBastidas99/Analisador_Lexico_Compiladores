@@ -69,7 +69,7 @@ class Impresion(var expresion: Expresion?, var identificador: Token?) : Sentenci
         }
 
         if(identificador != null){
-            codigo += identificador!!.lexema.substring(1)
+            codigo += CodigoJava.usar(identificador!!.lexema)
         }
 
         codigo += ");\n"

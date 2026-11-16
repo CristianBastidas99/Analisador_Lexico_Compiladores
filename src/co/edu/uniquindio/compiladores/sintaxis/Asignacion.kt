@@ -130,14 +130,19 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
     }
 
     override fun getCodeJava(): String {
-        var codigo = identificador.lexema.substring(1) + " "
-        codigo += operAsignacion.lexema + " "
+        val izquierda = CodigoJava.usar(identificador.lexema)
+        return izquierda + " " + operAsignacion.lexema + " " + getCodeJavaDerecha()
+    }
+
+    /** Lado derecho de la asignacion (con el ; final); permite generarlo antes de declarar la variable destino */
+    fun getCodeJavaDerecha(): String {
+        var codigo = ""
 
         if(expresion != null){
             codigo += expresion!!.getCodeJava() + ";\n"
         }
         if(identificador2 != null){
-            codigo += identificador2!!.lexema.substring(1) + ";\n"
+            codigo += CodigoJava.usar(identificador2!!.lexema) + ";\n"
         }
         if(sentencia != null){
             codigo += sentencia!!.getCodeJava()

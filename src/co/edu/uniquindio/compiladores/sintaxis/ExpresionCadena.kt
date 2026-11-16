@@ -26,28 +26,27 @@ class ExpresionCadena(var valorTipo: Token, var operAgrupacion: Token?, var expr
     }
 
     override fun getCodeJava(): String {
-        var codigo = stringValorTipo() + " "
-
-        if(operAgrupacion != null){
-            codigo += operAgrupacion!!.lexema + " "
-            if(expresionCadena != null){
-                codigo += expresionCadena!!.getCodeJava()
-            }
+        if (operAgrupacion == null || expresionCadena == null) {
+            return stringValorTipo()
         }
+        // El prefijo "" garantiza concatenacion de texto (en Java char + char suma enteros)
+        return "\"\" + " + partes()
+    }
 
+    private fun partes(): String {
+        var codigo = stringValorTipo()
+        if (operAgrupacion != null && expresionCadena != null) {
+            codigo += " + " + expresionCadena!!.partes()
+        }
         return codigo
     }
 
     fun stringValorTipo(): String{
-        var codigo = ""
-        if(valorTipo.categoria == Categoria.CADENA_CARCTERES){
-            codigo += "\"" + valorTipo.lexema.substring(1, valorTipo.lexema.length - 1) + "\""
-        }else if(valorTipo.categoria == Categoria.CARACTER){
-            codigo += "\'" + valorTipo.lexema.substring(1, valorTipo.lexema.length - 1) + "\'"
-        }else{
-            codigo += valorTipo.lexema.substring(1)
+        return when (valorTipo.categoria) {
+            Categoria.CADENA_CARCTERES -> CodigoJava.cadena(valorTipo.lexema)
+            Categoria.CARACTER -> CodigoJava.caracter(valorTipo.lexema)
+            else -> CodigoJava.numero(valorTipo)
         }
-        return codigo
     }
 
 }

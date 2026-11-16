@@ -98,11 +98,13 @@ class Retorno(var identificador:Token?, var expresion: Expresion?, var fila:Int,
             }
     }
 
+    override fun completaNormalmente(): Boolean = false
+
     override fun getCodeJava(): String {
         var codigo = "return "
 
         if(identificador != null) {
-            codigo += identificador!!.lexema.substring(1)
+            codigo += CodigoJava.usar(identificador!!.lexema)
         }
 
         if(expresion != null) {

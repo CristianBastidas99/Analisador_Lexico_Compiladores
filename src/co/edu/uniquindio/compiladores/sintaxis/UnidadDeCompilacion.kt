@@ -61,33 +61,36 @@ class UnidadDeCompilacion(var visibilidad:Token, var nombre:Token, val listaVari
     }
 
     fun getCodeJava():String {
+        CodigoJava.reiniciarAmbitos()
+        try {
+            return generarCodigo()
+        } finally {
+            CodigoJava.reiniciarAmbitos()
+        }
+    }
+
+    private fun generarCodigo(): String {
         var codigo = "import javax.swing.JOptionPane;\n" +
-                "\n" + obtenerVisibilidad() + " class "
+                "\n" + obtenerVisibilidad() + "class "
         codigo += nombre.lexema.substring(1) + " {\n\n"
 
-        if(listaVariablesGlobales.isNotEmpty()){
-            for (v in listaVariablesGlobales){
-                codigo += v.getCodeJava()
-            }
+        for (v in listaVariablesGlobales){
+            codigo += v.getCodeJava()
         }
+
         codigo += "\n\n"
-        if(listaFunciones.isNotEmpty()){
-            for (f in listaFunciones){
-                codigo += f.getCodeJava()
-            }
+
+        for (f in listaFunciones){
+            codigo += f.getCodeJava()
         }
 
-        codigo += "}"
-
+        codigo += "}\n"
         return codigo
     }
 
     fun obtenerVisibilidad(): String{
-        var stringVisibilidad = "public"
-        if(visibilidad.lexema.equals("pvt")){
-            stringVisibilidad = "private"
-        }
-        return stringVisibilidad
+        // Una clase de nivel superior en Java no puede ser private: pvt se traduce a visibilidad de paquete (sin modificador)
+        return if (visibilidad.lexema.equals("pvt")) "" else "public "
     }
 
 

@@ -11,4 +11,7 @@ abstract class Sentencia{
     abstract fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String )
     abstract fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String)
     abstract fun getCodeJava(): String
+
+    /** Indica si la ejecucion puede continuar tras la sentencia (false si siempre retorna); usado al generar Java */
+    open fun completaNormalmente(): Boolean = true
 }

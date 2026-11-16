@@ -15,7 +15,7 @@ class ParametroSinTipo(var nombre: Token) {
     }
 
     fun getCodeJava(): String {
-        return nombre.lexema.substring(1)
+        return CodigoJava.usar(nombre.lexema)
     }
 
 }

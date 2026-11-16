@@ -30,20 +30,14 @@ class ExpresionLogica(var negacion:Token?, var exprRelacional:ExpresionRelaciona
 
     override fun getCodeJava(): String {
         var codigo = ""
-
         if(negacion != null){
             codigo += "!"
         }
-
-        codigo += "(" + exprRelacional.getCodeJava() + ") "
-
-        if(operLogico != null){
-            codigo += stringOpeLogico() + " "
-                if(exprLogica != null){
-                    codigo += exprLogica!!.getCodeJava()
-                }
+        codigo += "(" + exprRelacional.getCodeJava() + ")"
+        if(operLogico != null && exprLogica != null){
+            codigo += " " + stringOpeLogico() + " (" + exprLogica!!.getCodeJava() + ")"
         }
-        return  codigo
+        return codigo
     }
 
     fun stringOpeLogico():String{

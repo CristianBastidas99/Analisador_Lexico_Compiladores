@@ -18,7 +18,7 @@ class ParametroConTipo(var tipo: Token, var nombre: Token) {
 
     fun getCodeJava(): String {
         var codigo = obtenerStringTipo() + " "
-        codigo += nombre.lexema.substring(1)
+        codigo += CodigoJava.declarar(nombre.lexema)
         return  codigo
     }
 
