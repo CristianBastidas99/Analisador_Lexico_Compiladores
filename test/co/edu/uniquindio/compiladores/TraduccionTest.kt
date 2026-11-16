@@ -39,14 +39,7 @@ class TraduccionTest {
         val sintactico = AnalizadorSintactico(lexico.listaTokens)
         val unidad = sintactico.esUnidadDeCompilacion()
         assertTrue(unidad != null, "No se pudo construir la unidad de compilacion. Token actual: ${sintactico.tokenActual}. Ultimos errores: ${sintactico.listaErrores.takeLast(6)}")
-        // Nota: el analizador sintactico reporta errores especulativos (prueba alternativas) incluso en programas
-        // validos, por lo que listaErrores no es un indicador fiable; la validez se comprueba con unidad != null,
-        // con que no queden tokens sin consumir y con el resto de fases.
-        assertTrue(
-            sintactico.posicionActual >= lexico.listaTokens.size - 1 ||
-                    sintactico.tokenActual.categoria == Categoria.LLAVE_DERECHO,
-            "Quedaron tokens sin consumir: ${sintactico.tokenActual}"
-        )
+        assertTrue(sintactico.listaErrores.isEmpty(), "Errores sintacticos en un programa valido: ${sintactico.listaErrores}")
 
         val semantico = AnalizadorSemantico(unidad!!)
         semantico.llenarTablaSimbolos()

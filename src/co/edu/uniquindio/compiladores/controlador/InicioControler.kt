@@ -8,10 +8,10 @@ import co.edu.uniquindio.compiladores.semantico.AnalizadorSemantico
 import co.edu.uniquindio.compiladores.semantico.Simbolo
 import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import co.edu.uniquindio.compiladores.sintaxis.UnidadDeCompilacion
-import javafx.collections.FXCollections
 import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.scene.control.Button
+import javafx.scene.control.Label
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.control.TableColumn
@@ -41,6 +41,15 @@ class InicioControler {
     @FXML lateinit var colm_filaTabLexico : TableColumn<Token, Int>
     @FXML lateinit var colm_colmTabLexico : TableColumn<Token, Int>
 
+    @FXML lateinit var estado : Label
+    @FXML lateinit var tabErroresLex : Tab
+    @FXML lateinit var tabErroresSint : Tab
+    @FXML lateinit var tabErroresSem : Tab
+    @FXML lateinit var tablaErroresLex : TableView<Error>
+    @FXML lateinit var colm_errorErroresLex : TableColumn<Error, String>
+    @FXML lateinit var colm_filaErroresLex : TableColumn<Error, Int>
+    @FXML lateinit var colm_columnaErroresLex : TableColumn<Error, Int>
+
     @FXML lateinit var tablaErroresSint : TableView<Error>
     @FXML lateinit var colm_errorErroresSint : TableColumn<Error, String>
     @FXML lateinit var colm_filaErroresSint : TableColumn<Error, Int>
@@ -68,103 +77,149 @@ class InicioControler {
     @Volatile private var directorioTemporal: Path? = null
     @Volatile private var procesoActual: Process? = null
     private val hookRegistrado = java.util.concurrent.atomic.AtomicBoolean(false)
-    var isCodigoJava: Boolean = false
+    private var isCodigoJava: Boolean = false
+    private val generacion = java.util.concurrent.atomic.AtomicInteger(0)
     lateinit var ucg: UnidadDeCompilacion
 
 
     @FXML
-    fun analizarCodigo(e : ActionEvent?){
-
-        if(codigo_fuente.length > 0) {
-            var analizador = AnalizadorLexico(codigo_fuente.text)
-            analizador.analizar()
-            println(analizador.listaTokens)
-
-            val list = FXCollections.observableArrayList<Token>()
-            list.addAll(analizador.listaTokens)
-
-            tablaTabLexico.items.clear()
-
-            colm_lexemaTabLexico.setCellValueFactory(PropertyValueFactory<Token, String>("lexema"))
-            colm_catTabLexico.setCellValueFactory(PropertyValueFactory<Token, Categoria>("categoria"))
-            colm_filaTabLexico.setCellValueFactory(PropertyValueFactory<Token, Int>("fila"))
-            colm_colmTabLexico.setCellValueFactory(PropertyValueFactory<Token, Int>("columna"))
-
-            tablaTabLexico.items.addAll(list)
-
-
-            var analizadorSintactico = AnalizadorSintactico(analizador.listaTokens)
-            var uc = analizadorSintactico.esUnidadDeCompilacion()
-
-            if(uc != null) {
-                arbolVisual.setRoot(uc!!.getArbolVisual())
-
-                println(uc.toString())
-
-                val listErrorSint = FXCollections.observableArrayList<Error>()
-                listErrorSint.addAll(analizadorSintactico.listaErrores)
-
-                tablaErroresSint.items.clear()
-
-                colm_errorErroresSint.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
-                colm_filaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
-                colm_columnaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
-
-                tablaErroresSint.items.addAll(listErrorSint)
-
-                val semantica = AnalizadorSemantico(uc)
-                semantica.llenarTablaSimbolos()
-                semantica.analizarSemantica()
-                println(semantica.tablaSimbolos)
-
-                if(semantica.tablaSimbolos.listaSimbolos.isNotEmpty()) {
-
-                    val listTablaSim = FXCollections.observableArrayList<Simbolo>()
-                    listTablaSim.addAll(semantica.tablaSimbolos.listaSimbolos)
-
-                    tablaSimbolos.items.clear()
-
-                    colm_tsNombre.setCellValueFactory(PropertyValueFactory<Simbolo, String>("nombre"))
-                    colm_tsTipo.setCellValueFactory(PropertyValueFactory<Simbolo, String>("tipo"))
-                    colm_tsModificable.setCellValueFactory(PropertyValueFactory<Simbolo, Boolean>("modificable"))
-                    colm_tsAmbito.setCellValueFactory(PropertyValueFactory<Simbolo, String>("ambito"))
-                    colm_tsAcceso.setCellValueFactory(PropertyValueFactory<Simbolo, String>("acceso"))
-                    colm_tsFila.setCellValueFactory(PropertyValueFactory<Simbolo, Int>("fila"))
-                    colm_tsColumna.setCellValueFactory(PropertyValueFactory<Simbolo, Int>("columna"))
-                    colm_tsTiposParametros.setCellValueFactory(PropertyValueFactory<Simbolo, ArrayList<String>>("tiposParametros"))
-
-                    tablaSimbolos.items.addAll(listTablaSim)
-
-                }else{
-                    tablaErroresSem.items.clear()
-                }
-
-                if(semantica.tablaSimbolos.listaErrores.isNotEmpty()) {
-
-                    val listErrorSema = FXCollections.observableArrayList<Error>()
-                    listErrorSema.addAll(semantica.tablaSimbolos.listaErrores)
-
-                    tablaErroresSem.items.clear()
-
-                    colm_esemError.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
-                    colm_esemFila.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
-                    colm_esemColumna.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
-
-                    tablaErroresSem.items.addAll(listErrorSema)
-                }else{
-                    tablaErroresSem.items.clear()
-                    isCodigoJava = true
-                    ucg = uc
-                }
-
+    fun initialize() {
+        codigo_fuente.textProperty().addListener { _, _, _ ->
+            if (isCodigoJava || tablaTabLexico.items.isNotEmpty()) {
+                isCodigoJava = false
+                estado.text = "El código cambió: vuelva a analizar."
             }
+        }
+        colm_lexemaTabLexico.setCellValueFactory(PropertyValueFactory<Token, String>("lexema"))
+        colm_catTabLexico.setCellValueFactory(PropertyValueFactory<Token, Categoria>("categoria"))
+        colm_filaTabLexico.setCellValueFactory(PropertyValueFactory<Token, Int>("fila"))
+        colm_colmTabLexico.setCellValueFactory(PropertyValueFactory<Token, Int>("columna"))
+
+        colm_errorErroresLex.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
+        colm_filaErroresLex.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
+        colm_columnaErroresLex.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+
+        colm_errorErroresSint.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
+        colm_filaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
+        colm_columnaErroresSint.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+
+        colm_tsNombre.setCellValueFactory(PropertyValueFactory<Simbolo, String>("nombre"))
+        colm_tsTipo.setCellValueFactory(PropertyValueFactory<Simbolo, String>("tipo"))
+        colm_tsModificable.setCellValueFactory(PropertyValueFactory<Simbolo, Boolean>("modificable"))
+        colm_tsAmbito.setCellValueFactory(PropertyValueFactory<Simbolo, String>("ambito"))
+        colm_tsAcceso.setCellValueFactory(PropertyValueFactory<Simbolo, String>("acceso"))
+        colm_tsFila.setCellValueFactory(PropertyValueFactory<Simbolo, Int>("fila"))
+        colm_tsColumna.setCellValueFactory(PropertyValueFactory<Simbolo, Int>("columna"))
+        colm_tsTiposParametros.setCellValueFactory(PropertyValueFactory<Simbolo, ArrayList<String>>("tiposParametros"))
+
+        colm_esemError.setCellValueFactory(PropertyValueFactory<Error, String>("error"))
+        colm_esemFila.setCellValueFactory(PropertyValueFactory<Error, Int>("fila"))
+        colm_esemColumna.setCellValueFactory(PropertyValueFactory<Error, Int>("columna"))
+    }
+
+    private fun titulo(base: String, n: Int) = if (n > 0) "$base ($n)" else base
+
+    private fun limpiarTodo() {
+        tablaTabLexico.items.clear()
+        tablaErroresLex.items.clear()
+        tablaErroresSint.items.clear()
+        tablaSimbolos.items.clear()
+        tablaErroresSem.items.clear()
+        arbolVisual.root = null
+        codigoJava.clear()
+        salidaPrograma.clear()
+        isCodigoJava = false
+        tabErroresLex.text = titulo("Errores Léxicos", 0)
+        tabErroresSint.text = titulo("Errores Sintácticos", 0)
+        tabErroresSem.text = titulo("Errores Semánticos", 0)
+    }
+
+    private fun cancelarEjecucion() {
+        generacion.incrementAndGet()
+        try { procesoActual?.destroyForcibly() } catch (_: Exception) { }
+        button_traducir.isDisable = false
+    }
+
+    private fun plural(n: Int, singular: String, plural: String) = if (n == 1) "1 $singular" else "$n $plural"
+
+    @FXML
+    fun analizarCodigo(e : ActionEvent?){
+        cancelarEjecucion()
+        limpiarTodo()
+        try {
+            analizar()
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            isCodigoJava = false
+            estado.text = "Error interno del analizador: ${ex.message ?: ex.javaClass.simpleName}"
+        }
+    }
+
+    private fun analizar() {
+        if(codigo_fuente.text.isBlank()) {
+            estado.text = "El área de código está vacía: escriba un programa para analizar."
+            return
+        }
+
+        val analizador = AnalizadorLexico(codigo_fuente.text)
+        analizador.analizar()
+        println(analizador.listaTokens)
+
+        tablaTabLexico.items.addAll(analizador.listaTokens)
+        tablaErroresLex.items.addAll(analizador.listaErrores)
+        tabErroresLex.text = titulo("Errores Léxicos", analizador.listaErrores.size)
+
+        val analizadorSintactico = AnalizadorSintactico(analizador.listaTokens)
+        val uc = analizadorSintactico.esUnidadDeCompilacion()
+
+        if(uc != null) {
+            arbolVisual.root = uc.getArbolVisual()
+            println(uc.toString())
+        }
+
+        // Los errores sintácticos se muestran siempre
+        tablaErroresSint.items.addAll(analizadorSintactico.listaErrores)
+        tabErroresSint.text = titulo("Errores Sintácticos", analizadorSintactico.listaErrores.size)
+
+        val nLex = analizador.listaErrores.size
+        val nSint = analizadorSintactico.listaErrores.size
+        if(nLex > 0 || nSint > 0 || uc == null) {
+            val partes = ArrayList<String>()
+            if(nLex > 0) partes.add(plural(nLex, "error léxico", "errores léxicos"))
+            if(nSint > 0) partes.add(plural(nSint, "error sintáctico", "errores sintácticos"))
+            if(partes.isEmpty()) partes.add("el programa no es una unidad de compilación válida")
+            estado.text = "Hay " + partes.joinToString(" y ") + ": no se ejecuta el análisis semántico ni se puede traducir."
+            if(nLex > 0) tabPane.selectionModel.select(tabErroresLex)
+            else if(nSint > 0) tabPane.selectionModel.select(tabErroresSint)
+            return
+        }
+
+        val semantica = AnalizadorSemantico(uc)
+        semantica.llenarTablaSimbolos()
+        semantica.analizarSemantica()
+        println(semantica.tablaSimbolos)
+
+        tablaSimbolos.items.addAll(semantica.tablaSimbolos.listaSimbolos)
+
+        val nSem = semantica.tablaSimbolos.listaErrores.size
+        tablaErroresSem.items.addAll(semantica.tablaSimbolos.listaErrores)
+        tabErroresSem.text = titulo("Errores Semánticos", nSem)
+
+        if(nSem > 0) {
+            estado.text = plural(nSem, "error semántico", "errores semánticos") + ": corríjalos para poder traducir."
+            tabPane.selectionModel.select(tabErroresSem)
+        } else {
+            isCodigoJava = true
+            ucg = uc
+            estado.text = "Análisis correcto: listo para traducir."
         }
     }
 
     @FXML
     fun traducirCodigo(e : ActionEvent?){
         if(!isCodigoJava){
-            val msg = "Hay errores semanticos"
+            val msg = "No se puede traducir: analice primero un programa sin errores."
+            estado.text = msg
             codigoJava.setText(msg)
             salidaPrograma.setText(msg)
             tabPane.selectionModel.select(tabSalida)
@@ -177,22 +232,23 @@ class InicioControler {
         salidaPrograma.clear()
         tabPane.selectionModel.select(tabSalida)
         button_traducir.isDisable = true
+        val gen = generacion.incrementAndGet()
 
         val hilo = Thread {
             try {
-                compilarYEjecutar(codigoFuente, nombreClase)
+                compilarYEjecutar(codigoFuente, nombreClase, gen)
             } catch (ex: Exception) {
-                escribirSalida("Error inesperado: ${ex.message}\n")
+                escribirSalida("Error inesperado: ${ex.message}\n", gen)
             } finally {
-                Platform.runLater { button_traducir.isDisable = false }
+                Platform.runLater { if (generacion.get() == gen) button_traducir.isDisable = false }
             }
         }
         hilo.isDaemon = true
         hilo.start()
     }
 
-    private fun escribirSalida(texto: String) {
-        Platform.runLater { salidaPrograma.appendText(texto) }
+    private fun escribirSalida(texto: String, gen: Int) {
+        Platform.runLater { if (generacion.get() == gen) salidaPrograma.appendText(texto) }
     }
 
     private fun registrarHookCierre() {
@@ -205,7 +261,7 @@ class InicioControler {
     }
 
     /** Lanza el proceso, vuelca su salida a la UI y devuelve true si termino a tiempo. */
-    private fun ejecutarConLimite(pb: ProcessBuilder, charset: java.nio.charset.Charset, mostrar: Boolean, acumulado: StringBuilder?): Pair<Boolean, Int> {
+    private fun ejecutarConLimite(pb: ProcessBuilder, charset: java.nio.charset.Charset, mostrar: Boolean, acumulado: StringBuilder?, gen: Int): Pair<Boolean, Int> {
         pb.redirectErrorStream(true)
         val proceso = pb.start()
         procesoActual = proceso
@@ -218,7 +274,7 @@ class InicioControler {
                         if (n < 0) break
                         val trozo = String(buf, 0, n)
                         acumulado?.append(trozo)
-                        if (mostrar) escribirSalida(trozo)
+                        if (mostrar) escribirSalida(trozo, gen)
                     }
                 }
             } catch (_: Exception) {
@@ -237,7 +293,7 @@ class InicioControler {
         return Pair(aTiempo, if (aTiempo) proceso.exitValue() else -1)
     }
 
-    private fun compilarYEjecutar(codigoFuente: String, nombreClase: String) {
+    private fun compilarYEjecutar(codigoFuente: String, nombreClase: String, gen: Int) {
         registrarHookCierre()
         // Directorio temporal propio; se elimina el anterior
         directorioTemporal?.let { borrarDirectorio(it) }
@@ -247,7 +303,7 @@ class InicioControler {
         val archivo = dir.resolve("$nombreClase.java")
         Files.write(archivo, codigoFuente.toByteArray(StandardCharsets.UTF_8))
 
-        escribirSalida("Compilando...\n")
+        escribirSalida("Compilando...\n", gen)
         val javaHome = System.getProperty("java.home")
         val exe = if (System.getProperty("os.name").lowercase().contains("win")) ".exe" else ""
 
@@ -270,14 +326,14 @@ class InicioControler {
         } else {
             val javac = File(javaHome, "bin/javac$exe")
             if (!javac.exists()) {
-                escribirSalida("No se encontro un compilador de Java (javac). Ejecute la aplicacion con un JDK, no con un JRE.\n")
+                escribirSalida("No se encontró un compilador de Java (javac). Ejecute la aplicación con un JDK, no con un JRE.\n", gen)
                 return
             }
             val acumulado = StringBuilder()
             val pb = ProcessBuilder(javac.absolutePath, "-J-Dfile.encoding=UTF-8", "-encoding", "UTF-8", "-d", dir.toString(), archivo.toString())
-            val (aTiempo, codigo) = ejecutarConLimite(pb, StandardCharsets.UTF_8, false, acumulado)
+            val (aTiempo, codigo) = ejecutarConLimite(pb, StandardCharsets.UTF_8, false, acumulado, gen)
             if (!aTiempo) {
-                escribirSalida("Tiempo limite excedido (10 s) al compilar: el proceso javac fue terminado.\n")
+                escribirSalida("Tiempo límite excedido (10 s) al compilar: el proceso javac fue terminado.\n", gen)
                 return
             }
             compilado = codigo == 0
@@ -285,29 +341,30 @@ class InicioControler {
         }
 
         if (!compilado) {
-            escribirSalida("Errores de compilacion:\n$mensajes\n")
+            escribirSalida("Errores de compilación:\n$mensajes\n", gen)
             return
         }
-        if (mensajes.isNotBlank()) escribirSalida("$mensajes\n")
+        if (mensajes.isNotBlank()) escribirSalida("$mensajes\n", gen)
 
         if (!Regex("static\\s+void\\s+main\\s*\\(\\s*String\\[\\]\\s+args").containsMatchIn(codigoFuente)) {
-            escribirSalida("Compilado correctamente. El programa no tiene una función ^main de tipo vd, no se ejecuta.\n")
+            escribirSalida("Compilado correctamente. El programa no tiene una función ^main de tipo vd, no se ejecuta.\n", gen)
             return
         }
 
-        escribirSalida("Ejecutando...\n")
+        if (generacion.get() != gen) return
+        escribirSalida("Ejecutando...\n", gen)
         val pb = ProcessBuilder(
             File(javaHome, "bin/java$exe").absolutePath,
             "-Dfile.encoding=UTF-8", "-Dstdout.encoding=UTF-8", "-Dstderr.encoding=UTF-8",
             "-Dsun.stdout.encoding=UTF-8", "-Dsun.stderr.encoding=UTF-8",
             "-cp", dir.toString(), nombreClase
         )
-        val (aTiempo, codigo) = ejecutarConLimite(pb, StandardCharsets.UTF_8, true, null)
+        val (aTiempo, codigo) = ejecutarConLimite(pb, StandardCharsets.UTF_8, true, null, gen)
         if (!aTiempo) {
-            escribirSalida("\nTiempo limite excedido (10 s): el proceso fue terminado.\n")
+            escribirSalida("\nTiempo límite excedido (10 s): el proceso fue terminado.\n", gen)
             return
         }
-        escribirSalida("\nProceso terminado (código $codigo)\n")
+        escribirSalida("\nProceso terminado (código $codigo)\n", gen)
     }
 
     private fun borrarDirectorio(dir: Path) {

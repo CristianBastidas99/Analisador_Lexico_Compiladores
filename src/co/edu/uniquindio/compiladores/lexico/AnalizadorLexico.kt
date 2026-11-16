@@ -7,6 +7,7 @@ class AnalizadorLexico (var codigoFuente:String) {
     var posicionAcual = 0
     var caracterActual = codigoFuente[0]
     var listaTokens = ArrayList<Token>()
+    var listaErrores = ArrayList<Error>()
     var finCodigo = 0.toChar()
     var filaActual = 0
     var columnaActual = 0
@@ -68,9 +69,138 @@ class AnalizadorLexico (var codigoFuente:String) {
 
             if(esCadenaCaracter()) continue
 
-            almacenarToken(caracterActual + "", Categoria.DESCONOCIDO, filaActual, columnaActual)
+            manejarDesconocido()
+        }
+    }
+
+    fun reportarError(mensaje:String, fila:Int, columna:Int){
+        listaErrores.add(Error(mensaje, fila, columna))
+    }
+
+    fun mostrarCaracter(c:Char):String = when {
+        c == '\n' -> "\\n"
+        c == '\r' -> "\\r"
+        c == '\t' -> "\\t"
+        c.isISOControl() -> "\\u%04x".format(c.code)
+        else -> c.toString()
+    }
+
+    /** Consume el resto del codigo fuente (hasta el fin) y lo almacena como un unico token DESCONOCIDO */
+    private fun consumirRestoComoDesconocido(fila:Int, columna:Int){
+        var lexema = ""
+        while (caracterActual != finCodigo) {
+            lexema += caracterActual
             obtenerSiguienteCaracter()
         }
+        almacenarToken(lexema, Categoria.DESCONOCIDO, fila, columna)
+    }
+
+    /**
+     * Ningun automata reconocio el caracter actual: se genera un token DESCONOCIDO y se reporta el error
+     * lexico con la fila y columna donde empieza el problema.
+     */
+    fun manejarDesconocido(){
+        val fila = filaActual
+        val columna = columnaActual
+        val posicion = posicionAcual
+
+        when (caracterActual) {
+            '"' -> {
+                if (posicion + 2 < codigoFuente.length && codigoFuente[posicion + 1] == '"' && codigoFuente[posicion + 2] == '"') {
+                    reportarError("Comentario de bloque sin cerrar: falta el cierre \"\"\"", fila, columna)
+                    consumirRestoComoDesconocido(fila, columna)
+                    return
+                }
+                reportarError("Carácter no reconocido: '\"'", fila, columna)
+            }
+            '#' -> {
+                reportarError("Entero mal formado: después de '#' se esperaba al menos un dígito", fila, columna)
+            }
+            '@' -> {
+                var lexema = "@"
+                obtenerSiguienteCaracter()
+                var digitosEnteros = 0
+                while (caracterActual.isDigit()) { lexema += caracterActual; obtenerSiguienteCaracter(); digitosEnteros++ }
+                var hayPunto = false
+                if (caracterActual == '.') {
+                    hayPunto = true
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                    while (caracterActual.isDigit()) { lexema += caracterActual; obtenerSiguienteCaracter() }
+                }
+                val mensaje = when {
+                    digitosEnteros == 0 -> "Decimal mal formado: después de '@' se esperaban dígitos"
+                    !hayPunto -> "Decimal mal formado: falta el punto y la parte decimal ('$lexema')"
+                    else -> "Decimal mal formado: falta la parte decimal después del punto ('$lexema')"
+                }
+                reportarError(mensaje, fila, columna)
+                almacenarToken(lexema, Categoria.DESCONOCIDO, fila, columna)
+                return
+            }
+            '^' -> {
+                var lexema = "^"
+                obtenerSiguienteCaracter()
+                while (caracterActual.isLetterOrDigit()) { lexema += caracterActual; obtenerSiguienteCaracter() }
+                reportarError("Identificador mal formado: después de '^' se esperaba una letra ('$lexema')", fila, columna)
+                almacenarToken(lexema, Categoria.DESCONOCIDO, fila, columna)
+                return
+            }
+            '\'' -> {
+                reportarError(diagnosticarCadena(posicion), fila, columna)
+                // La cadena mal formada se consume hasta el fin de la linea como un unico token DESCONOCIDO
+                var lexema = ""
+                while (caracterActual != finCodigo && caracterActual != '\n') {
+                    lexema += caracterActual
+                    obtenerSiguienteCaracter()
+                }
+                almacenarToken(lexema, Categoria.DESCONOCIDO, fila, columna)
+                return
+            }
+            '°' -> {
+                reportarError(diagnosticarCaracter(posicion), fila, columna)
+            }
+            else -> {
+                reportarError("Carácter no reconocido: '${mostrarCaracter(caracterActual)}'", fila, columna)
+            }
+        }
+        almacenarToken(caracterActual + "", Categoria.DESCONOCIDO, fila, columna)
+        obtenerSiguienteCaracter()
+    }
+
+    /** Explica por qué la cadena que empieza en la posicion dada (comilla simple) no es válida */
+    private fun diagnosticarCadena(inicio:Int):String{
+        var i = inicio + 1
+        val n = codigoFuente.length
+        while (i < n && codigoFuente[i] != '\'') {
+            val c = codigoFuente[i]
+            if (c == '\\') {
+                if (i + 1 >= n) break
+                val e = codigoFuente[i + 1]
+                if (e == '\n' || e == '\t' || e == '"' || e == '\'' || e == '\\') i += 2
+                else return "Cadena mal formada: secuencia de escape no válida '\\${mostrarCaracter(e)}'"
+            } else if (c == '\n' || c == '\t' || c == '"') {
+                return "Cadena sin cerrar: carácter no permitido '${mostrarCaracter(c)}' dentro de la cadena"
+            } else i++
+        }
+        return "Cadena sin cerrar: falta la comilla simple de cierre"
+    }
+
+    /** Explica por qué el caracter que empieza en la posicion dada (simbolo °) no es válido */
+    private fun diagnosticarCaracter(inicio:Int):String{
+        val n = codigoFuente.length
+        val i = inicio + 1
+        if (i >= n) return "Carácter sin cerrar: falta el símbolo ° de cierre"
+        val c = codigoFuente[i]
+        if (c == '°') return "Carácter mal formado: no puede estar vacío"
+        if (c == '\\') {
+            if (i + 1 >= n) return "Carácter sin cerrar: falta el símbolo ° de cierre"
+            val e = codigoFuente[i + 1]
+            if (!(e == '°' || e == '\n' || e == '\t' || e == '"' || e == '\\'))
+                return "Carácter mal formado: secuencia de escape no válida '\\${mostrarCaracter(e)}'"
+            return "Carácter sin cerrar: falta el símbolo ° de cierre"
+        }
+        if (c == '\n' || c == '\t' || c == '"') return "Carácter mal formado: '${mostrarCaracter(c)}' no se permite sin escapar"
+        return "Carácter sin cerrar o mal formado: se esperaba un solo símbolo seguido de °"
     }
 
     fun esPalabraReservada():Boolean{
@@ -901,6 +1031,17 @@ class AnalizadorLexico (var codigoFuente:String) {
                     i++
                 }
                 almacenarToken(lexema, Categoria.IDENTIFICADOR, filaInicial, columnaInicial)
+                if (caracterActual.isLetterOrDigit()) {
+                    reportarError("Identificador demasiado largo: máximo 10 caracteres incluyendo '^' ('$lexema')", filaInicial, columnaInicial)
+                    val filaExceso = filaActual
+                    val columnaExceso = columnaActual
+                    var exceso = ""
+                    while (caracterActual.isLetterOrDigit()) {
+                        exceso += caracterActual
+                        obtenerSiguienteCaracter()
+                    }
+                    almacenarToken(exceso, Categoria.DESCONOCIDO, filaExceso, columnaExceso)
+                }
                 return true
             }
             restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
@@ -1357,13 +1498,13 @@ class AnalizadorLexico (var codigoFuente:String) {
                 obtenerSiguienteCaracter()
             }
 
-            if(caracterActual == '\n' && caracterActual != finCodigo) {
+            // El comentario termina en un salto de línea o en el fin del código (ambos son válidos)
+            if(caracterActual == '\n') {
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
-                almacenarToken(lexema, Categoria.COMENTARIO_LINEA, filaInicial, columnaInicial)
-                return true
             }
-            restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
+            almacenarToken(lexema, Categoria.COMENTARIO_LINEA, filaInicial, columnaInicial)
+            return true
         }
         return false
     }
@@ -1428,7 +1569,7 @@ class AnalizadorLexico (var codigoFuente:String) {
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 
-                if(caracterActual == '°' || caracterActual == '\n' || caracterActual == '\t' || caracterActual == '\"' || caracterActual == '\\'){
+                if(caracterActual != finCodigo && (caracterActual == '°' || caracterActual == '\n' || caracterActual == '\t' || caracterActual == '\"' || caracterActual == '\\')){
                     lexema += caracterActual
                     obtenerSiguienteCaracter()
 
@@ -1442,7 +1583,7 @@ class AnalizadorLexico (var codigoFuente:String) {
                     restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
                 }
                 restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
-            }else if(caracterActual != '°' && caracterActual != '\n' && caracterActual != '\t' && caracterActual != '\"'){
+            }else if(caracterActual != finCodigo && caracterActual != '°' && caracterActual != '\n' && caracterActual != '\t' && caracterActual != '\"'){
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 

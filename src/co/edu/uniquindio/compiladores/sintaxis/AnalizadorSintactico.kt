@@ -11,6 +11,16 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     var tokenActual = Token("Inicio",Categoria.PUNTO, 0, 0) //Se inicializa como un token sin importancia
     var listaErrores = ArrayList<Error>()
 
+    /** Error mas lejano visto durante el analisis (incluidos los de alternativas descartadas) y la posicion de token donde ocurrio */
+    private var falloMasLejano: Error? = null
+    private var posicionFalloMasLejano = -1
+
+    /** Token que representa el fin del archivo (se usa cuando se agotan los tokens) */
+    private fun tokenFinDeArchivo(): Token {
+        val ultimo = listaTokens.lastOrNull()
+        return Token("", Categoria.DESCONOCIDO, ultimo?.fila ?: 0, if (ultimo != null) ultimo.columna + ultimo.lexema.length else 0)
+    }
+
     fun obtenerSiguienteToken(){
 
         posicionActual++
@@ -21,6 +31,8 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             if(tokenActual.categoria == Categoria.COMENTARIO_LINEA || tokenActual.categoria == Categoria.COMENTARIO_BLOQUE){
                 obtenerSiguienteToken()
             }
+        }else{
+            tokenActual = tokenFinDeArchivo()
         }
     }
 
@@ -29,14 +41,63 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun restablecerToken(posicion:Int){
 
-        if(posicion < listaTokens.size){
-            posicionActual = posicion
+        posicionActual = posicion
+
+        if(posicion >= 0 && posicion < listaTokens.size){
             tokenActual = listaTokens[posicionActual]
+        }else if(posicion >= listaTokens.size){
+            tokenActual = tokenFinDeArchivo()
         }
     }
 
-    fun reportarError(mensaje:String){
-        listaErrores.add(Error(mensaje,tokenActual.fila, tokenActual.columna))
+    /**
+     * Retrocede a una posicion guardada y descarta los errores reportados desde ese punto: eran especulativos,
+     * producidos al probar una alternativa que se abandona. (El error mas lejano se conserva aparte para
+     * explicar el fallo si ninguna alternativa tiene exito.)
+     */
+    fun restablecerToken(posicion:Int, cantidadErrores:Int){
+        restablecerToken(posicion)
+
+        if(listaErrores.size > cantidadErrores){
+            listaErrores.subList(cantidadErrores, listaErrores.size).clear()
+        }
+    }
+
+    /**
+     * @param candidato si es false el error se lista pero no compite como "error mas lejano". Se usa para
+     * alternativas debiles/ambiguas: en un empate de posicion el primer error reportado gana, y asi un mensaje
+     * generico de una alternativa no tapa al de la alternativa especifica que se prueba despues.
+     */
+    fun reportarError(mensaje:String, candidato:Boolean = true){
+        val error = Error(mensaje, tokenActual.fila, tokenActual.columna)
+
+        if(candidato && posicionActual > posicionFalloMasLejano){
+            falloMasLejano = error
+            posicionFalloMasLejano = posicionActual
+        }
+
+        agregarError(error)
+    }
+
+    private fun agregarError(error: Error){
+        if(listaErrores.none { it.error == error.error && it.fila == error.fila && it.columna == error.columna }){
+            listaErrores.add(error)
+        }
+    }
+
+    /**
+     * Reporta un error de nivel de unidad de compilacion. Si durante el analisis se llego mas lejos que la posicion
+     * actual (una alternativa fallo mas adelante y se descarto), se reporta ese error, que es el que realmente
+     * explica el problema, en lugar del mensaje generico.
+     */
+    private fun reportarErrorFinal(mensaje:String){
+        val lejano = falloMasLejano
+
+        if(lejano != null && posicionFalloMasLejano > posicionActual){
+            agregarError(lejano)
+        }else{
+            reportarError(mensaje)
+        }
     }
 
     /**
@@ -63,23 +124,40 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                         val listaFunciones:ArrayList<Funcion> = esListaFunciones()
 
                         if(tokenActual.categoria == Categoria.LLAVE_DERECHO){
+                            reportarTokensSobrantes()
                             return UnidadDeCompilacion(visibilidad, nombre, listaVariablesGlobales, listaFunciones)
                         }else{
-                            reportarError("Falta la llave derecha")
+                            reportarErrorFinal("Falta la llave derecha")
                         }
                     }else{
-                        reportarError("Falta la llave izquierda")
+                        reportarErrorFinal("Falta la llave izquierda")
                     }
                 }else{
-                    reportarError("Falta el identificador de la funcion")
+                    reportarErrorFinal("Falta el identificador de la clase")
                 }
             }else{
-                reportarError("Falta palabra reservada cls")
+                reportarErrorFinal("Falta palabra reservada cls")
             }
         }else{
-            reportarError("Debe definir la visibilidad de la clase")
+            reportarErrorFinal("Debe definir la visibilidad de la clase")
         }
         return null
+    }
+
+    /**
+     * Despues de la llave que cierra la clase no debe quedar nada (salvo comentarios)
+     */
+    private fun reportarTokensSobrantes(){
+        var i = posicionActual + 1
+
+        while(i < listaTokens.size && (listaTokens[i].categoria == Categoria.COMENTARIO_LINEA || listaTokens[i].categoria == Categoria.COMENTARIO_BLOQUE)){
+            i++
+        }
+
+        if(i < listaTokens.size){
+            val sobrante = listaTokens[i]
+            agregarError(Error("Hay codigo despues de la llave que cierra la clase", sobrante.fila, sobrante.columna))
+        }
     }
 
     /**
@@ -117,6 +195,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esVariableGlobal(): VariableGlobal? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         var visibilidad = esVisibilidad()
 
@@ -141,9 +220,10 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     reportarError("Debe definir el identificador de la variable global")
                 }
             }else{
-                reportarError("Debe definir el tipo de la variable global")
+                //No compite como error mas lejano: "pub X" puede ser tambien una funcion y esa alternativa se prueba despues
+                reportarError("Debe definir el tipo de la variable global", candidato = false)
             }
-            restablecerToken(posicionInicial)
+            restablecerToken(posicionInicial, erroresIniciales)
         }
 
         return null
@@ -186,6 +266,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esFuncion(): Funcion? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         var visibilidad = esVisibilidad()
 
@@ -232,7 +313,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }else{
                 reportarError("Debe definir el valor retornado de la funcion")
             }
-            restablecerToken(posicionInicial)
+            restablecerToken(posicionInicial, erroresIniciales)
         }
 
         return null
@@ -281,6 +362,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esParametroConTipo(): ParametroConTipo? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var tipo = esTipo()
 
         if(tipo != null) {
@@ -295,7 +377,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -328,6 +410,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esParametroSinTipo(): ParametroSinTipo? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var tipo = esTipo()
 
         if(tipo == null) {
@@ -343,7 +426,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             reportarError("Este parametro no lleva tipo")
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -425,6 +508,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esDecisionSentencia(): Decision? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "if"){
             obtenerSiguienteToken()
@@ -461,8 +545,6 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                                     }else{
                                         reportarError("Debe definir la llave izquierda de la desicion ELSE")
                                     }
-                                }else{
-                                    reportarError("Debe indicar la palabra reservada ELSE de la desicion")
                                 }
 
                                 return Decision(exprLogica, listaSentenciasIf, ArrayList<Sentencia>())
@@ -483,7 +565,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -493,6 +575,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esExpresionLogica(): ExpresionLogica? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var negacion:Token? = null
 
         if(tokenActual.categoria == Categoria.OPERADOR_LOGICO && tokenActual.lexema == "not"){
@@ -511,6 +594,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     var opeLogico:Token? = esOperadorLogico()
 
                     if(opeLogico != null){
+                        val posicionOperador = posicionActual
                         obtenerSiguienteToken()
                         var expLogica:ExpresionLogica?  = esExpresionLogica()
 
@@ -518,7 +602,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                             return ExpresionLogica(negacion, expRelacional, opeLogico, expLogica)
                         }else{
                             reportarError("Expresion logica no valida")
-                            restablecerToken(posicionActual - 1)
+                            restablecerToken(posicionOperador)
                         }
                     }
 
@@ -533,7 +617,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             reportarError("Debe iniciar con un parentecis izquierdo la expresion logica")
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -558,6 +642,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esExpresionRelacional(): ExpresionRelacional? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
 
         if(tokenActual.categoria == Categoria.PARENTESIS_IZQUIERDO) {
@@ -604,7 +689,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             reportarError("Debe encerrar en parentesis la expresion aritmetica")
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -614,6 +699,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     fun esExpresionAritmetica(): ExpresionAritmetica? {
 
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.ENTERO || tokenActual.categoria == Categoria.DECIMAL){
             var numero = tokenActual
@@ -642,7 +728,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                 }else{
                     reportarError("Debe encerrar en parentesis la expresion aritmetica")
                 }
-                restablecerToken(posicionInicial)
+                restablecerToken(posicionInicial, erroresIniciales)
             }
 
             return ExpresionAritmetica(numero, null, null)
@@ -650,7 +736,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             reportarError("Una expresion aritmetica debe tener minimo un numero")
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -659,6 +745,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esDeclaracionVariableMutSentencia(): DeclaracionVariableMut? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var tipo:Token? = esTipo()
 
         if(tipo != null){
@@ -679,7 +766,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -688,6 +775,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esDeclaracionVariableInmSentencia(): DeclaracionVariableInm? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var tipo:Token? = esTipo()
 
         if(tipo != null){
@@ -701,7 +789,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -711,6 +799,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esAsignacionSentencia(): Asignacion? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.IDENTIFICADOR){
             var identificador = tokenActual
@@ -762,7 +851,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -771,6 +860,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esExpresion(): Expresion? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var expresion:Expresion? = esExpresionAritmetica()
 
         if(expresion != null){
@@ -795,7 +885,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             return expresion
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -804,6 +894,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esExpresionCadena(): ExpresionCadena? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
         var tipoExpresionCadena:Token? = esTipoExpresionCadena()
 
         if(tipoExpresionCadena != null){
@@ -811,6 +902,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
             if(tokenActual.categoria == Categoria.OPERADOR_ARITMETICO && tokenActual.lexema == "+"){
                 var operAgrupacion = tokenActual
+                val posicionOperador = posicionActual
                 obtenerSiguienteToken()
                 var expresionCadena:ExpresionCadena? = esExpresionCadena()
 
@@ -818,7 +910,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
                     return ExpresionCadena(tipoExpresionCadena, operAgrupacion, expresionCadena)
                 }else{
                     reportarError("Expresion cadena no valida")
-                    restablecerToken(posicionActual - 1)
+                    restablecerToken(posicionOperador)
                 }
             }
             return ExpresionCadena(tipoExpresionCadena, null, null)
@@ -826,7 +918,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             reportarError("La expresion cadena debe tener minimo una cadena")
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -848,6 +940,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esImpresionSentencia(): Impresion? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "imp"){
             obtenerSiguienteToken()
@@ -897,7 +990,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -906,6 +999,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esCicloSentencia(): Ciclo? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "whl"){
             obtenerSiguienteToken()
@@ -943,7 +1037,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -953,6 +1047,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esRetornoSentencia(): Retorno? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "ret"){
             obtenerSiguienteToken()
@@ -984,7 +1079,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -993,6 +1088,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esLecturaSentencia(): Lectura? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "rad"){
             obtenerSiguienteToken()
@@ -1024,7 +1120,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -1033,6 +1129,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esInvFuncionSentencia(): InvFuncion? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.IDENTIFICADOR){
             var nombre = tokenActual
@@ -1057,7 +1154,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 
@@ -1067,6 +1164,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
      */
     fun esIncrDecrSentencia(): IncrDecr? {
         var posicionInicial = posicionActual
+        val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.IDENTIFICADOR){
             var nombre = tokenActual
@@ -1085,7 +1183,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
             }
         }
 
-        restablecerToken(posicionInicial)
+        restablecerToken(posicionInicial, erroresIniciales)
         return null
     }
 }
