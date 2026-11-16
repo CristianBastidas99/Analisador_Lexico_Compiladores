@@ -50,8 +50,8 @@ src/*.class
 
 # ==========================================================
 #  IntelliJ IDEA
-#  (.idea/ y el .iml se mantienen versionados porque el proyecto
-#   no usa Gradle/Maven y son necesarios para abrirlo y ejecutarlo)
+#  (.idea/ y el .iml se mantienen versionados para poder abrir y ejecutar
+#   el proyecto directamente en IntelliJ; ademas ahora existe un pom.xml de Maven)
 # ==========================================================
 .idea/workspace.xml
 .idea/shelf/
