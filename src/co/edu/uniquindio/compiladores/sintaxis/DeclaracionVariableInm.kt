@@ -8,6 +8,11 @@ import java.util.ArrayList
 
 class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sentencia() {
 
+    init {
+        // La asignacion de la declaracion es la inicializacion: no cuenta como modificacion de la inmutable
+        asignacion.esInicializacion = true
+    }
+
     override fun getArbolVisual(): TreeItem<String> {
         val raiz = TreeItem("Declaracion Variable Inmutable")
 
@@ -19,7 +24,7 @@ class DeclaracionVariableInm(var tipo:Token, var asignacion: Asignacion) : Sente
     }
 
     override fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
-        tablaSimbolos.guardasSimboloValor(asignacion.identificador.lexema, tipo.lexema, true, ambito, "pvt", tipo.fila, tipo.columna)
+        tablaSimbolos.guardasSimboloValor(asignacion.identificador.lexema, tipo.lexema, false, ambito, "pvt", asignacion.identificador.fila, asignacion.identificador.columna)
     }
 
     override fun analizarSemantica(

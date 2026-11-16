@@ -8,6 +8,12 @@ import java.util.ArrayList
 
 
 class Lectura(var cadena:Token) : Sentencia() {
+
+    /** Tipo y nombre de la variable que recibe la lectura; los fija Asignacion durante el analisis semantico */
+    var tipoDestino: String? = null
+    var nombreDestino: String? = null
+    var posicionDestino: Token? = null
+
     override fun getArbolVisual(): TreeItem<String> {
         val raiz = TreeItem("Lectura")
 
@@ -26,13 +32,19 @@ class Lectura(var cadena:Token) : Sentencia() {
 
     override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
-        if(ambito != "str"){
-            listaErroresSemanticos.add(Error("El tipo de la variable ($ambito) no coincide con la lectura (str)", cadena.fila, cadena.columna))
+        val tipo = tipoDestino ?: return
+        if(tipo != "str" && tipo != "ent" && tipo != "dbe"){
+            listaErroresSemanticos.add(Error("La variable ($nombreDestino) es de tipo $tipo: la lectura (rad) solo se puede asignar a variables str, ent o dbe", (posicionDestino ?: cadena).fila, (posicionDestino ?: cadena).columna))
         }
     }
 
     override fun getCodeJava(): String {
-        return "JOptionPane.showInputDialog(" + CodigoJava.cadena(cadena.lexema) + ");\n"
+        val lectura = "JOptionPane.showInputDialog(" + CodigoJava.cadena(cadena.lexema) + ")"
+        return when (tipoDestino) {
+            "ent" -> "Integer.parseInt($lectura);\n"
+            "dbe" -> "Double.parseDouble($lectura);\n"
+            else -> "$lectura;\n"
+        }
     }
 
 }

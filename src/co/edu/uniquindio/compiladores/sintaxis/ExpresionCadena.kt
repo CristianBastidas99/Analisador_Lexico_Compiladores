@@ -22,6 +22,10 @@ class ExpresionCadena(var valorTipo: Token, var operAgrupacion: Token?, var expr
     }
 
     override fun obtenerTipo(): String {
+        // Un caracter suelto (sin concatenacion) es crt; con concatenacion el resultado es str
+        if (operAgrupacion == null && expresionCadena == null && valorTipo.categoria == Categoria.CARACTER) {
+            return "crt"
+        }
         return "str"
     }
 

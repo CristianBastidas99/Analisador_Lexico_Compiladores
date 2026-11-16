@@ -165,8 +165,8 @@ class SintacticoErroresTest {
         assertEquals(1, a.errores.size, "${a.errores}")
         val e = a.errores[0]
         assertEquals("Falta palabra reservada cls", e.error)
-        assertEquals(0, e.fila)
-        assertEquals(4, e.columna)
+        assertEquals(1, e.fila)
+        assertEquals(5, e.columna)
     }
 
     @Test
@@ -175,8 +175,8 @@ class SintacticoErroresTest {
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
         assertEquals("Falta el fin de sentencia", a.errores[0].error)
-        assertEquals(3, a.errores[0].fila)
-        assertEquals(0, a.errores[0].columna)
+        assertEquals(4, a.errores[0].fila)
+        assertEquals(1, a.errores[0].columna)
         assertSinDuplicados(a)
     }
 
@@ -186,7 +186,7 @@ class SintacticoErroresTest {
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
         assertEquals("Debe definir el parentesis derecho de la desicion", a.errores[0].error)
-        assertEquals(2, a.errores[0].fila)
+        assertEquals(3, a.errores[0].fila)
         assertSinDuplicados(a)
     }
 
@@ -196,8 +196,8 @@ class SintacticoErroresTest {
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
         assertEquals("Debe definir el valor retornado de la funcion", a.errores[0].error)
-        assertEquals(1, a.errores[0].fila)
-        assertEquals(4, a.errores[0].columna)
+        assertEquals(2, a.errores[0].fila)
+        assertEquals(5, a.errores[0].columna)
         assertSinDuplicados(a)
     }
 
@@ -207,8 +207,8 @@ class SintacticoErroresTest {
         assertNull(a.unidad, "${a.errores}")
         assertEquals(1, a.errores.size, "${a.errores}")
         assertEquals("Falta la llave derecha", a.errores[0].error)
-        assertEquals(1, a.errores[0].columna)
-        assertEquals(3, a.errores[0].fila)
+        assertEquals(2, a.errores[0].columna)
+        assertEquals(4, a.errores[0].fila)
         assertSinDuplicados(a)
     }
 
@@ -217,7 +217,7 @@ class SintacticoErroresTest {
         val a = analizar("pub cls ^a {\n}\nimp ( 'x' ) |")
         assertEquals(1, a.errores.size, "${a.errores}")
         assertEquals("Hay codigo despues de la llave que cierra la clase", a.errores[0].error)
-        assertEquals(2, a.errores[0].fila)
-        assertEquals(0, a.errores[0].columna)
+        assertEquals(3, a.errores[0].fila)
+        assertEquals(1, a.errores[0].columna)
     }
 }

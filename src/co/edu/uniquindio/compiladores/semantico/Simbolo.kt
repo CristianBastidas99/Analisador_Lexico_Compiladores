@@ -27,12 +27,14 @@ class Simbolo {
     /**
      * Contructor para crear un simbolo de tipo Metodo (Funcion)
      */
-    constructor( nombre: String?, tipo: String?, tiposParametros: ArrayList<String>, ambito: String?, acceso: String? ) {
+    constructor( nombre: String?, tipo: String?, tiposParametros: ArrayList<String>, ambito: String?, acceso: String?, fila: Int?, columna: Int? ) {
         this.nombre = nombre
         this.tipo = tipo
         this.tiposParametros = tiposParametros
         this.ambito = ambito
         this.acceso = acceso
+        this.fila = fila
+        this.columna = columna
     }
 
     override fun toString(): String {

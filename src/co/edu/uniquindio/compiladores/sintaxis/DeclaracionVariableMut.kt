@@ -19,7 +19,7 @@ class DeclaracionVariableMut(var tipo: Token, var identificador: Token) : Senten
     }
 
     override fun llenarTablaSimbolos(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
-        tablaSimbolos.guardasSimboloValor(identificador.lexema, tipo.lexema, true, ambito, "pvt", tipo.fila, tipo.columna)
+        tablaSimbolos.guardasSimboloValor(identificador.lexema, tipo.lexema, true, ambito, "pvt", identificador.fila, identificador.columna)
     }
 
     override fun analizarSemantica(

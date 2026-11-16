@@ -22,10 +22,16 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
         return raiz
     }
 
+    /** Ambito unico y determinista por ciclo: se basa en la posicion del operador relacional de la condicion */
+    private fun ambitoWhile(ambito: String): String {
+        val t = expresionLogica.exprRelacional.opeRelacional
+        return "$ambito/while@${t.fila}:${t.columna}"
+    }
+
     override fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String ) {
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
-                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "$ambito/while")
+                s.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, ambitoWhile(ambito))
             }
         }
     }
@@ -33,7 +39,7 @@ class Ciclo(var expresionLogica: ExpresionLogica, val listaSentencias:ArrayList<
     override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
-                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "$ambito/while")
+                s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambitoWhile(ambito))
             }
         }
     }

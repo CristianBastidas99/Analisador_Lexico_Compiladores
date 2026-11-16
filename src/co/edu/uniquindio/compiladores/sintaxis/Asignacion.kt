@@ -2,12 +2,14 @@ package co.edu.uniquindio.compiladores.sintaxis
 
 import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
-import co.edu.uniquindio.compiladores.semantico.Simbolo
 import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
 import java.util.ArrayList
 
 class Asignacion(var identificador:Token, var operAsignacion:Token, var expresion:Expresion?, var identificador2:Token?, var sentencia: Sentencia?) :Sentencia() {
+
+    /** true cuando es la asignacion inicial de una declaracion de variable inmutable (no cuenta como modificacion) */
+    var esInicializacion: Boolean = false
 
     override fun getArbolVisual(): TreeItem<String> {
 
@@ -42,90 +44,79 @@ class Asignacion(var identificador:Token, var operAsignacion:Token, var expresio
 
     override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
-        var simbolo: Simbolo? = null
-        var posicionS = ambito.length
-        var ambitoActS = ambito
+        // Se limpian los destinos de la ejecucion anterior (el analisis puede repetirse)
+        val s = sentencia
+        if (s is InvFuncion) s.tipoDestino = null
+        if (s is Lectura) { s.tipoDestino = null; s.nombreDestino = null }
 
-        do {
-            ambitoActS = ambitoActS.substring(0, posicionS)
-            simbolo = tablaSimbolos.buscarSimboloValor(identificador.lexema, ambitoActS)
+        val simbolo = tablaSimbolos.buscarSimboloValorEnAmbitos(identificador.lexema, ambito)
 
-            if (simbolo != null) {
-                if (expresion != null) {
-                    var tipoExpresion = expresion!!.obtenerTipo()
-                    if (simbolo.tipo != tipoExpresion) {
-                        listaErroresSemanticos.add(
-                            Error(
-                                "El tipo de dato de la expresion ($tipoExpresion) no coincide con el tipo de la variable (${simbolo.tipo})",
-                                identificador.fila,
-                                identificador.columna
-                            )
-                        )
-                    }
-                }
-
-                if (identificador2 != null) {
-                    var tipoIdentificador2: Simbolo? = null
-                    var posicion = ambito.length
-                    var ambitoAct = ambito
-
-                    do {
-                        ambitoAct = ambitoAct.substring(0, posicion)
-                        tipoIdentificador2 = tablaSimbolos.buscarSimboloValor(identificador2!!.lexema, ambitoAct)
-
-                        if (tipoIdentificador2 != null) {
-                            if (!simbolo.tipo.equals(tipoIdentificador2.tipo)) {
-                                listaErroresSemanticos.add(
-                                    Error(
-                                        "El tipo de dato del identificador (${tipoIdentificador2.tipo}) no coincide con el tipo de la variable (${simbolo.tipo})",
-                                        identificador.fila,
-                                        identificador.columna
-                                    )
-                                )
-                            }
-                            posicion = -1
-                        } else {
-                            posicion = ambitoAct.lastIndexOf('/')
-                        }
-
-                    } while (posicion != -1)
-
-                    if (tipoIdentificador2 == null) {
-                        listaErroresSemanticos.add(
-                            Error(
-                                "La variable (${identificador2!!.lexema}) que intenta dar como asignacion no se ha declarado",
-                                identificador.fila,
-                                identificador.columna
-                            )
-                        )
-                    }
-                }
-
-                if (sentencia != null) {
-                    if (sentencia!!.javaClass.simpleName.equals("InvFuncion")) {
-                        sentencia!!.analizarSemantica(
-                            listaErroresSemanticos,
-                            tablaSimbolos,
-                            ambito + ".${simbolo.tipo}"
-                        )
-                    } else if (sentencia!!.javaClass.simpleName.equals("Lectura")) {
-                        sentencia!!.analizarSemantica(listaErroresSemanticos, tablaSimbolos, simbolo.tipo!!)
-                    }
-                }
-                posicionS = -1
-            } else {
-                posicionS = ambitoActS.lastIndexOf('/')
-            }
-        }while (posicionS != -1)
-
-        if(simbolo == null){
+        if (simbolo == null) {
             listaErroresSemanticos.add(
                 Error(
-                    "La variable (${identificador.lexema}) que intenta dar asignacion no se ha declarado en el ambito $ambito",
+                    "La variable (${identificador.lexema}) que intenta dar asignación no se ha declarado en el ámbito $ambito",
                     identificador.fila,
                     identificador.columna
                 )
             )
+            return
+        }
+
+        if (simbolo.modificable == false && !esInicializacion) {
+            listaErroresSemanticos.add(
+                Error(
+                    "La variable (${identificador.lexema}) es inmutable y no se puede modificar",
+                    identificador.fila,
+                    identificador.columna
+                )
+            )
+        }
+
+        if (expresion != null) {
+            val tipoExpresion = expresion!!.obtenerTipo()
+            if (simbolo.tipo != tipoExpresion) {
+                listaErroresSemanticos.add(
+                    Error(
+                        "El tipo de dato de la expresión ($tipoExpresion) no coincide con el tipo de la variable (${simbolo.tipo})",
+                        identificador.fila,
+                        identificador.columna
+                    )
+                )
+            }
+        }
+
+        if (identificador2 != null) {
+            val simbolo2 = tablaSimbolos.buscarSimboloValorEnAmbitos(identificador2!!.lexema, ambito)
+
+            if (simbolo2 != null) {
+                if (simbolo.tipo != simbolo2.tipo) {
+                    listaErroresSemanticos.add(
+                        Error(
+                            "El tipo de dato del identificador (${simbolo2.tipo}) no coincide con el tipo de la variable (${simbolo.tipo})",
+                            identificador.fila,
+                            identificador.columna
+                        )
+                    )
+                }
+            } else {
+                listaErroresSemanticos.add(
+                    Error(
+                        "La variable (${identificador2!!.lexema}) que intenta dar como asignación no se ha declarado",
+                        identificador.fila,
+                        identificador.columna
+                    )
+                )
+            }
+        }
+
+        if (s is InvFuncion) {
+            s.tipoDestino = simbolo.tipo
+            s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambito)
+        } else if (s is Lectura) {
+            s.tipoDestino = simbolo.tipo
+            s.nombreDestino = identificador.lexema
+            s.posicionDestino = identificador
+            s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambito)
         }
     }
 

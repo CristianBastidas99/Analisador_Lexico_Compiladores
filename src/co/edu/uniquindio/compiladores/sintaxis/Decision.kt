@@ -31,15 +31,25 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
         return  raiz
     }
 
+    /** Ambitos unicos y deterministas por bloque: se basan en la posicion del operador relacional de la condicion */
+    private fun posicion(): String {
+        val t = exprLogica.exprRelacional.opeRelacional
+        return "@${t.fila}:${t.columna}"
+    }
+
+    private fun ambitoIf(ambito: String) = "$ambito/if" + posicion()
+
+    private fun ambitoElse(ambito: String) = "$ambito/else" + posicion()
+
     override fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String ) {
         if(listaSentenciasIf.isNotEmpty()){
             for(i in listaSentenciasIf){
-                i.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "$ambito/if")
+                i.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, ambitoIf(ambito))
             }
         }
         if(listaSentenciasElse.isNotEmpty()){
             for(e in listaSentenciasElse){
-                e.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, "$ambito/else")
+                e.llenarTablaSimbolos(listaErroresSemanticos, tablaSimbolos, ambitoElse(ambito))
             }
         }
     }
@@ -51,12 +61,12 @@ class Decision(var exprLogica:ExpresionLogica, val listaSentenciasIf:ArrayList<S
     ) {
         if(listaSentenciasIf.isNotEmpty()){
             for(i in listaSentenciasIf){
-                i.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "$ambito/if")
+                i.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambitoIf(ambito))
             }
         }
         if(listaSentenciasElse.isNotEmpty()){
             for(e in listaSentenciasElse){
-                e.analizarSemantica(listaErroresSemanticos, tablaSimbolos, "$ambito/else")
+                e.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambitoElse(ambito))
             }
         }
     }

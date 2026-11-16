@@ -5,18 +5,18 @@ import java.util.ArrayList
 class AnalizadorLexico (var codigoFuente:String) {
 
     var posicionAcual = 0
-    var caracterActual = codigoFuente[0]
+    var caracterActual = if (codigoFuente.isEmpty()) 0.toChar() else codigoFuente[0]
     var listaTokens = ArrayList<Token>()
     var listaErrores = ArrayList<Error>()
     var finCodigo = 0.toChar()
-    var filaActual = 0
-    var columnaActual = 0
+    var filaActual = 1
+    var columnaActual = 1
 
     fun  almacenarToken(lexema:String, categoria: Categoria, fila:Int, columna:Int) = listaTokens.add(Token(lexema, categoria, fila, columna))
 
     fun analizar(){
         while(caracterActual != finCodigo){
-            if(caracterActual == ' ' || caracterActual == '\t' || caracterActual == '\n'){
+            if(caracterActual == ' ' || caracterActual == '\t' || caracterActual == '\n' || caracterActual == '\r'){
                 obtenerSiguienteCaracter()
                 continue
             }
@@ -35,11 +35,11 @@ class AnalizadorLexico (var codigoFuente:String) {
 
             if(esOperadorDecremento()) continue
 
+            if(esOperadorRelacional()) continue
+
             if(esOperadorAsignacion()) continue
 
             if(esOperadorAritmetico()) continue
-
-            if(esOperadorRelacional()) continue
 
             if(esParentesisIzquierdo()) continue
 
@@ -119,20 +119,10 @@ class AnalizadorLexico (var codigoFuente:String) {
             '@' -> {
                 var lexema = "@"
                 obtenerSiguienteCaracter()
-                var digitosEnteros = 0
-                while (caracterActual.isDigit()) { lexema += caracterActual; obtenerSiguienteCaracter(); digitosEnteros++ }
-                var hayPunto = false
-                if (caracterActual == '.') {
-                    hayPunto = true
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-                    while (caracterActual.isDigit()) { lexema += caracterActual; obtenerSiguienteCaracter() }
-                }
-                val mensaje = when {
-                    digitosEnteros == 0 -> "Decimal mal formado: después de '@' se esperaban dígitos"
-                    !hayPunto -> "Decimal mal formado: falta el punto y la parte decimal ('$lexema')"
-                    else -> "Decimal mal formado: falta la parte decimal después del punto ('$lexema')"
-                }
+                while (caracterActual.isDigit()) { lexema += caracterActual; obtenerSiguienteCaracter() }
+                // Si hubiera un punto, esDecimal() ya habria reconocido el token: aqui falta el punto
+                val mensaje = if (lexema.length == 1) "Decimal mal formado: después de '@' se esperaba '.' con dígitos opcionales"
+                              else "Decimal mal formado: falta el punto ('$lexema')"
                 reportarError(mensaje, fila, columna)
                 almacenarToken(lexema, Categoria.DESCONOCIDO, fila, columna)
                 return
@@ -977,7 +967,12 @@ class AnalizadorLexico (var codigoFuente:String) {
             lexema += caracterActual
             obtenerSiguienteCaracter()
 
-            if(caracterActual.isDigit()) {
+            while (caracterActual.isDigit()) {
+                lexema += caracterActual
+                obtenerSiguienteCaracter()
+            }
+
+            if (caracterActual == '.') {
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
 
@@ -986,23 +981,8 @@ class AnalizadorLexico (var codigoFuente:String) {
                     obtenerSiguienteCaracter()
                 }
 
-                if (caracterActual == '.') {
-                    lexema += caracterActual
-                    obtenerSiguienteCaracter()
-
-                    if(caracterActual.isDigit()) {
-                        lexema += caracterActual
-                        obtenerSiguienteCaracter()
-
-                        while (caracterActual.isDigit()) {
-                            lexema += caracterActual
-                            obtenerSiguienteCaracter()
-                        }
-
-                        almacenarToken(lexema, Categoria.DECIMAL, filaInicial, columnaInicial)
-                        return true
-                    }
-                }
+                almacenarToken(lexema, Categoria.DECIMAL, filaInicial, columnaInicial)
+                return true
             }
             restablecerCaracterActual(posicionInicial,filaInicial,columnaInicial)
         }
@@ -1498,12 +1478,15 @@ class AnalizadorLexico (var codigoFuente:String) {
                 obtenerSiguienteCaracter()
             }
 
-            // El comentario termina en un salto de línea o en el fin del código (ambos son válidos)
+            // Segun el automata, el comentario debe terminar en un salto de línea
             if(caracterActual == '\n') {
                 lexema += caracterActual
                 obtenerSiguienteCaracter()
+                almacenarToken(lexema, Categoria.COMENTARIO_LINEA, filaInicial, columnaInicial)
+            } else {
+                reportarError("Comentario de línea sin salto de línea final", filaInicial, columnaInicial)
+                almacenarToken(lexema, Categoria.DESCONOCIDO, filaInicial, columnaInicial)
             }
-            almacenarToken(lexema, Categoria.COMENTARIO_LINEA, filaInicial, columnaInicial)
             return true
         }
         return false
@@ -1655,7 +1638,7 @@ class AnalizadorLexico (var codigoFuente:String) {
         }else{
             if(caracterActual == '\n'){
                 filaActual++
-                columnaActual = 0
+                columnaActual = 1
             }else{
                 columnaActual++
             }

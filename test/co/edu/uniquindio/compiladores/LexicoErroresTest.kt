@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.Duration
 
-/** Pruebas del reporte de errores lexicos (fila y columna base 0, igual que los tokens) */
+/** Pruebas del reporte de errores lexicos (fila y columna desde 1, igual que los tokens) */
 class LexicoErroresTest {
 
     private fun analizarConLimite(fuente: String): AnalizadorLexico =
@@ -25,8 +25,8 @@ class LexicoErroresTest {
         val lexico = analizar("pub cls ^a { $ }")
         assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
         val error = lexico.listaErrores[0]
-        assertEquals(0, error.fila)
-        assertEquals(13, error.columna)
+        assertEquals(1, error.fila)
+        assertEquals(14, error.columna)
         assertTrue(error.error.contains("'$'"), error.error)
     }
 
@@ -34,8 +34,8 @@ class LexicoErroresTest {
     fun caracterNoReconocidoEnOtraLinea() {
         val lexico = analizar("pub cls ^a {\n  $\n}")
         assertEquals(1, lexico.listaErrores.size)
-        assertEquals(1, lexico.listaErrores[0].fila)
-        assertEquals(2, lexico.listaErrores[0].columna)
+        assertEquals(2, lexico.listaErrores[0].fila)
+        assertEquals(3, lexico.listaErrores[0].columna)
     }
 
     @Test
@@ -43,8 +43,8 @@ class LexicoErroresTest {
         val lexico = analizar("pub cls ^a {\n  imp ( 'hola ) |\n}")
         assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
         val error = lexico.listaErrores[0]
-        assertEquals(1, error.fila)
-        assertEquals(8, error.columna)
+        assertEquals(2, error.fila)
+        assertEquals(9, error.columna)
         assertTrue(error.error.contains("Cadena sin cerrar"), error.error)
     }
 
@@ -53,8 +53,8 @@ class LexicoErroresTest {
         val lexico = analizar("pub cls ^a {\n\"\"\" comentario\nsin cierre }")
         assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
         val error = lexico.listaErrores[0]
-        assertEquals(1, error.fila)
-        assertEquals(0, error.columna)
+        assertEquals(2, error.fila)
+        assertEquals(1, error.columna)
         assertTrue(error.error.contains("Comentario de bloque sin cerrar"), error.error)
     }
 
@@ -70,40 +70,109 @@ class LexicoErroresTest {
 
     @Test
     fun otrosMalFormados() {
-        verificarUnError("ent ^a = # |", 0, 9, "Entero mal formado")
-        verificarUnError("dbe ^a = @1. |", 0, 9, "Decimal mal formado")
-        verificarUnError("ent ^ |", 0, 4, "Identificador mal formado")
-        verificarUnError("ent ^abcdefghijkl |", 0, 4, "Identificador demasiado largo")
-        verificarUnError("ent ^a = ° |", 0, 9, "Carácter sin cerrar o mal formado")
+        verificarUnError("ent ^a = # |", 1, 10, "Entero mal formado")
+        verificarUnError("dbe ^a = @12 |", 1, 10, "Decimal mal formado")
+        verificarUnError("ent ^ |", 1, 5, "Identificador mal formado")
+        verificarUnError("ent ^abcdefghijkl |", 1, 5, "Identificador demasiado largo")
+        verificarUnError("ent ^a = ° |", 1, 10, "Carácter sin cerrar o mal formado")
     }
 
     @Test
     fun malFormadosComoUltimosCaracteres() {
-        verificarUnError("ent ^a = #", 0, 9, "Entero mal formado")
-        verificarUnError("dbe ^a = @1.", 0, 9, "Decimal mal formado")
-        verificarUnError("ent ^", 0, 4, "Identificador mal formado")
-        verificarUnError("ent ^a = °", 0, 9, "Carácter sin cerrar")
-        verificarUnError("imp ( 'abc", 0, 6, "Cadena sin cerrar")
-        verificarUnError("pub \"\"\"", 0, 4, "Comentario de bloque sin cerrar")
+        verificarUnError("ent ^a = #", 1, 10, "Entero mal formado")
+        verificarUnError("dbe ^a = @12", 1, 10, "Decimal mal formado")
+        verificarUnError("ent ^", 1, 5, "Identificador mal formado")
+        verificarUnError("ent ^a = °", 1, 10, "Carácter sin cerrar")
+        verificarUnError("imp ( 'abc", 1, 7, "Cadena sin cerrar")
+        verificarUnError("pub \"\"\"", 1, 5, "Comentario de bloque sin cerrar")
     }
 
     @Test
-    fun comentarioDeLineaAlFinalSinSaltoEsValido() {
+    fun comentarioDeLineaAlFinalSinSaltoEsError() {
         val lexico = analizarConLimite("pub cls ^a { }\n& comentario final")
+        assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
+        assertEquals(2, lexico.listaErrores[0].fila)
+        assertEquals(1, lexico.listaErrores[0].columna)
+        assertTrue(lexico.listaErrores[0].error.contains("Comentario de línea sin salto de línea final"))
+        assertEquals(Categoria.DESCONOCIDO, lexico.listaTokens.last().categoria)
+        assertEquals("& comentario final", lexico.listaTokens.last().lexema)
+    }
+
+    @Test
+    fun comentarioDeLineaConSaltoEsValido() {
+        val lexico = analizarConLimite("& comentario\n")
+        assertTrue(lexico.listaErrores.isEmpty())
+        assertEquals(Categoria.COMENTARIO_LINEA, lexico.listaTokens.single().categoria)
+    }
+
+    @Test
+    fun finDeLineaWindowsEquivaleASaltoUnix() {
+        val unix = "pub cls ^a {\n  ent ^x = #1 |\n}"
+        val windows = unix.replace("\n", "\r\n")
+        val a = analizar(unix)
+        val b = analizar(windows)
+        assertTrue(b.listaErrores.isEmpty(), b.listaErrores.toString())
+        fun firma(l: AnalizadorLexico) = l.listaTokens.map { listOf(it.lexema, it.categoria, it.fila, it.columna) }
+        assertEquals(firma(a), firma(b))
+    }
+
+    @Test
+    fun cadenaVaciaNoGeneraTokensNiErrores() {
+        val lexico = analizar("")
+        assertEquals(0, lexico.listaTokens.size)
+        assertEquals(0, lexico.listaErrores.size)
+    }
+
+    @Test
+    fun igualdadEsOperadorRelacionalYAsignacionSigueIgual() {
+        val igual = analizar("==")
+        assertTrue(igual.listaErrores.isEmpty())
+        assertEquals(1, igual.listaTokens.size)
+        assertEquals(Categoria.OPERADOR_RELACIONAL, igual.listaTokens[0].categoria)
+        assertEquals("==", igual.listaTokens[0].lexema)
+
+        val asig = analizar("=")
+        assertEquals(1, asig.listaTokens.size)
+        assertEquals(Categoria.OPERADOR_ASIGNACION, asig.listaTokens[0].categoria)
+
+        val mixto = analizar("^a = ^b == ^c <= ^d != ^e")
+        assertEquals(
+            listOf(Categoria.IDENTIFICADOR, Categoria.OPERADOR_ASIGNACION, Categoria.IDENTIFICADOR, Categoria.OPERADOR_RELACIONAL,
+                Categoria.IDENTIFICADOR, Categoria.OPERADOR_RELACIONAL, Categoria.IDENTIFICADOR, Categoria.OPERADOR_RELACIONAL, Categoria.IDENTIFICADOR),
+            mixto.listaTokens.map { it.categoria })
+    }
+
+    @Test
+    fun decimalesValidosSegunElAutomata() {
+        val lexico = analizar("@1.5 @1. @.5 @.")
         assertTrue(lexico.listaErrores.isEmpty(), lexico.listaErrores.toString())
-        assertEquals(Categoria.COMENTARIO_LINEA, lexico.listaTokens.last().categoria)
+        assertEquals(listOf("@1.5", "@1.", "@.5", "@."), lexico.listaTokens.map { it.lexema })
+        assertTrue(lexico.listaTokens.all { it.categoria == Categoria.DECIMAL })
+    }
+
+    @Test
+    fun decimalesSinPuntoSonError() {
+        verificarUnError("@12", 1, 1, "Decimal mal formado")
+        verificarUnError("@", 1, 1, "Decimal mal formado")
+    }
+
+    @Test
+    fun primerTokenEmpiezaEnFilaYColumnaUno() {
+        val lexico = analizar("pub")
+        assertEquals(1, lexico.listaTokens[0].fila)
+        assertEquals(1, lexico.listaTokens[0].columna)
     }
 
     @Test
     fun limiteDeLongitudDelIdentificador() {
         val valido = analizar("ent ^abcdefghi |")
         assertTrue(valido.listaErrores.isEmpty(), valido.listaErrores.toString())
-        verificarUnError("ent ^abcdefghij |", 0, 4, "Identificador demasiado largo")
+        verificarUnError("ent ^abcdefghij |", 1, 5, "Identificador demasiado largo")
     }
 
     @Test
     fun errorTrasComentarioDeBloqueMultilinea() {
-        verificarUnError("\"\"\"a\nb\"\"\" $", 1, 5, "'$'")
+        verificarUnError("\"\"\"a\nb\"\"\" $", 2, 6, "'$'")
     }
 
     @Test
@@ -115,5 +184,36 @@ class LexicoErroresTest {
                 "}"
         val lexico = analizar(fuente)
         assertTrue(lexico.listaErrores.isEmpty(), lexico.listaErrores.toString())
+    }
+
+    @Test
+    fun exclamacionSueltaEsError() {
+        val lexico = analizar("^a ! ^b")
+        assertEquals(1, lexico.listaErrores.size, lexico.listaErrores.toString())
+        assertEquals(1, lexico.listaErrores[0].fila)
+        assertEquals(4, lexico.listaErrores[0].columna)
+    }
+
+    @Test
+    fun menorIgualSeguidoDeIgual() {
+        val lexico = analizar("<==")
+        assertTrue(lexico.listaErrores.isEmpty())
+        assertEquals(listOf("<=", "="), lexico.listaTokens.map { it.lexema })
+        assertEquals(listOf(Categoria.OPERADOR_RELACIONAL, Categoria.OPERADOR_ASIGNACION), lexico.listaTokens.map { it.categoria })
+    }
+
+    @Test
+    fun retornoDeCarroSueltoEsEspacio() {
+        val lexico = analizar("^a\r^b")
+        assertTrue(lexico.listaErrores.isEmpty())
+        assertEquals(listOf("^a", "^b"), lexico.listaTokens.map { it.lexema })
+    }
+
+    @Test
+    fun tabuladorCuentaComoUnaColumna() {
+        // Convencion: el tabulador ocupa 1 columna (no se expande a 4 u 8)
+        val lexico = analizar("\t^a")
+        assertEquals(1, lexico.listaTokens[0].fila)
+        assertEquals(2, lexico.listaTokens[0].columna)
     }
 }

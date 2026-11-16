@@ -18,7 +18,12 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
     /** Token que representa el fin del archivo (se usa cuando se agotan los tokens) */
     private fun tokenFinDeArchivo(): Token {
         val ultimo = listaTokens.lastOrNull()
-        return Token("", Categoria.DESCONOCIDO, ultimo?.fila ?: 0, if (ultimo != null) ultimo.columna + ultimo.lexema.length else 0)
+        if (ultimo == null) return Token("", Categoria.DESCONOCIDO, 1, 1)
+        // Posicion justo despues del ultimo token (que puede contener saltos de linea)
+        val saltos = ultimo.lexema.count { it == '\n' }
+        val fila = ultimo.fila + saltos
+        val columna = if (saltos == 0) ultimo.columna + ultimo.lexema.length else ultimo.lexema.length - ultimo.lexema.lastIndexOf('\n')
+        return Token("", Categoria.DESCONOCIDO, fila, columna)
     }
 
     fun obtenerSiguienteToken(){
@@ -1050,6 +1055,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
         val erroresIniciales = listaErrores.size
 
         if(tokenActual.categoria == Categoria.PALABRA_RESERVADA && tokenActual.lexema == "ret"){
+            val tokenRet = tokenActual
             obtenerSiguienteToken()
             var expresion:Expresion? = esExpresion()
 
@@ -1057,7 +1063,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                 if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                     obtenerSiguienteToken()
-                    return Retorno(null, expresion, tokenActual.fila, tokenActual.columna)
+                    return Retorno(null, expresion, tokenRet.fila, tokenRet.columna)
                 }else{
                     reportarError("Falta el fin de sentencia")
                 }
@@ -1069,7 +1075,7 @@ class AnalizadorSintactico(var listaTokens:ArrayList<Token>) {
 
                 if(tokenActual.categoria == Categoria.FIN_SENTENCIA){
                     obtenerSiguienteToken()
-                    return Retorno(identificador, null, tokenActual.fila, tokenActual.columna)
+                    return Retorno(identificador, null, tokenRet.fila, tokenRet.columna)
                 }else{
                     reportarError("Falta el fin de sentencia")
                 }

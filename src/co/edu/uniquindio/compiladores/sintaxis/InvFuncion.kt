@@ -7,6 +7,9 @@ import javafx.scene.control.TreeItem
 
 class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<ParametroSinTipo>) : Sentencia() {
 
+    /** Tipo de la variable que recibe el resultado (si la invocacion es el valor de una asignacion); lo fija Asignacion */
+    var tipoDestino: String? = null
+
     override fun getArbolVisual(): TreeItem<String> {
         val raiz = TreeItem("Invocacion Funcion")
 
@@ -34,35 +37,29 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
 
     override fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
-        var arreglo = ambito.split("\\.")
-        var ambitoo  = ""
-        var tipoAsignacion = ""
-
-        if(arreglo.size > 1){
-            ambitoo = arreglo.get(0)
-            tipoAsignacion = arreglo.get(1)
+        val listaTipoParametro = ArrayList<String>()
+        var parametrosValidos = true
+        for (p in listaParametrosSinTipo) {
+            val simbolo = tablaSimbolos.buscarSimboloValorEnAmbitos(p.nombre.lexema, ambito)
+            if (simbolo != null) {
+                listaTipoParametro.add(simbolo.tipo!!)
+            } else {
+                parametrosValidos = false
+                listaErroresSemanticos.add(Error("La variable (${p.nombre.lexema}) que intenta dar como argumento no se ha declarado", p.nombre.fila, p.nombre.columna))
+            }
         }
 
-        if(tipoAsignacion.isNotEmpty()) {
-            val listaTipoParametro: ArrayList<String> =
-                obtenerTipoParametros(listaErroresSemanticos, tablaSimbolos, ambitoo)
-            var funcion = tablaSimbolos.buscarSimboloFuncion(nombre.lexema, listaTipoParametro)
+        // Si algun argumento no existe ya se reporto; buscar la funcion solo produciria un error derivado
+        if (!parametrosValidos) {
+            return
+        }
 
-            if (funcion != null) {
-                if(funcion.tipo != tipoAsignacion){
-                    listaErroresSemanticos.add(Error("EL tipo de la invocacion de funcion (${funcion.tipo}) es diferente a la variable ($tipoAsignacion)", nombre.fila, nombre.columna))
-                }
-            }else{
-                listaErroresSemanticos.add(Error("La funcion invocada no existe", nombre.fila, nombre.columna))
-            }
-        }else{
-            val listaTipoParametro: ArrayList<String> =
-                obtenerTipoParametros(listaErroresSemanticos, tablaSimbolos, ambito)
-            var funcion = tablaSimbolos.buscarSimboloFuncion(nombre.lexema, listaTipoParametro)
+        val funcion = tablaSimbolos.buscarSimboloFuncion(nombre.lexema, listaTipoParametro)
 
-            if (funcion == null) {
-                listaErroresSemanticos.add(Error("La funcion invocada no existe", nombre.fila, nombre.columna))
-            }
+        if (funcion == null) {
+            listaErroresSemanticos.add(Error("La función invocada no existe", nombre.fila, nombre.columna))
+        } else if (tipoDestino != null && funcion.tipo != tipoDestino) {
+            listaErroresSemanticos.add(Error("El tipo de la invocación de función (${funcion.tipo}) es diferente al de la variable ($tipoDestino)", nombre.fila, nombre.columna))
         }
     }
 
@@ -77,21 +74,6 @@ class InvFuncion (var nombre:Token, val listaParametrosSinTipo: ArrayList<Parame
         }
         codigo += " );\n"
         return codigo
-    }
-
-    fun obtenerTipoParametros(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String):ArrayList<String> {
-        val listaTipoParametro : ArrayList<String> = ArrayList()
-        if(listaParametrosSinTipo.isNotEmpty()){
-            for(p in listaParametrosSinTipo){
-                var simbolo = tablaSimbolos.buscarSimboloValor(p.nombre.lexema, ambito)
-                if(simbolo != null) {
-                    listaTipoParametro.add(simbolo.tipo!!)
-                }else{
-                    listaErroresSemanticos.add(Error("La variable (${p.nombre!!.lexema}) que intenta dar como asignacion no se ha declarado", p.nombre.fila, p.nombre.columna))
-                }
-            }
-        }
-        return listaTipoParametro
     }
 
 }

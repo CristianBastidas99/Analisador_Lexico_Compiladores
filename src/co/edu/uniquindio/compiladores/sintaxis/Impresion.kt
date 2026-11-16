@@ -2,7 +2,6 @@ package co.edu.uniquindio.compiladores.sintaxis
 
 import co.edu.uniquindio.compiladores.lexico.Error
 import co.edu.uniquindio.compiladores.lexico.Token
-import co.edu.uniquindio.compiladores.semantico.Simbolo
 import co.edu.uniquindio.compiladores.semantico.TablaSimbolos
 import javafx.scene.control.TreeItem
 import java.util.ArrayList
@@ -32,27 +31,12 @@ class Impresion(var expresion: Expresion?, var identificador: Token?) : Sentenci
     override fun analizarSemantica(listaErroresSemanticos: ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
 
         if (identificador != null) {
-            var simbolo: Simbolo? = null
-            var posicionS = ambito.length
-            var ambitoActS = ambito
-
-            do {
-
-                ambitoActS = ambitoActS.substring(0, posicionS)
-                simbolo = tablaSimbolos.buscarSimboloValor(identificador!!.lexema, ambitoActS)
-
-                if (simbolo != null) {
-                    posicionS = -1
-                } else {
-                    posicionS = ambitoActS.lastIndexOf('/')
-                }
-
-            } while (posicionS != -1)
+            val simbolo = tablaSimbolos.buscarSimboloValorEnAmbitos(identificador!!.lexema, ambito)
 
             if (simbolo == null) {
                 listaErroresSemanticos.add(
                     Error(
-                        "La variable (${identificador!!.lexema}) que intenta imprimir no se a declarado",
+                        "La variable (${identificador!!.lexema}) que intenta imprimir no se ha declarado",
                         identificador!!.fila,
                         identificador!!.columna
                     )

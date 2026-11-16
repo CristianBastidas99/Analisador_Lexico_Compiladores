@@ -15,7 +15,7 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>) {
         if(s == null){
             listaSimbolos.add(Simbolo(nombre, tipo, modificable, ambito, acceso, fila, columna))
         }else{
-            listaErrores.add(Error("El campo con el nombre $nombre ya existe dentro del ambito $ambito", fila, columna))
+            listaErrores.add(Error("El campo con el nombre $nombre ya existe dentro del ámbito $ambito", fila, columna))
         }
     }
 
@@ -26,9 +26,9 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>) {
         val s = buscarSimboloFuncion(nombre, tiposParametros)
 
         if(s == null){
-            listaSimbolos.add(Simbolo(nombre, tipo, tiposParametros, ambito, acceso))
+            listaSimbolos.add(Simbolo(nombre, tipo, tiposParametros, ambito, acceso, fila, columna))
         }else{
-            listaErrores.add(Error("La funcion con el nombre $nombre ya existe dentro del ambito $ambito", fila, columna))
+            listaErrores.add(Error("La función con el nombre $nombre ya existe dentro del ámbito $ambito", fila, columna))
         }
     }
 
@@ -42,6 +42,24 @@ class TablaSimbolos (var listaErrores: ArrayList<Error>) {
                     return s
                 }
             }
+        }
+        return null
+    }
+
+
+    /**
+     * Busca un valor en el ámbito dado y, si no está, en los ámbitos que lo contienen (hasta el de la clase).
+     * Los ámbitos tienen la forma ^clase/^funcion:tipo/if/while...
+     */
+    fun buscarSimboloValorEnAmbitos(nombre: String?, ambito: String?): Simbolo?{
+        var actual = ambito
+        while (actual != null) {
+            val s = buscarSimboloValor(nombre, actual)
+            if (s != null) {
+                return s
+            }
+            val posicion = actual.lastIndexOf('/')
+            actual = if (posicion == -1) null else actual.substring(0, posicion)
         }
         return null
     }

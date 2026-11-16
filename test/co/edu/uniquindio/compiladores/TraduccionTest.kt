@@ -7,7 +7,6 @@ import co.edu.uniquindio.compiladores.sintaxis.AnalizadorSintactico
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assumptions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
@@ -30,7 +29,7 @@ class TraduccionTest {
     private class Resultado(val java: String, val diagnosticos: String, val compilo: Boolean)
 
     /** Ejecuta las fases del compilador, exige que no haya errores y devuelve el Java generado */
-    private fun generarJava(fuente: String, exigirSemantica: Boolean = true): String {
+    private fun generarJava(fuente: String): String {
         val lexico = AnalizadorLexico(fuente)
         lexico.analizar()
         val desconocidos = lexico.listaTokens.filter { it.categoria == Categoria.DESCONOCIDO }
@@ -44,7 +43,7 @@ class TraduccionTest {
         val semantico = AnalizadorSemantico(unidad!!)
         semantico.llenarTablaSimbolos()
         semantico.analizarSemantica()
-        assertTrue(!exigirSemantica || semantico.listaErroresSemanticos.isEmpty(), "Errores semanticos: ${semantico.listaErroresSemanticos}")
+        assertTrue(semantico.listaErroresSemanticos.isEmpty(), "Errores semanticos: ${semantico.listaErroresSemanticos}")
 
         return unidad.getCodeJava()
     }
@@ -66,8 +65,8 @@ class TraduccionTest {
         return Resultado(java, diagnosticos.diagnostics.joinToString("\n"), ok)
     }
 
-    private fun compilarPrograma(fuente: String, clase: String, exigirSemantica: Boolean = true) {
-        val java = generarJava(fuente, exigirSemantica)
+    private fun compilarPrograma(fuente: String, clase: String) {
+        val java = generarJava(fuente)
         val r = compilar(java, clase)
         assertTrue(r.compilo, "javac fallo.\n--- Java generado ---\n${r.java}\n--- Diagnosticos ---\n${r.diagnosticos}")
     }
@@ -83,8 +82,8 @@ class TraduccionTest {
         return salida
     }
 
-    private fun compilarYEjecutar(fuente: String, clase: String, exigirSemantica: Boolean = true): String {
-        compilarPrograma(fuente, clase, exigirSemantica)
+    private fun compilarYEjecutar(fuente: String, clase: String): String {
+        compilarPrograma(fuente, clase)
         return ejecutar(clase)
     }
 
@@ -117,16 +116,6 @@ class TraduccionTest {
             "}\n" +
             "}"
 
-    /**
-     * Globales + funcion con parametros y retorno. La invocacion como valor (^total = ^sumar(...) |) se traduce bien,
-     * pero el analizador semantico la rechaza (falso error, ver testInvocacionComoValorSemantica), por eso aqui se
-     * omite la comprobacion semantica y se verifica solo la traduccion (compila y ejecuta: imprime 7 dos veces y luego 7).
-     */
-    @Test
-    fun globalesYFuncionConParametrosYRetorno() {
-        assertEquals("777", compilarYEjecutar(fuenteFuncionConRetorno, "calc", exigirSemantica = false))
-    }
-
     @Test
     fun invocacionSoloComoSentencia() {
         val fuente = fuenteFuncionConRetorno.replace("^total = ^sumar ( ^x : ^y ) |\n", "")
@@ -134,7 +123,7 @@ class TraduccionTest {
         assertEquals("7", compilarYEjecutar(fuente, "calc"))
     }
 
-    @Disabled("Falso error semantico (Fase 3): InvFuncion.analizarSemantica usa split(\"\\.\") (literal, no regex) y busca los parametros en un ambito con sufijo '.tipo'; rechaza ^total = ^sumar(^x : ^y)")
+    /** Globales + funcion con parametros y retorno + invocacion como valor (imprime 7 dos veces y luego 7) */
     @Test
     fun testInvocacionComoValorSemantica() {
         assertEquals("777", compilarYEjecutar(fuenteFuncionConRetorno, "calc"))
@@ -217,16 +206,9 @@ class TraduccionTest {
         assertEquals("72.5abtrue51.5holatrue", compilarYEjecutar(fuenteTipos(false), "tipos"))
     }
 
-    /** Traduccion de crt: se omite la semantica porque rechaza los literales de caracter (ver el test deshabilitado) */
-    @Test
-    fun declaracionesConCrtSoloTraduccion() {
-        assertEquals("72.5abtrue51.5holatrueyx", compilarYEjecutar(fuenteTipos(true), "tipos", exigirSemantica = false))
-    }
-
-    @Disabled("Falso error semantico (Fase 3): ExpresionCadena.obtenerTipo() devuelve siempre str, asi que crt ^c = °x° se rechaza")
     @Test
     fun declaracionesConCrtSemantica() {
-        compilarPrograma(fuenteTipos(true), "tipos")
+        assertEquals("72.5abtrue51.5holatrueyx", compilarYEjecutar(fuenteTipos(true), "tipos"))
     }
 
     @Test
@@ -240,6 +222,28 @@ class TraduccionTest {
                 "}\n" +
                 "}"
         compilarPrograma(fuente, "lee")
+    }
+
+    @Test
+    fun lecturaAsignadaAEnteroYDecimal() {
+        // Solo compila: rad abre un dialogo grafico, no se puede ejecutar en la prueba
+        val fuente = "pub cls ^lee {\n" +
+                "pub vd ^main ( ) {\n" +
+                "ent ^edad |\n" +
+                "dbe ^nota |\n" +
+                "^edad = rad ( 'Edad' ) |\n" +
+                "^nota = rad ( 'Nota' ) |\n" +
+                "ent ^otra = rad ( 'Otra edad' ) |\n" +
+                "dbe ^otraNota = rad ( 'Otra nota' ) |\n" +
+                "imp ( ^edad ) |\n" +
+                "imp ( ^nota ) |\n" +
+                "}\n" +
+                "}"
+        val java = generarJava(fuente)
+        assertTrue(java.contains("Integer.parseInt(JOptionPane.showInputDialog("), java)
+        assertTrue(java.contains("Double.parseDouble(JOptionPane.showInputDialog("), java)
+        val r = compilar(java, "lee")
+        assertTrue(r.compilo, "javac fallo.\n--- Java generado ---\n${r.java}\n--- Diagnosticos ---\n${r.diagnosticos}")
     }
 
     @Test
@@ -274,7 +278,6 @@ class TraduccionTest {
                 "imp ( °a° + °b° ) |\n" +
                 "}\n" +
                 "}"
-        // Semantica omitida: rechaza ^w = ^class ( ^v ) | (falso error de InvFuncion en asignaciones, Fase 3)
-        assertEquals("274a\\b51.5zab", compilarYEjecutar(fuente, "borde", exigirSemantica = false))
+        assertEquals("274a\\b51.5zab", compilarYEjecutar(fuente, "borde"))
     }
 }

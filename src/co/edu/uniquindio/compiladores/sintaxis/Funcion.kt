@@ -45,7 +45,7 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
 
     fun llenarTablaSimbolos(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
         val listaTipoParametro : ArrayList<String> = obtenerTipoParametros()
-        tablaSimbolos.guardasSimboloFuncion(nombre.lexema, valorRetornado.lexema, listaTipoParametro, ambito, visibilidad.lexema, visibilidad.fila, visibilidad.columna)
+        tablaSimbolos.guardasSimboloFuncion(nombre.lexema, valorRetornado.lexema, listaTipoParametro, ambito, visibilidad.lexema, nombre.fila, nombre.columna)
 
         if(listaParametrosConTipo.isNotEmpty()){
             for(p in listaParametrosConTipo){
@@ -62,6 +62,10 @@ class Funcion(var visibilidad:Token, var valorRetornado:Token, var nombre:Token,
     }
 
     fun analizarSemantica(listaErroresSemanticos: java.util.ArrayList<Error>, tablaSimbolos: TablaSimbolos, ambito: String) {
+        // ^main de tipo vd se traduce a main(String[] args): sus parametros se perderian
+        if(nombre.lexema == "^main" && valorRetornado.lexema == "vd" && listaParametrosConTipo.isNotEmpty()){
+            listaErroresSemanticos.add(Error("La función ^main no puede tener parámetros", nombre.fila, nombre.columna))
+        }
         if(listaSentencias.isNotEmpty()){
             for(s in listaSentencias){
                 s.analizarSemantica(listaErroresSemanticos, tablaSimbolos, ambito + "/" + nombre.lexema + ":" + valorRetornado.lexema)

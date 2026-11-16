@@ -73,7 +73,11 @@ object CodigoJava {
         if (token.categoria == Categoria.ENTERO) {
             return texto.trimStart('0').ifEmpty { "0" }
         }
-        return texto
+        // Decimal @D*.D*: @1. -> 1.0, @.5 -> 0.5, @. -> 0.0, @007.5 -> 7.5
+        val punto = texto.indexOf('.')
+        val parteEntera = (if (punto >= 0) texto.substring(0, punto) else texto).trimStart('0').ifEmpty { "0" }
+        val parteDecimal = (if (punto >= 0) texto.substring(punto + 1) else "").ifEmpty { "0" }
+        return "$parteEntera.$parteDecimal"
     }
 
     /** Convierte un literal de cadena del lenguaje ('...') a un literal Java (comillas dobles) */
